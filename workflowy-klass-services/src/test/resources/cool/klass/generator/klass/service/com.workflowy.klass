@@ -22,20 +22,74 @@ service UserResource on User
         }
 }
 
-service DeleteMeExampleTypeResource on DeleteMeExampleType
+service ItemResource on Item
 {
-    /deleteMeExampleType/{id: Long[1..1]}
+    /item/{id: String[1..1]}
         GET
         {
             multiplicity: one;
             criteria    : this.id == id;
-            projection  : DeleteMeExampleTypeProjection;
+            projection  : ItemProjection;
         }
-    /deleteMeExampleType
+    /item
         GET
         {
             multiplicity: many;
             criteria    : all;
-            projection  : DeleteMeExampleTypeProjection;
+            projection  : ItemProjection;
+        }
+}
+
+service MirrorResource on Mirror
+{
+    /mirror/{id: String[1..1]}
+        GET
+        {
+            multiplicity: one;
+            criteria    : this.id == id;
+            projection  : MirrorProjection;
+        }
+    /mirror
+        GET
+        {
+            multiplicity: many;
+            criteria    : all;
+            projection  : MirrorProjection;
+        }
+}
+
+service TagResource on Tag
+{
+    /tag/{name: String[1..1]}
+        GET
+        {
+            multiplicity: one;
+            criteria    : this.name == name;
+            projection  : TagProjection;
+        }
+    /tag
+        GET
+        {
+            multiplicity: many;
+            criteria    : all;
+            projection  : TagProjection;
+        }
+}
+
+service DataImportTimestampResource on DataImportTimestamp
+{
+    /dataImportTimestamp/{name: String[1..1]}
+        GET
+        {
+            multiplicity: one;
+            criteria    : this.name == name;
+            projection  : DataImportTimestampProjection;
+        }
+    /dataImportTimestamp
+        GET
+        {
+            multiplicity: many;
+            criteria    : all;
+            projection  : DataImportTimestampProjection;
         }
 }

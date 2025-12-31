@@ -9,20 +9,35 @@ projection UserProjection on User
     userId: "User userId",
     systemFrom: "User systemFrom",
     systemTo: "User systemTo",
+    email: "User email",
     firstName: "User firstName",
     lastName: "User lastName",
-    email: "User email",
 }
 
-projection DeleteMeExampleTypeProjection on DeleteMeExampleType
+projection ItemProjection on Item
 {
-    id: "DeleteMeExampleType id",
-    systemFrom: "DeleteMeExampleType systemFrom",
-    systemTo: "DeleteMeExampleType systemTo",
-    createdOn: "DeleteMeExampleType createdOn",
-    name: "DeleteMeExampleType name",
-    deleteMeExampleOwnedTypes: DeleteMeExampleOwnedTypeProjection,
-    version: DeleteMeExampleTypeVersionProjection,
+    id: "Item id",
+    systemFrom: "Item systemFrom",
+    systemTo: "Item systemTo",
+    createdOn: "Item createdOn",
+    name: "Item name",
+    note: "Item note",
+    completed: "Item completed",
+    completedAt: "Item completedAt",
+    priority: "Item priority",
+    collapsed: "Item collapsed",
+    children: ItemProjection,
+    parent: {
+        id: "Item id",
+    },
+    mirrors: {
+        id: "Mirror id",
+    },
+    asMirror: MirrorProjection,
+    shares: SharedItemProjection,
+    tags: ItemTagMappingProjection,
+    dates: ItemDateProjection,
+    version: ItemVersionProjection,
     createdBy: {
         userId: "User userId",
     },
@@ -31,20 +46,64 @@ projection DeleteMeExampleTypeProjection on DeleteMeExampleType
     },
 }
 
-projection DeleteMeExampleOwnedTypeProjection on DeleteMeExampleOwnedType
+projection MirrorProjection on Mirror
 {
-    id: "DeleteMeExampleOwnedType id",
-    systemFrom: "DeleteMeExampleOwnedType systemFrom",
-    systemTo: "DeleteMeExampleOwnedType systemTo",
-    name: "DeleteMeExampleOwnedType name",
+    id: "Mirror id",
+    systemFrom: "Mirror systemFrom",
+    systemTo: "Mirror systemTo",
 }
 
-projection DeleteMeExampleTypeVersionProjection on DeleteMeExampleTypeVersion
+projection SharedItemProjection on SharedItem
 {
-    systemFrom: "DeleteMeExampleTypeVersion systemFrom",
-    systemTo: "DeleteMeExampleTypeVersion systemTo",
-    createdOn: "DeleteMeExampleTypeVersion createdOn",
-    number: "DeleteMeExampleTypeVersion number",
+    id: "SharedItem id",
+    systemFrom: "SharedItem systemFrom",
+    systemTo: "SharedItem systemTo",
+    permission: "SharedItem permission",
+    shareUrl: "SharedItem shareUrl",
+    recipient: {
+        userId: "User userId",
+    },
+}
+
+projection TagProjection on Tag
+{
+    name: "Tag name",
+    systemFrom: "Tag systemFrom",
+    systemTo: "Tag systemTo",
+    color: "Tag color",
+}
+
+projection ItemTagMappingProjection on ItemTagMapping
+{
+    systemFrom: "ItemTagMapping systemFrom",
+    systemTo: "ItemTagMapping systemTo",
+    tag: {
+        name: "Tag name",
+    },
+}
+
+projection ItemDateProjection on ItemDate
+{
+    id: "ItemDate id",
+    systemFrom: "ItemDate systemFrom",
+    systemTo: "ItemDate systemTo",
+    dateValue: "ItemDate dateValue",
+}
+
+projection DataImportTimestampProjection on DataImportTimestamp
+{
+    name: "DataImportTimestamp name",
+    systemFrom: "DataImportTimestamp systemFrom",
+    systemTo: "DataImportTimestamp systemTo",
+    timestamp: "DataImportTimestamp timestamp",
+}
+
+projection ItemVersionProjection on ItemVersion
+{
+    systemFrom: "ItemVersion systemFrom",
+    systemTo: "ItemVersion systemTo",
+    createdOn: "ItemVersion createdOn",
+    number: "ItemVersion number",
     createdBy: {
         userId: "User userId",
     },

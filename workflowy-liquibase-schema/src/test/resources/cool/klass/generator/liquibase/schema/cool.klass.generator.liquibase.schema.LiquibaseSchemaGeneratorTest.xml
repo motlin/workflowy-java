@@ -7,7 +7,7 @@
 
     <changeSet author="Klass" id="initial-table-1-USER">
         <createTable tableName="USER">
-            <column name="USER_ID" type="varchar(255)">
+            <column name="USER_ID" type="varchar(256)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="USER_PK" />
             </column>
 
@@ -19,21 +19,21 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="USER_PK" />
             </column>
 
-            <column name="EMAIL" type="varchar(255)" />
+            <column name="EMAIL" type="varchar(320)" />
 
-            <column name="FIRST_NAME" type="varchar(255)" />
+            <column name="FIRST_NAME" type="varchar(256)" />
 
-            <column name="LAST_NAME" type="varchar(255)" />
+            <column name="LAST_NAME" type="varchar(256)" />
         </createTable>
     </changeSet>
 
     <changeSet author="Klass" id="initial-table-2-ITEM">
         <createTable tableName="ITEM">
-            <column name="ID" type="varchar(255)">
+            <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_PK" />
             </column>
 
-            <column name="PARENT_ID" type="varchar(255)" />
+            <column name="PARENT_ID" type="varchar(36)" />
 
             <column name="SYSTEM_FROM" type="timestamp">
                 <constraints nullable="false" />
@@ -43,7 +43,7 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_PK" />
             </column>
 
-            <column name="CREATED_BY_ID" type="varchar(255)">
+            <column name="CREATED_BY_ID" type="varchar(256)">
                 <constraints nullable="false" />
             </column>
 
@@ -51,17 +51,17 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="LAST_UPDATED_BY_ID" type="varchar(255)">
+            <column name="LAST_UPDATED_BY_ID" type="varchar(256)">
                 <constraints nullable="false" />
             </column>
 
-            <column name="NAME" type="varchar(255)">
+            <column name="NAME" type="varchar(1000000)">
                 <constraints nullable="false" />
             </column>
 
-            <column name="NOTE" type="varchar(255)" />
+            <column name="NOTE" type="varchar(1000000)" />
 
-            <column name="IS_COMPLETED" type="boolean">
+            <column name="COMPLETED" type="boolean">
                 <constraints nullable="false" />
             </column>
 
@@ -71,7 +71,7 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="IS_COLLAPSED" type="boolean">
+            <column name="COLLAPSED" type="boolean">
                 <constraints nullable="false" />
             </column>
         </createTable>
@@ -79,15 +79,15 @@
 
     <changeSet author="Klass" id="initial-table-3-MIRROR">
         <createTable tableName="MIRROR">
-            <column name="ID" type="varchar(255)">
+            <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="MIRROR_PK" />
             </column>
 
-            <column name="SOURCE_ITEM_ID" type="varchar(255)">
+            <column name="SOURCE_ITEM_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
-            <column name="VIRTUAL_ITEM_ID" type="varchar(255)">
+            <column name="VIRTUAL_ITEM_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
@@ -103,15 +103,15 @@
 
     <changeSet author="Klass" id="initial-table-4-SHARED_ITEM">
         <createTable tableName="SHARED_ITEM">
-            <column name="ID" type="varchar(255)">
+            <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="SHARED_ITEM_PK" />
             </column>
 
-            <column name="ITEM_ID" type="varchar(255)">
+            <column name="ITEM_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
-            <column name="SHARED_WITH" type="varchar(255)">
+            <column name="SHARED_WITH" type="varchar(256)">
                 <constraints nullable="false" />
             </column>
 
@@ -127,13 +127,13 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="SHARE_URL" type="varchar(255)" />
+            <column name="SHARE_URL" type="varchar(2048)" />
         </createTable>
     </changeSet>
 
     <changeSet author="Klass" id="initial-table-5-TAG">
         <createTable tableName="TAG">
-            <column name="NAME" type="varchar(255)">
+            <column name="NAME" type="varchar(128)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="TAG_PK" />
             </column>
 
@@ -145,17 +145,17 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="TAG_PK" />
             </column>
 
-            <column name="COLOR" type="varchar(255)" />
+            <column name="COLOR" type="varchar(32)" />
         </createTable>
     </changeSet>
 
     <changeSet author="Klass" id="initial-table-6-ITEM_TAG_MAPPING">
         <createTable tableName="ITEM_TAG_MAPPING">
-            <column name="ITEM_ID" type="varchar(255)">
+            <column name="ITEM_ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_TAG_MAPPING_PK" />
             </column>
 
-            <column name="TAG_NAME" type="varchar(255)">
+            <column name="TAG_NAME" type="varchar(128)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_TAG_MAPPING_PK" />
             </column>
 
@@ -171,11 +171,11 @@
 
     <changeSet author="Klass" id="initial-table-7-ITEM_DATE">
         <createTable tableName="ITEM_DATE">
-            <column name="ID" type="varchar(255)">
+            <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_DATE_PK" />
             </column>
 
-            <column name="ITEM_ID" type="varchar(255)">
+            <column name="ITEM_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
@@ -193,9 +193,29 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-8-ITEM_VERSION">
+    <changeSet author="Klass" id="initial-table-8-DATA_IMPORT_TIMESTAMP">
+        <createTable tableName="DATA_IMPORT_TIMESTAMP">
+            <column name="NAME" type="varchar(64)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="DATA_IMPORT_TIMESTAMP_PK" />
+            </column>
+
+            <column name="SYSTEM_FROM" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_TO" type="timestamp">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="DATA_IMPORT_TIMESTAMP_PK" />
+            </column>
+
+            <column name="TIMESTAMP" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-table-9-ITEM_VERSION">
         <createTable tableName="ITEM_VERSION">
-            <column name="ID" type="varchar(255)">
+            <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_VERSION_PK" />
             </column>
 
@@ -207,7 +227,7 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_VERSION_PK" />
             </column>
 
-            <column name="CREATED_BY_ID" type="varchar(255)">
+            <column name="CREATED_BY_ID" type="varchar(256)">
                 <constraints nullable="false" />
             </column>
 
@@ -215,7 +235,7 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="LAST_UPDATED_BY_ID" type="varchar(255)">
+            <column name="LAST_UPDATED_BY_ID" type="varchar(256)">
                 <constraints nullable="false" />
             </column>
 
@@ -315,7 +335,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-8-ITEM_VERSION_IDX_CREATED_BY">
+    <changeSet author="Klass" id="initial-indices-9-ITEM_VERSION_IDX_CREATED_BY">
         <createIndex
                 indexName="ITEM_VERSION_IDX_CREATED_BY"
                 tableName="ITEM_VERSION">
@@ -324,7 +344,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-8-ITEM_VERSION_IDX_LAST_UPDATED_BY">
+    <changeSet author="Klass" id="initial-indices-9-ITEM_VERSION_IDX_LAST_UPDATED_BY">
         <createIndex
                 indexName="ITEM_VERSION_IDX_LAST_UPDATED_BY"
                 tableName="ITEM_VERSION">

@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>workflowy</groupId>
         <artifactId>workflowy</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>workflowy-uml-nomnoml</artifactId>
 
@@ -23,21 +20,13 @@
                 <version>${klass.version}</version>
 
                 <configuration>
+                    <colorScheme>dark</colorScheme>
                     <rootPackageName>${app.rootPackageName}</rootPackageName>
                     <applicationName>${app.name}</applicationName>
                     <klassSourcePackages>
                         <klassSourcePackage>${app.rootPackageName}</klassSourcePackage>
                     </klassSourcePackages>
                 </configuration>
-
-                <executions>
-                    <execution>
-                        <id>generate-uml-diagram-nomnoml</id>
-                        <goals>
-                            <goal>generate-uml-diagram-nomnoml</goal>
-                        </goals>
-                    </execution>
-                </executions>
 
                 <dependencies>
 
@@ -48,6 +37,15 @@
                     </dependency>
 
                 </dependencies>
+
+                <executions>
+                    <execution>
+                        <id>generate-uml-diagram-nomnoml</id>
+                        <goals>
+                            <goal>generate-uml-diagram-nomnoml</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

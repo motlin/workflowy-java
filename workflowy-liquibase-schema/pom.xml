@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-<project
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>workflowy</groupId>
         <artifactId>workflowy</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>workflowy-liquibase-schema</artifactId>
 
@@ -107,20 +103,11 @@
                 <version>${klass.version}</version>
 
                 <configuration>
+                    <colorScheme>dark</colorScheme>
                     <klassSourcePackages>
                         <klassSourcePackage>${app.rootPackageName}</klassSourcePackage>
                     </klassSourcePackages>
                 </configuration>
-
-                <executions>
-                    <execution>
-                        <id>generate-liquibase-schema</id>
-                        <goals>
-                            <goal>generate-liquibase-schema</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                    </execution>
-                </executions>
 
                 <dependencies>
 
@@ -131,6 +118,16 @@
                     </dependency>
 
                 </dependencies>
+
+                <executions>
+                    <execution>
+                        <id>generate-liquibase-schema</id>
+                        <goals>
+                            <goal>generate-liquibase-schema</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                    </execution>
+                </executions>
 
             </plugin>
 

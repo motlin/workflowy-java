@@ -1,17 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.liftwizard</groupId>
         <artifactId>liftwizard-parent-build</artifactId>
         <version>2.1.38</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
     <groupId>workflowy</groupId>
     <artifactId>workflowy</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <name>Workflowy (Module Group)</name>
+    <modules>
+        <module>workflowy-data</module>
+        <module>workflowy-domain-model</module>
+        <module>workflowy-dropwizard-application</module>
+        <module>workflowy-dtos</module>
+        <module>workflowy-graphql-fragment</module>
+        <module>workflowy-graphql-reladomo-finder</module>
+        <module>workflowy-graphql-schema</module>
+        <module>workflowy-graphql-schema-query</module>
+        <module>workflowy-json-views</module>
+        <module>workflowy-klass-macros</module>
+        <module>workflowy-klass-projections</module>
+        <module>workflowy-klass-services</module>
+        <module>workflowy-liquibase-schema</module>
+        <module>workflowy-reladomo-definitions</module>
+        <module>workflowy-reladomo-merge-hooks</module>
+        <module>workflowy-reladomo-pojos</module>
+        <module>workflowy-reladomo-runtime-configuration</module>
+        <module>workflowy-services</module>
+        <module>workflowy-uml-nomnoml</module>
+    </modules>
     <properties>
         <klass.version>0.6.0-SNAPSHOT</klass.version>
         <app.artifactId>workflowy</app.artifactId>
@@ -20,7 +40,6 @@
         <mainClass>${app.rootPackageName}.dropwizard.application.WorkflowyApplication</mainClass>
         <liftwizard.version>2.1.38</liftwizard.version>
     </properties>
-    <name>Workflowy (Module Group)</name>
     <dependencyManagement>
         <dependencies>
 
@@ -49,25 +68,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <modules>
-        <module>workflowy-data</module>
-        <module>workflowy-domain-model</module>
-        <module>workflowy-dropwizard-application</module>
-        <module>workflowy-dtos</module>
-        <module>workflowy-graphql-fragment</module>
-        <module>workflowy-graphql-reladomo-finder</module>
-        <module>workflowy-graphql-schema</module>
-        <module>workflowy-graphql-schema-query</module>
-        <module>workflowy-json-views</module>
-        <module>workflowy-klass-macros</module>
-        <module>workflowy-klass-projections</module>
-        <module>workflowy-klass-services</module>
-        <module>workflowy-liquibase-schema</module>
-        <module>workflowy-reladomo-definitions</module>
-        <module>workflowy-reladomo-merge-hooks</module>
-        <module>workflowy-reladomo-pojos</module>
-        <module>workflowy-reladomo-runtime-configuration</module>
-        <module>workflowy-services</module>
-        <module>workflowy-uml-nomnoml</module>
-    </modules>
 </project>

@@ -1,105 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<project
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>workflowy</groupId>
         <artifactId>workflowy</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>workflowy-dropwizard-application</artifactId>
 
     <name>${app.name} Application</name>
-
-    <build>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <directory>src/test/inputresources</directory>
-            </testResource>
-        </testResources>
-
-        <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                    <filesets>
-                        <fileset>
-                            <directory>target</directory>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/*-h2.mv.db</exclude>
-                            </excludes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>${mainClass}</mainClass>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>cool.klass</groupId>
-                <artifactId>klass-generator-dropwizard-plugin</artifactId>
-                <version>${klass.version}</version>
-
-                <configuration>
-                    <rootPackageName>${app.rootPackageName}</rootPackageName>
-                    <applicationName>${app.name}</applicationName>
-                    <klassSourcePackages>
-                        <klassSourcePackage>klass.model.meta.domain</klassSourcePackage>
-                        <klassSourcePackage>${app.rootPackageName}</klassSourcePackage>
-                    </klassSourcePackages>
-                    <colorScheme>dark</colorScheme>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate-abstract-application</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                    </execution>
-                </executions>
-                <dependencies>
-
-                    <dependency>
-                        <groupId>${project.groupId}</groupId>
-                        <artifactId>${app.artifactId}-domain-model</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>cool.klass</groupId>
-                        <artifactId>klass-model-bootstrapped-domain-model</artifactId>
-                        <version>${klass.version}</version>
-                    </dependency>
-
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
 
@@ -637,6 +547,92 @@
         <!--endregion-->
     </dependencies>
 
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>src/test/inputresources</directory>
+            </testResource>
+        </testResources>
+
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                    <filesets>
+                        <fileset>
+                            <directory>target</directory>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*-h2.mv.db</exclude>
+                            </excludes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>${mainClass}</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>cool.klass</groupId>
+                <artifactId>klass-generator-dropwizard-plugin</artifactId>
+                <version>${klass.version}</version>
+
+                <configuration>
+                    <rootPackageName>${app.rootPackageName}</rootPackageName>
+                    <applicationName>${app.name}</applicationName>
+                    <klassSourcePackages>
+                        <klassSourcePackage>klass.model.meta.domain</klassSourcePackage>
+                        <klassSourcePackage>${app.rootPackageName}</klassSourcePackage>
+                    </klassSourcePackages>
+                    <colorScheme>dark</colorScheme>
+                </configuration>
+                <dependencies>
+
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>${app.artifactId}-domain-model</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>cool.klass</groupId>
+                        <artifactId>klass-model-bootstrapped-domain-model</artifactId>
+                        <version>${klass.version}</version>
+                    </dependency>
+
+                </dependencies>
+
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-abstract-application</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <profiles>
         <!--region Phase 17: package-->
         <profile>
@@ -694,7 +690,7 @@
                                     <arguments>
                                         <argument>-Xmx8g</argument>
                                         <argument>-classpath</argument>
-                                        <classpath/>
+                                        <classpath />
                                         <argument>${mainClass}</argument>
                                         <argument>import-workflowy</argument>
                                         <argument>config.json5</argument>

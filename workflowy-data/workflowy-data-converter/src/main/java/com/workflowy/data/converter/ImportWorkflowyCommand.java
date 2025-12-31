@@ -6,10 +6,9 @@ import java.nio.file.Paths;
 import javax.annotation.Nonnull;
 
 import cool.klass.data.store.DataStore;
+import cool.klass.dropwizard.configuration.AbstractKlassConfiguration;
 import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
-import io.liftwizard.dropwizard.configuration.datasource.NamedDataSourceProvider;
-import io.liftwizard.dropwizard.configuration.klass.KlassFactoryProvider;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.eclipse.jetty.util.component.ContainerLifeCycle;
@@ -17,7 +16,7 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ImportWorkflowyCommand<T extends KlassFactoryProvider & NamedDataSourceProvider>
+public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration>
         extends EnvironmentCommand<T>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportWorkflowyCommand.class);

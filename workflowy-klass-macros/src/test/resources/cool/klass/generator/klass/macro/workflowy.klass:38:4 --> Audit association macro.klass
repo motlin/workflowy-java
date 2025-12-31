@@ -1,16 +1,16 @@
 package com.workflowy
 
-association DeleteMeExampleTypeHasCreatedBy
+association ItemHasCreatedBy
 {
-    deleteMeExampleTypeCreatedBy: DeleteMeExampleType[0..*];
+    itemCreatedBy: Item[0..*];
     createdBy: User[1..1] createdBy final;
 
     relationship this.createdById == User.userId
 }
 
-association DeleteMeExampleTypeHasLastUpdatedBy
+association ItemHasLastUpdatedBy
 {
-    deleteMeExampleTypeLastUpdatedBy: DeleteMeExampleType[0..*];
+    itemLastUpdatedBy: Item[0..*];
     lastUpdatedBy: User[1..1] lastUpdatedBy;
 
     relationship this.lastUpdatedById == User.userId

@@ -1,0 +1,7 @@
+package com.workflowy
+
+class ItemVersion systemTemporal audited
+{
+    id: String key minLength(36) maxLength(36);
+    number: Integer version;
+}

@@ -1,0 +1,9 @@
+package com.workflowy
+
+association ItemHasVersion
+{
+    item: Item[1..1];
+    version: ItemVersion[1..1] owned version;
+
+    relationship this.id == ItemVersion.id
+}

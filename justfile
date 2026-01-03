@@ -28,6 +28,10 @@ download-backups:
 # Import Workflowy backup data into the database
 [group('data')]
 import-data DAYS="10000" MVN=default_mvn:
+    {{MVN}} package \
+        --projects workflowy-dropwizard-application \
+        --also-make \
+        -DskipTests
     {{MVN}} exec:exec@import-workflowy \
         --projects workflowy-dropwizard-application \
         --activate-profiles import-workflowy \

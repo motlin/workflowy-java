@@ -242,6 +242,18 @@ public final class WorkflowyDataConverter
             {
                 nodeMetadata.setOriginalId(metadata.originalId());
             }
+
+            if (metadata.changes() != null && !metadata.changes().isEmpty())
+            {
+                try
+                {
+                    nodeMetadata.setChanges(this.objectMapper.writeValueAsString(metadata.changes()));
+                }
+                catch (Exception e)
+                {
+                    LOGGER.warn("Failed to serialize changes for node {}: {}", inputItem.id(), e.getMessage());
+                }
+            }
         }
         return nodeMetadata;
     }
@@ -378,6 +390,10 @@ public final class WorkflowyDataConverter
                 nodeDate.setLevel(calendarMeta.level());
                 nodeDate.setDateId(calendarMeta.dateId());
                 nodeDate.setTimestamp(calendarMeta.timestamp());
+                if (calendarMeta.value() != null)
+                {
+                    nodeDate.setValue(String.valueOf(calendarMeta.value()));
+                }
                 this.nodeDates.add(nodeDate);
             }
         }

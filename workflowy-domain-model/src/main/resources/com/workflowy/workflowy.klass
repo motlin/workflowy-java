@@ -99,6 +99,9 @@ class NodeMetadata
 
     // Original ID for mirrored content (from metadata.originalId or metadata.mirror.originalId)
     originalId  : String? maxLength(64);
+
+    // Changes metadata stored as JSON (from metadata.changes)
+    changes     : String? maxLength(10000);
 }
 
 // Note: NodeEmbedding is stored separately (e.g., SQLite) rather than in H2
@@ -256,6 +259,7 @@ class NodeDate
     level     : String? maxLength(32);
     dateId    : String? maxLength(64);
     timestamp : Long?;
+    value     : String? maxLength(1024);
 }
 
 association NodeHasDates
@@ -381,6 +385,7 @@ projection NodeDateProjection on NodeDate
     level     : "NodeDate level",
     dateId    : "NodeDate dateId",
     timestamp : "NodeDate timestamp",
+    value     : "NodeDate value",
     systemFrom: "NodeDate systemFrom",
     systemTo  : "NodeDate systemTo",
 }
@@ -451,6 +456,7 @@ projection NodeMetadataProjection on NodeMetadata
     inChat          : "NodeMetadata inChat",
     isMirrorRoot    : "NodeMetadata isMirrorRoot",
     originalId      : "NodeMetadata originalId",
+    changes         : "NodeMetadata changes",
     systemFrom      : "NodeMetadata systemFrom",
     systemTo        : "NodeMetadata systemTo",
     createdOn       : "NodeMetadata createdOn",

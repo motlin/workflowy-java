@@ -1,8 +1,8 @@
 package com.workflowy;
 import java.sql.Timestamp;
-public class SharedItem extends SharedItemAbstract
+public class NodeTagMapping extends NodeTagMappingAbstract
 {
-	public SharedItem(Timestamp system
+	public NodeTagMapping(Timestamp system
 	)
 	{
 		super(system
@@ -11,7 +11,7 @@ public class SharedItem extends SharedItemAbstract
 		// You can call this constructor. You can also add new constructors.
 	}
 
-	public SharedItem()
+	public NodeTagMapping()
 	{
 		this(com.gs.fw.common.mithra.util.DefaultInfinityTimestamp.getDefaultInfinity());
 	}

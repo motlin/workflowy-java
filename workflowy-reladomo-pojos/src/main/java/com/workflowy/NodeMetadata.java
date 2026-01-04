@@ -1,8 +1,8 @@
 package com.workflowy;
 import java.sql.Timestamp;
-public class ItemDate extends ItemDateAbstract
+public class NodeMetadata extends NodeMetadataAbstract
 {
-	public ItemDate(Timestamp system
+	public NodeMetadata(Timestamp system
 	)
 	{
 		super(system
@@ -11,7 +11,7 @@ public class ItemDate extends ItemDateAbstract
 		// You can call this constructor. You can also add new constructors.
 	}
 
-	public ItemDate()
+	public NodeMetadata()
 	{
 		this(com.gs.fw.common.mithra.util.DefaultInfinityTimestamp.getDefaultInfinity());
 	}

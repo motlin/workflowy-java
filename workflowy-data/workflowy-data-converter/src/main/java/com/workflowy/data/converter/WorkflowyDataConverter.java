@@ -24,18 +24,21 @@ import com.gs.fw.common.mithra.finder.Operation;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
 import com.workflowy.DataImportTimestamp;
 import com.workflowy.DataImportTimestampFinder;
-import com.workflowy.Item;
-import com.workflowy.ItemDate;
-import com.workflowy.ItemDateFinder;
-import com.workflowy.ItemDateList;
-import com.workflowy.ItemFinder;
-import com.workflowy.ItemList;
-import com.workflowy.ItemTagMapping;
-import com.workflowy.ItemTagMappingFinder;
-import com.workflowy.ItemTagMappingList;
 import com.workflowy.Mirror;
 import com.workflowy.MirrorFinder;
 import com.workflowy.MirrorList;
+import com.workflowy.NodeContent;
+import com.workflowy.NodeContentFinder;
+import com.workflowy.NodeContentList;
+import com.workflowy.NodeDate;
+import com.workflowy.NodeDateFinder;
+import com.workflowy.NodeDateList;
+import com.workflowy.NodeMetadata;
+import com.workflowy.NodeMetadataFinder;
+import com.workflowy.NodeMetadataList;
+import com.workflowy.NodeTagMapping;
+import com.workflowy.NodeTagMappingFinder;
+import com.workflowy.NodeTagMappingList;
 import com.workflowy.Tag;
 import com.workflowy.TagFinder;
 import com.workflowy.TagList;
@@ -67,11 +70,12 @@ public final class WorkflowyDataConverter
     private final File backupFile;
     private final String userId;
 
-    private final MutableMap<String, Item> items = MapAdapter.adapt(new LinkedHashMap<>());
+    private final MutableMap<String, NodeContent> nodeContents = MapAdapter.adapt(new LinkedHashMap<>());
+    private final MutableMap<String, NodeMetadata> nodeMetadatas = MapAdapter.adapt(new LinkedHashMap<>());
     private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
-    private final ItemTagMappingList itemTagMappings = new ItemTagMappingList();
+    private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
     private final MirrorList mirrors = new MirrorList();
-    private final ItemDateList itemDates = new ItemDateList();
+    private final NodeDateList nodeDates = new NodeDateList();
 
     private WorkflowyDataConverter(
             @Nonnull ObjectMapper objectMapper,
@@ -146,66 +150,74 @@ public final class WorkflowyDataConverter
 
         Instant backupInstant = getFileTimestamp(this.backupFile);
 
-        LOGGER.info("Pass 1: Creating items from {} root items", rootItems.size());
-        this.processItemsPass1(rootItems, null, 0);
-        LOGGER.info("Created {} items", this.items.size());
+        LOGGER.info("Pass 1: Creating nodes from {} root items", rootItems.size());
+        this.processNodesPass1(rootItems, null, 0);
+        LOGGER.info("Created {} node contents and {} node metadatas", this.nodeContents.size(), this.nodeMetadatas.size());
 
         LOGGER.info("Pass 2: Extracting tags");
-        this.extractTagsFromItems();
-        LOGGER.info("Extracted {} tags and {} item-tag mappings", this.tags.size(), this.itemTagMappings.size());
+        this.extractTagsFromNodes();
+        LOGGER.info("Extracted {} tags and {} node-tag mappings", this.tags.size(), this.nodeTagMappings.size());
 
         LOGGER.info("Pass 3: Processing metadata (mirrors, dates)");
         this.processMetadata(rootItems);
-        LOGGER.info("Created {} mirrors and {} item dates", this.mirrors.size(), this.itemDates.size());
+        LOGGER.info("Created {} mirrors and {} node dates", this.mirrors.size(), this.nodeDates.size());
 
         this.mergeIntoDatabase(backupInstant);
     }
 
-    private void processItemsPass1(List<InputItem> inputItems, String parentId, int startPriority)
+    private void processNodesPass1(List<InputItem> inputItems, String parentId, int startPriority)
     {
         int priority = startPriority;
         for (InputItem inputItem : inputItems)
         {
-            Item item = this.createItem(inputItem, parentId, priority);
-            this.items.put(inputItem.id(), item);
+            NodeContent nodeContent = this.createNodeContent(inputItem, parentId);
+            NodeMetadata nodeMetadata = this.createNodeMetadata(inputItem, priority);
+            this.nodeContents.put(inputItem.id(), nodeContent);
+            this.nodeMetadatas.put(inputItem.id(), nodeMetadata);
             priority++;
 
             if (inputItem.hasChildren())
             {
-                this.processItemsPass1(inputItem.children(), inputItem.id(), 0);
+                this.processNodesPass1(inputItem.children(), inputItem.id(), 0);
             }
         }
     }
 
-    private Item createItem(InputItem inputItem, String parentId, int priority)
+    private NodeContent createNodeContent(InputItem inputItem, String parentId)
     {
-        Item item = new Item();
-        item.setId(inputItem.id());
-        item.setParentId(parentId);
-        item.setName(inputItem.name() != null ? inputItem.name() : "");
-        item.setNote(inputItem.note());
-        item.setCompleted(inputItem.isCompleted());
-        item.setCompletedAt(convertWorkflowyTimestamp(inputItem.completedTimestamp()));
-        item.setPriority(priority);
-        item.setCollapsed(false);
-        item.setCreatedById(this.userId);
-        item.setCreatedOn(convertWorkflowyTimestamp(inputItem.createdTimestamp()));
-        item.setLastUpdatedById(this.userId);
-
-        return item;
+        NodeContent nodeContent = new NodeContent();
+        nodeContent.setId(inputItem.id());
+        nodeContent.setParentId(parentId);
+        nodeContent.setName(inputItem.name() != null ? inputItem.name() : "");
+        nodeContent.setNote(inputItem.note());
+        return nodeContent;
     }
 
-    private void extractTagsFromItems()
+    private NodeMetadata createNodeMetadata(InputItem inputItem, int priority)
     {
-        for (Item item : this.items.values())
+        NodeMetadata nodeMetadata = new NodeMetadata();
+        nodeMetadata.setNodeId(inputItem.id());
+        nodeMetadata.setPriority(priority);
+        nodeMetadata.setCompleted(inputItem.isCompleted());
+        nodeMetadata.setCompletedAt(convertWorkflowyTimestamp(inputItem.completedTimestamp()));
+        nodeMetadata.setCollapsed(false);
+        nodeMetadata.setCreatedById(this.userId);
+        nodeMetadata.setCreatedOn(convertWorkflowyTimestamp(inputItem.createdTimestamp()));
+        nodeMetadata.setLastUpdatedById(this.userId);
+        return nodeMetadata;
+    }
+
+    private void extractTagsFromNodes()
+    {
+        for (NodeContent nodeContent : this.nodeContents.values())
         {
-            this.extractTagsFromName(item);
+            this.extractTagsFromName(nodeContent);
         }
     }
 
-    private void extractTagsFromName(Item item)
+    private void extractTagsFromName(NodeContent nodeContent)
     {
-        String name = item.getName();
+        String name = nodeContent.getName();
         if (name == null || name.isEmpty())
         {
             return;
@@ -223,10 +235,10 @@ public final class WorkflowyDataConverter
                 return newTag;
             });
 
-            ItemTagMapping mapping = new ItemTagMapping();
-            mapping.setItemId(item.getId());
+            NodeTagMapping mapping = new NodeTagMapping();
+            mapping.setNodeId(nodeContent.getId());
             mapping.setTagName(tagName);
-            this.itemTagMappings.add(mapping);
+            this.nodeTagMappings.add(mapping);
         }
     }
 
@@ -234,7 +246,7 @@ public final class WorkflowyDataConverter
     {
         for (InputItem inputItem : inputItems)
         {
-            this.processItemMetadata(inputItem);
+            this.processInputItemMetadata(inputItem);
             if (inputItem.hasChildren())
             {
                 this.processMetadata(inputItem.children());
@@ -242,7 +254,7 @@ public final class WorkflowyDataConverter
         }
     }
 
-    private void processItemMetadata(InputItem inputItem)
+    private void processInputItemMetadata(InputItem inputItem)
     {
         InputMetadata metadata = inputItem.metadata();
         if (metadata == null)
@@ -266,14 +278,14 @@ public final class WorkflowyDataConverter
         }
     }
 
-    private void processMirrorMetadata(String itemId, InputMirrorMetadata mirrorMeta)
+    private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta)
     {
         for (String sourceId : mirrorMeta.getMirrorSourceIds())
         {
             Mirror mirror = new Mirror();
             mirror.setId(UUID.randomUUID().toString());
-            mirror.setSourceItemId(sourceId);
-            mirror.setVirtualItemId(itemId);
+            mirror.setSourceNodeId(sourceId);
+            mirror.setVirtualNodeId(nodeId);
             this.mirrors.add(mirror);
         }
     }
@@ -284,24 +296,24 @@ public final class WorkflowyDataConverter
         {
             Mirror mirror = new Mirror();
             mirror.setId(UUID.randomUUID().toString());
-            mirror.setSourceItemId(backlinkMeta.sourceId());
-            mirror.setVirtualItemId(backlinkMeta.targetId());
+            mirror.setSourceNodeId(backlinkMeta.sourceId());
+            mirror.setVirtualNodeId(backlinkMeta.targetId());
             this.mirrors.add(mirror);
         }
     }
 
-    private void processCalendarMetadata(String itemId, InputCalendarMetadata calendarMeta)
+    private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta)
     {
         if (calendarMeta.date() != null)
         {
             Timestamp dateValue = parseCalendarDate(calendarMeta.date());
             if (dateValue != null)
             {
-                ItemDate itemDate = new ItemDate();
-                itemDate.setId(UUID.randomUUID().toString());
-                itemDate.setItemId(itemId);
-                itemDate.setDateValue(dateValue);
-                this.itemDates.add(itemDate);
+                NodeDate nodeDate = new NodeDate();
+                nodeDate.setId(UUID.randomUUID().toString());
+                nodeDate.setNodeId(nodeId);
+                nodeDate.setDateValue(dateValue);
+                this.nodeDates.add(nodeDate);
             }
         }
     }
@@ -336,24 +348,34 @@ public final class WorkflowyDataConverter
             TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
             existingTags.merge(updatedTags, tagMergeOptions);
 
-            LOGGER.info("Merging {} items", this.items.size());
-            ItemList existingItems = ItemFinder.findMany(ItemFinder.all());
-            ItemList updatedItems = new ItemList();
-            updatedItems.addAll(this.items.values());
-            TopLevelMergeOptions<Item> itemMergeOptions = new TopLevelMergeOptions<>(ItemFinder.getFinderInstance());
-            itemMergeOptions.doNotCompare(
-                    ItemFinder.systemFrom(),
-                    ItemFinder.systemTo(),
-                    ItemFinder.createdById(),
-                    ItemFinder.createdOn(),
-                    ItemFinder.lastUpdatedById());
-            existingItems.merge(updatedItems, itemMergeOptions);
+            LOGGER.info("Merging {} node contents", this.nodeContents.size());
+            NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
+            NodeContentList updatedContents = new NodeContentList();
+            updatedContents.addAll(this.nodeContents.values());
+            TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(NodeContentFinder.getFinderInstance());
+            contentMergeOptions.doNotCompare(
+                    NodeContentFinder.systemFrom(),
+                    NodeContentFinder.systemTo());
+            existingContents.merge(updatedContents, contentMergeOptions);
 
-            LOGGER.info("Merging {} item-tag mappings", this.itemTagMappings.size());
-            ItemTagMappingList existingMappings = ItemTagMappingFinder.findMany(ItemTagMappingFinder.all());
-            TopLevelMergeOptions<ItemTagMapping> mappingMergeOptions =
-                    new TopLevelMergeOptions<>(ItemTagMappingFinder.getFinderInstance());
-            existingMappings.merge(this.itemTagMappings, mappingMergeOptions);
+            LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
+            NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
+            NodeMetadataList updatedMetadatas = new NodeMetadataList();
+            updatedMetadatas.addAll(this.nodeMetadatas.values());
+            TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(NodeMetadataFinder.getFinderInstance());
+            metadataMergeOptions.doNotCompare(
+                    NodeMetadataFinder.systemFrom(),
+                    NodeMetadataFinder.systemTo(),
+                    NodeMetadataFinder.createdById(),
+                    NodeMetadataFinder.createdOn(),
+                    NodeMetadataFinder.lastUpdatedById());
+            existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
+
+            LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
+            NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
+            TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions =
+                    new TopLevelMergeOptions<>(NodeTagMappingFinder.getFinderInstance());
+            existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
             LOGGER.info("Merging {} mirrors", this.mirrors.size());
             MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
@@ -361,11 +383,11 @@ public final class WorkflowyDataConverter
                     new TopLevelMergeOptions<>(MirrorFinder.getFinderInstance());
             existingMirrors.merge(this.mirrors, mirrorMergeOptions);
 
-            LOGGER.info("Merging {} item dates", this.itemDates.size());
-            ItemDateList existingDates = ItemDateFinder.findMany(ItemDateFinder.all());
-            TopLevelMergeOptions<ItemDate> dateMergeOptions =
-                    new TopLevelMergeOptions<>(ItemDateFinder.getFinderInstance());
-            existingDates.merge(this.itemDates, dateMergeOptions);
+            LOGGER.info("Merging {} node dates", this.nodeDates.size());
+            NodeDateList existingDates = NodeDateFinder.findMany(NodeDateFinder.all());
+            TopLevelMergeOptions<NodeDate> dateMergeOptions =
+                    new TopLevelMergeOptions<>(NodeDateFinder.getFinderInstance());
+            existingDates.merge(this.nodeDates, dateMergeOptions);
 
             WorkflowyDataConverter.storeHighWatermark(backupInstant);
 

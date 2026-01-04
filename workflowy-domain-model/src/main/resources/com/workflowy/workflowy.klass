@@ -46,8 +46,8 @@ class Item
     // The text content of the item/bullet
     name         : String maxLength(1_000_000);
 
-    // Optional note/description attached to the item
-    note         : String? maxLength(1_000_000);
+    // Optional note/description attached to the item (can contain embedded files)
+    note         : String? maxLength(100_000_000);
 
     // Whether this item has been marked as completed
     completed    : Boolean;

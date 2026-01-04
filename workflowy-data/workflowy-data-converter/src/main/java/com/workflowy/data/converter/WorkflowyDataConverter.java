@@ -36,6 +36,9 @@ import com.workflowy.NodeDateList;
 import com.workflowy.NodeMetadata;
 import com.workflowy.NodeMetadataFinder;
 import com.workflowy.NodeMetadataList;
+import com.workflowy.NodeS3File;
+import com.workflowy.NodeS3FileFinder;
+import com.workflowy.NodeS3FileList;
 import com.workflowy.NodeTagMapping;
 import com.workflowy.NodeTagMappingFinder;
 import com.workflowy.NodeTagMappingList;
@@ -44,11 +47,15 @@ import com.workflowy.TagFinder;
 import com.workflowy.TagList;
 import com.workflowy.User;
 import com.workflowy.UserFinder;
+import com.workflowy.VirtualRootMapping;
+import com.workflowy.VirtualRootMappingFinder;
+import com.workflowy.VirtualRootMappingList;
 import com.workflowy.data.pojo.InputBacklinkMetadata;
 import com.workflowy.data.pojo.InputCalendarMetadata;
 import com.workflowy.data.pojo.InputItem;
 import com.workflowy.data.pojo.InputMetadata;
 import com.workflowy.data.pojo.InputMirrorMetadata;
+import com.workflowy.data.pojo.InputS3FileMetadata;
 import cool.klass.data.store.DataStore;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.MutableMap;
@@ -76,6 +83,8 @@ public final class WorkflowyDataConverter
     private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
     private final MirrorList mirrors = new MirrorList();
     private final NodeDateList nodeDates = new NodeDateList();
+    private final NodeS3FileList nodeS3Files = new NodeS3FileList();
+    private final VirtualRootMappingList virtualRootMappings = new VirtualRootMappingList();
 
     private WorkflowyDataConverter(
             @Nonnull ObjectMapper objectMapper,
@@ -158,9 +167,10 @@ public final class WorkflowyDataConverter
         this.extractTagsFromNodes();
         LOGGER.info("Extracted {} tags and {} node-tag mappings", this.tags.size(), this.nodeTagMappings.size());
 
-        LOGGER.info("Pass 3: Processing metadata (mirrors, dates)");
+        LOGGER.info("Pass 3: Processing metadata (mirrors, dates, S3 files, virtual roots)");
         this.processMetadata(rootItems);
-        LOGGER.info("Created {} mirrors and {} node dates", this.mirrors.size(), this.nodeDates.size());
+        LOGGER.info("Created {} mirrors, {} node dates, {} S3 files, {} virtual root mappings",
+                this.mirrors.size(), this.nodeDates.size(), this.nodeS3Files.size(), this.virtualRootMappings.size());
 
         this.mergeIntoDatabase(backupInstant);
     }
@@ -201,9 +211,38 @@ public final class WorkflowyDataConverter
         nodeMetadata.setCompleted(inputItem.isCompleted());
         nodeMetadata.setCompletedAt(convertWorkflowyTimestamp(inputItem.completedTimestamp()));
         nodeMetadata.setCollapsed(false);
+        nodeMetadata.setLastModified(convertWorkflowyTimestamp(inputItem.lastModifiedTimestamp()));
         nodeMetadata.setCreatedById(this.userId);
         nodeMetadata.setCreatedOn(convertWorkflowyTimestamp(inputItem.createdTimestamp()));
         nodeMetadata.setLastUpdatedById(this.userId);
+
+        InputMetadata metadata = inputItem.metadata();
+        if (metadata != null)
+        {
+            nodeMetadata.setLayoutMode(metadata.layoutMode());
+            nodeMetadata.setIsVirtualRoot(metadata.isVirtualRoot());
+            nodeMetadata.setIsReferencesRoot(metadata.isReferencesRoot());
+
+            if (metadata.ai() != null)
+            {
+                nodeMetadata.setInChat(metadata.ai().inChat());
+            }
+
+            if (metadata.mirror() != null)
+            {
+                nodeMetadata.setIsMirrorRoot(metadata.mirror().isMirrorRoot());
+                if (metadata.mirror().originalId() != null)
+                {
+                    nodeMetadata.setOriginalId(metadata.mirror().originalId());
+                }
+            }
+
+            // metadata.originalId takes precedence if both are present
+            if (metadata.originalId() != null)
+            {
+                nodeMetadata.setOriginalId(metadata.originalId());
+            }
+        }
         return nodeMetadata;
     }
 
@@ -276,6 +315,16 @@ public final class WorkflowyDataConverter
         {
             this.processCalendarMetadata(inputItem.id(), metadata.calendar());
         }
+
+        if (metadata.s3File() != null)
+        {
+            this.processS3FileMetadata(inputItem.id(), metadata.s3File());
+        }
+
+        if (metadata.virtualRootIds() != null && !metadata.virtualRootIds().isEmpty())
+        {
+            this.processVirtualRootIds(inputItem.id(), metadata.virtualRootIds());
+        }
     }
 
     private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta)
@@ -284,8 +333,19 @@ public final class WorkflowyDataConverter
         {
             Mirror mirror = new Mirror();
             mirror.setId(UUID.randomUUID().toString());
-            mirror.setSourceNodeId(sourceId);
-            mirror.setVirtualNodeId(nodeId);
+            mirror.setMirrorRootId(sourceId);
+            mirror.setMirrorNodeId(nodeId);
+            mirror.setIsBacklink(false);
+            this.mirrors.add(mirror);
+        }
+
+        for (String sourceId : mirrorMeta.getBacklinkMirrorIds())
+        {
+            Mirror mirror = new Mirror();
+            mirror.setId(UUID.randomUUID().toString());
+            mirror.setMirrorRootId(sourceId);
+            mirror.setMirrorNodeId(nodeId);
+            mirror.setIsBacklink(true);
             this.mirrors.add(mirror);
         }
     }
@@ -296,8 +356,9 @@ public final class WorkflowyDataConverter
         {
             Mirror mirror = new Mirror();
             mirror.setId(UUID.randomUUID().toString());
-            mirror.setSourceNodeId(backlinkMeta.sourceId());
-            mirror.setVirtualNodeId(backlinkMeta.targetId());
+            mirror.setMirrorRootId(backlinkMeta.sourceId());
+            mirror.setMirrorNodeId(backlinkMeta.targetId());
+            mirror.setIsBacklink(true);
             this.mirrors.add(mirror);
         }
     }
@@ -313,8 +374,39 @@ public final class WorkflowyDataConverter
                 nodeDate.setId(UUID.randomUUID().toString());
                 nodeDate.setNodeId(nodeId);
                 nodeDate.setDateValue(dateValue);
+                nodeDate.setIsRoot(calendarMeta.isRoot());
+                nodeDate.setLevel(calendarMeta.level());
+                nodeDate.setDateId(calendarMeta.dateId());
+                nodeDate.setTimestamp(calendarMeta.timestamp());
                 this.nodeDates.add(nodeDate);
             }
+        }
+    }
+
+    private void processS3FileMetadata(String nodeId, InputS3FileMetadata s3FileMeta)
+    {
+        NodeS3File nodeS3File = new NodeS3File();
+        nodeS3File.setId(UUID.randomUUID().toString());
+        nodeS3File.setNodeId(nodeId);
+        nodeS3File.setIsFile(s3FileMeta.isFile() != null && s3FileMeta.isFile());
+        nodeS3File.setFileName(s3FileMeta.fileName());
+        nodeS3File.setFileType(s3FileMeta.fileType());
+        nodeS3File.setObjectFolder(s3FileMeta.objectFolder());
+        nodeS3File.setIsAnimatedGIF(s3FileMeta.isAnimatedGIF());
+        nodeS3File.setImageOriginalWidth(s3FileMeta.imageOriginalWidth());
+        nodeS3File.setImageOriginalHeight(s3FileMeta.imageOriginalHeight());
+        nodeS3File.setImageOriginalPixels(s3FileMeta.imageOriginalPixels());
+        this.nodeS3Files.add(nodeS3File);
+    }
+
+    private void processVirtualRootIds(String nodeId, java.util.Map<String, Boolean> virtualRootIds)
+    {
+        for (String virtualRootId : virtualRootIds.keySet())
+        {
+            VirtualRootMapping mapping = new VirtualRootMapping();
+            mapping.setNodeId(nodeId);
+            mapping.setVirtualRootId(virtualRootId);
+            this.virtualRootMappings.add(mapping);
         }
     }
 
@@ -388,6 +480,18 @@ public final class WorkflowyDataConverter
             TopLevelMergeOptions<NodeDate> dateMergeOptions =
                     new TopLevelMergeOptions<>(NodeDateFinder.getFinderInstance());
             existingDates.merge(this.nodeDates, dateMergeOptions);
+
+            LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
+            NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());
+            TopLevelMergeOptions<NodeS3File> s3FileMergeOptions =
+                    new TopLevelMergeOptions<>(NodeS3FileFinder.getFinderInstance());
+            existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
+
+            LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
+            VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(VirtualRootMappingFinder.all());
+            TopLevelMergeOptions<VirtualRootMapping> virtualRootMergeOptions =
+                    new TopLevelMergeOptions<>(VirtualRootMappingFinder.getFinderInstance());
+            existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
 
             WorkflowyDataConverter.storeHighWatermark(backupInstant);
 

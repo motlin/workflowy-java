@@ -78,6 +78,27 @@ class NodeMetadata
 
     // Whether this node is collapsed in the UI
     collapsed   : Boolean;
+
+    // Last modified timestamp from backup (lm field)
+    lastModified: Instant?;
+
+    // Display layout mode (bullets, todo, h1, h2, h3, code-block, quote-block)
+    layoutMode  : String? maxLength(32);
+
+    // Whether this node is a virtual root (from metadata.isVirtualRoot)
+    isVirtualRoot: Boolean?;
+
+    // Whether this node is a references root (from metadata.isReferencesRoot)
+    isReferencesRoot: Boolean?;
+
+    // Whether this node is included in AI chat (from metadata.ai.inChat)
+    inChat      : Boolean?;
+
+    // Whether this node is a mirror root (from metadata.mirror.isMirrorRoot)
+    isMirrorRoot: Boolean?;
+
+    // Original ID for mirrored content (from metadata.originalId or metadata.mirror.originalId)
+    originalId  : String? maxLength(64);
 }
 
 // Note: NodeEmbedding is stored separately (e.g., SQLite) rather than in H2
@@ -108,30 +129,42 @@ association NodeHasChildren
  * Workflowy allows creating "live copies" of nodes called mirrors.
  * When you edit a mirrored node, changes appear everywhere it's mirrored.
  *
- * The direction is implicit: sourceNodeId → virtualNodeId
+ * Terminology matches backup file:
+ * - mirrorRootId: ID from metadata.mirror.mirrorRootIds (the original node)
+ * - mirrorNodeId: The node that HAS the mirror metadata (the copy)
+ * - isBacklink: true if from backlinkMirrorRootIds instead of mirrorRootIds
  */
 class Mirror
     systemTemporal
 {
-    id            : String key minLength(36) maxLength(36);
-    sourceNodeId  : String private final minLength(36) maxLength(36);
-    virtualNodeId : String private final minLength(36) maxLength(36);
+    id           : String key minLength(36) maxLength(36);
+
+    // The ID of the original node (from mirrorRootIds keys)
+    mirrorRootId : String private final minLength(36) maxLength(36);
+
+    // The ID of the node that is the mirror (has the mirror metadata)
+    mirrorNodeId : String private final minLength(36) maxLength(36);
+
+    // True if this came from backlinkMirrorRootIds instead of mirrorRootIds
+    isBacklink   : Boolean;
 }
 
-association MirrorSourceNode
+// Association from the original node to its mirrors
+association MirrorRootHasMirrors
 {
-    sourceNode : NodeContent[1..1] final;
+    mirrorRoot : NodeContent[1..1] final;
     mirrors    : Mirror[0..*];
 
-    relationship this.id == Mirror.sourceNodeId
+    relationship this.id == Mirror.mirrorRootId
 }
 
-association MirrorVirtualNode
+// Association from the mirror node back to its Mirror record
+association MirrorNodeHasMirror
 {
-    virtualNode : NodeContent[1..1] final;
-    asMirror    : Mirror[0..1];
+    mirrorNode : NodeContent[1..1] final;
+    asMirror   : Mirror[0..1];
 
-    relationship this.id == Mirror.virtualNodeId
+    relationship this.id == Mirror.mirrorNodeId
 }
 
 /*
@@ -216,9 +249,13 @@ association TagHasNodes
 class NodeDate
     systemTemporal
 {
-    id       : String key minLength(36) maxLength(36);
-    nodeId   : String private final minLength(36) maxLength(36);
-    dateValue: Instant;
+    id        : String key minLength(36) maxLength(36);
+    nodeId    : String private final minLength(36) maxLength(36);
+    dateValue : Instant;
+    isRoot    : Boolean?;
+    level     : String? maxLength(32);
+    dateId    : String? maxLength(64);
+    timestamp : Long?;
 }
 
 association NodeHasDates
@@ -227,6 +264,73 @@ association NodeHasDates
     dates : NodeDate[0..*] owned;
 
     relationship this.id == NodeDate.nodeId
+}
+
+/*
+ * NodeS3File represents S3 file attachments on nodes.
+ * From backup: metadata.s3File
+ */
+class NodeS3File
+    systemTemporal
+{
+    id                  : String key minLength(36) maxLength(36);
+    nodeId              : String private final minLength(36) maxLength(36);
+
+    // Whether this is a file attachment
+    isFile              : Boolean;
+
+    // Original filename
+    fileName            : String? maxLength(1024);
+
+    // MIME type or file extension
+    fileType            : String? maxLength(128);
+
+    // S3 folder/path
+    objectFolder        : String? maxLength(1024);
+
+    // Animation flag for GIFs
+    isAnimatedGIF       : Boolean?;
+
+    // Image dimensions
+    imageOriginalWidth  : Integer?;
+    imageOriginalHeight : Integer?;
+    imageOriginalPixels : Integer?;
+}
+
+association NodeHasS3File
+{
+    node   : NodeContent[1..1] final;
+    s3File : NodeS3File[0..1] owned;
+
+    relationship this.id == NodeS3File.nodeId
+}
+
+/*
+ * VirtualRootMapping tracks virtual root references.
+ * From backup: metadata.virtualRootIds (Map<String, Boolean>)
+ * Maps a node to the virtual root nodes it references.
+ */
+class VirtualRootMapping
+    systemTemporal
+{
+    nodeId        : String key private final minLength(36) maxLength(36);
+    virtualRootId : String key private final minLength(36) maxLength(36);
+}
+
+association NodeHasVirtualRoots
+{
+    node         : NodeContent[1..1] final;
+    virtualRoots : VirtualRootMapping[0..*] owned;
+
+    relationship this.id == VirtualRootMapping.nodeId
+}
+
+association VirtualRootHasNodes
+{
+    referencingNodes : VirtualRootMapping[0..*];
+    virtualRoot      : NodeContent[1..1] final;
+
+    relationship this.virtualRootId == NodeContent.id
 }
 
 /*
@@ -273,6 +377,10 @@ projection NodeDateProjection on NodeDate
 {
     id        : "NodeDate id",
     dateValue : "NodeDate dateValue",
+    isRoot    : "NodeDate isRoot",
+    level     : "NodeDate level",
+    dateId    : "NodeDate dateId",
+    timestamp : "NodeDate timestamp",
     systemFrom: "NodeDate systemFrom",
     systemTo  : "NodeDate systemTo",
 }
@@ -290,11 +398,28 @@ projection SharedNodeProjection on SharedNode
 projection MirrorProjection on Mirror
 {
     id        : "Mirror id",
+    isBacklink: "Mirror isBacklink",
     systemFrom: "Mirror systemFrom",
     systemTo  : "Mirror systemTo",
 }
 
+projection NodeS3FileProjection on NodeS3File
+{
+    id                  : "NodeS3File id",
+    isFile              : "NodeS3File isFile",
+    fileName            : "NodeS3File fileName",
+    fileType            : "NodeS3File fileType",
+    objectFolder        : "NodeS3File objectFolder",
+    isAnimatedGIF       : "NodeS3File isAnimatedGIF",
+    imageOriginalWidth  : "NodeS3File imageOriginalWidth",
+    imageOriginalHeight : "NodeS3File imageOriginalHeight",
+    imageOriginalPixels : "NodeS3File imageOriginalPixels",
+    systemFrom          : "NodeS3File systemFrom",
+    systemTo            : "NodeS3File systemTo",
+}
+
 // Projection for NodeContent (embedding-affecting fields)
+// Must be declared before VirtualRootMappingProjection which references it
 projection NodeContentProjection on NodeContent
 {
     id        : "NodeContent id",
@@ -305,18 +430,32 @@ projection NodeContentProjection on NodeContent
     parent    : NodeContentProjection,
 }
 
+projection VirtualRootMappingProjection on VirtualRootMapping
+{
+    virtualRoot: NodeContentProjection,
+    systemFrom : "VirtualRootMapping systemFrom",
+    systemTo   : "VirtualRootMapping systemTo",
+}
+
 // Projection for NodeMetadata (non-embedding fields)
 projection NodeMetadataProjection on NodeMetadata
 {
-    priority    : "NodeMetadata priority",
-    completed   : "NodeMetadata completed",
-    completedAt : "NodeMetadata completedAt",
-    collapsed   : "NodeMetadata collapsed",
-    systemFrom  : "NodeMetadata systemFrom",
-    systemTo    : "NodeMetadata systemTo",
-    createdOn   : "NodeMetadata createdOn",
-    createdBy   : UserProjection,
-    lastUpdatedBy: UserProjection,
+    priority        : "NodeMetadata priority",
+    completed       : "NodeMetadata completed",
+    completedAt     : "NodeMetadata completedAt",
+    collapsed       : "NodeMetadata collapsed",
+    lastModified    : "NodeMetadata lastModified",
+    layoutMode      : "NodeMetadata layoutMode",
+    isVirtualRoot   : "NodeMetadata isVirtualRoot",
+    isReferencesRoot: "NodeMetadata isReferencesRoot",
+    inChat          : "NodeMetadata inChat",
+    isMirrorRoot    : "NodeMetadata isMirrorRoot",
+    originalId      : "NodeMetadata originalId",
+    systemFrom      : "NodeMetadata systemFrom",
+    systemTo        : "NodeMetadata systemTo",
+    createdOn       : "NodeMetadata createdOn",
+    createdBy       : UserProjection,
+    lastUpdatedBy   : UserProjection,
 }
 
 // Lightweight projection for listing nodes without nested data
@@ -333,18 +472,20 @@ projection NodeSummaryProjection on NodeContent
 // Full projection including children and all metadata
 projection NodeProjection on NodeContent
 {
-    id        : "NodeContent id",
-    name      : "NodeContent name",
-    note      : "NodeContent note",
-    systemFrom: "NodeContent systemFrom",
-    systemTo  : "NodeContent systemTo",
-    parent    : NodeContentProjection,
-    metadata  : NodeMetadataProjection,
-    children  : NodeSummaryProjection,
-    tags      : NodeTagMappingProjection,
-    dates     : NodeDateProjection,
-    shares    : SharedNodeProjection,
-    mirrors   : MirrorProjection,
+    id          : "NodeContent id",
+    name        : "NodeContent name",
+    note        : "NodeContent note",
+    systemFrom  : "NodeContent systemFrom",
+    systemTo    : "NodeContent systemTo",
+    parent      : NodeContentProjection,
+    metadata    : NodeMetadataProjection,
+    children    : NodeSummaryProjection,
+    tags        : NodeTagMappingProjection,
+    dates       : NodeDateProjection,
+    shares      : SharedNodeProjection,
+    mirrors     : MirrorProjection,
+    s3File      : NodeS3FileProjection,
+    virtualRoots: VirtualRootMappingProjection,
 }
 
 // ============================================================================

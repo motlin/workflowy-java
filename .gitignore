@@ -4,6 +4,13 @@ JUSTFILE_BRANCH
 
 # Project-specific
 spy.log
+logs/
+
+# Claude Code
+.claude/
+
+# IntelliJ (full directory)
+.idea/
 
 # Created by https://www.toptal.com/developers/gitignore/api/java,maven,intellij+iml,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,maven,intellij+iml,visualstudiocode

@@ -4,17 +4,19 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Mirror metadata indicating this item is a mirror of another item.
  */
 public record InputMirrorMetadata(
-        @JsonProperty("mirrorRootIds")
+        @Nullable
+        String originalId,
+
+        @Nullable
+        Boolean isMirrorRoot,
+
         @Nullable
         Map<String, Boolean> mirrorRootIds,
 
-        @JsonProperty("backlinkMirrorRootIds")
         @Nullable
         Map<String, Boolean> backlinkMirrorRootIds
 )

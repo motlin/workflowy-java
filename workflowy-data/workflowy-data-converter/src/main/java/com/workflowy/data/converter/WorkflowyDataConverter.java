@@ -39,6 +39,8 @@ import com.workflowy.MirrorList;
 import com.workflowy.Tag;
 import com.workflowy.TagFinder;
 import com.workflowy.TagList;
+import com.workflowy.User;
+import com.workflowy.UserFinder;
 import com.workflowy.data.pojo.InputBacklinkMetadata;
 import com.workflowy.data.pojo.InputCalendarMetadata;
 import com.workflowy.data.pojo.InputItem;
@@ -58,10 +60,12 @@ public final class WorkflowyDataConverter
 
     private static final long WORKFLOWY_EPOCH_OFFSET = 1262304000L;
     private static final Pattern FILE_DATE_PATTERN = Pattern.compile("\\.(\\d{4}-\\d{2}-\\d{2})\\.");
+    private static final Pattern FILE_EMAIL_PATTERN = Pattern.compile("^\\((.+?)\\)\\.");
 
     private final ObjectMapper objectMapper;
     private final DataStore dataStore;
     private final File backupFile;
+    private final String userId;
 
     private final MutableMap<String, Item> items = MapAdapter.adapt(new LinkedHashMap<>());
     private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
@@ -77,6 +81,18 @@ public final class WorkflowyDataConverter
         this.objectMapper = Objects.requireNonNull(objectMapper);
         this.dataStore = Objects.requireNonNull(dataStore);
         this.backupFile = Objects.requireNonNull(backupFile);
+        this.userId = extractUserIdFromFilename(backupFile);
+    }
+
+    private static String extractUserIdFromFilename(File file)
+    {
+        String fileName = file.getName();
+        Matcher matcher = FILE_EMAIL_PATTERN.matcher(fileName);
+        if (matcher.find())
+        {
+            return matcher.group(1);
+        }
+        throw new IllegalArgumentException("Could not extract email from filename: " + fileName);
     }
 
     public static void convert(
@@ -172,6 +188,9 @@ public final class WorkflowyDataConverter
         item.setCompletedAt(convertWorkflowyTimestamp(inputItem.completedTimestamp()));
         item.setPriority(priority);
         item.setCollapsed(false);
+        item.setCreatedById(this.userId);
+        item.setCreatedOn(convertWorkflowyTimestamp(inputItem.createdTimestamp()));
+        item.setLastUpdatedById(this.userId);
 
         return item;
     }
@@ -287,6 +306,19 @@ public final class WorkflowyDataConverter
         }
     }
 
+    private void ensureUserExists()
+    {
+        User existingUser = UserFinder.findOne(UserFinder.userId().eq(this.userId));
+        if (existingUser == null)
+        {
+            LOGGER.info("Creating user: {}", this.userId);
+            User user = new User();
+            user.setUserId(this.userId);
+            user.setEmail(this.userId);
+            user.insert();
+        }
+    }
+
     private void mergeIntoDatabase(Instant backupInstant)
     {
         long time = backupInstant.toEpochMilli();
@@ -294,6 +326,8 @@ public final class WorkflowyDataConverter
         this.dataStore.runInTransaction(transaction ->
         {
             transaction.setSystemTime(time);
+
+            this.ensureUserExists();
 
             LOGGER.info("Merging {} tags", this.tags.size());
             TagList existingTags = TagFinder.findMany(TagFinder.all());

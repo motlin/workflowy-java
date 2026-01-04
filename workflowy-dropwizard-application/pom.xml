@@ -536,13 +536,11 @@
         <dependency>
             <groupId>org.eclipse.collections</groupId>
             <artifactId>eclipse-collections-api</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.collections</groupId>
             <artifactId>eclipse-collections</artifactId>
-            <scope>test</scope>
         </dependency>
         <!--endregion-->
     </dependencies>

@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
-import com.workflowy.data.converter.ImportWorkflowyCommand;
 import cool.klass.dropwizard.bundle.graphql.KlassGraphQLBundle;
 import cool.klass.serialization.jackson.module.meta.model.module.KlassMetaModelJacksonModule;
 import io.dropwizard.db.DataSourceFactory;
@@ -35,7 +34,7 @@ public class WorkflowyApplication
     protected void initializeCommands(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap)
     {
         super.initializeCommands(bootstrap);
-        bootstrap.addCommand(new ImportWorkflowyCommand<>(this));
+        bootstrap.addCommand(new WorkflowyImportCommand(this));
     }
 
     @Override

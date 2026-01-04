@@ -195,7 +195,7 @@
 		skippedPackages: ["klass.model.meta.domain"],
 	},
 	bootstrap: {
-		enabled: true,
+		enabled: false, // TODO: Re-enable after implementing visitUserLiteral() in klass
 	},
 	liquibase: {
 		enabled: true,
@@ -223,7 +223,7 @@
 	},
 	singlePageRedirectFilter: {
 		enabled: true,
-		redirectSPAPage: "/index.html",
+		redirectPage: "/index.html",
 		cacheControlHeader: "public, max-age=86400",
 		wellKnownPathPrefixes: [
 			"/api/",

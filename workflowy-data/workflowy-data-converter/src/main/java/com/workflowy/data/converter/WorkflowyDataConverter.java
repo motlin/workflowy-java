@@ -220,8 +220,8 @@ public final class WorkflowyDataConverter
         if (metadata != null)
         {
             nodeMetadata.setLayoutMode(metadata.layoutMode());
-            nodeMetadata.setIsVirtualRoot(metadata.isVirtualRoot());
-            nodeMetadata.setIsReferencesRoot(metadata.isReferencesRoot());
+            nodeMetadata.setIsVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
+            nodeMetadata.setIsReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
 
             if (metadata.ai() != null)
             {

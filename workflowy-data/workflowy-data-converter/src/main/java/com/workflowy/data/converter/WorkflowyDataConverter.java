@@ -411,10 +411,22 @@ public final class WorkflowyDataConverter
         nodeS3File.setFileName(s3FileMeta.fileName());
         nodeS3File.setFileType(s3FileMeta.fileType());
         nodeS3File.setObjectFolder(s3FileMeta.objectFolder());
-        nodeS3File.setIsAnimatedGIF(s3FileMeta.isAnimatedGIF());
-        nodeS3File.setImageOriginalWidth(s3FileMeta.imageOriginalWidth());
-        nodeS3File.setImageOriginalHeight(s3FileMeta.imageOriginalHeight());
-        nodeS3File.setImageOriginalPixels(s3FileMeta.imageOriginalPixels());
+        if (s3FileMeta.isAnimatedGIF() != null)
+        {
+            nodeS3File.setIsAnimatedGIF(s3FileMeta.isAnimatedGIF());
+        }
+        if (s3FileMeta.imageOriginalWidth() != null)
+        {
+            nodeS3File.setImageOriginalWidth(s3FileMeta.imageOriginalWidth());
+        }
+        if (s3FileMeta.imageOriginalHeight() != null)
+        {
+            nodeS3File.setImageOriginalHeight(s3FileMeta.imageOriginalHeight());
+        }
+        if (s3FileMeta.imageOriginalPixels() != null)
+        {
+            nodeS3File.setImageOriginalPixels(s3FileMeta.imageOriginalPixels());
+        }
         this.nodeS3Files.add(nodeS3File);
     }
 

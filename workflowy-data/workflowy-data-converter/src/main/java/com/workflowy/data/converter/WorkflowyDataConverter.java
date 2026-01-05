@@ -230,7 +230,10 @@ public final class WorkflowyDataConverter
 
             if (metadata.mirror() != null)
             {
-                nodeMetadata.setIsMirrorRoot(metadata.mirror().isMirrorRoot());
+                if (metadata.mirror().isMirrorRoot() != null)
+                {
+                    nodeMetadata.setIsMirrorRoot(metadata.mirror().isMirrorRoot());
+                }
                 if (metadata.mirror().originalId() != null)
                 {
                     nodeMetadata.setOriginalId(metadata.mirror().originalId());

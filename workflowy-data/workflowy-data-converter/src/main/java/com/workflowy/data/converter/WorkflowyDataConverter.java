@@ -469,9 +469,6 @@ public final class WorkflowyDataConverter
             TagList updatedTags = new TagList();
             updatedTags.addAll(this.tags.values());
             TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
-            tagMergeOptions.doNotCompare(
-                    TagFinder.systemFrom(),
-                    TagFinder.systemTo());
             existingTags.merge(updatedTags, tagMergeOptions);
 
             LOGGER.info("Merging {} node contents", this.nodeContents.size());
@@ -479,9 +476,6 @@ public final class WorkflowyDataConverter
             NodeContentList updatedContents = new NodeContentList();
             updatedContents.addAll(this.nodeContents.values());
             TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(NodeContentFinder.getFinderInstance());
-            contentMergeOptions.doNotCompare(
-                    NodeContentFinder.systemFrom(),
-                    NodeContentFinder.systemTo());
             existingContents.merge(updatedContents, contentMergeOptions);
 
             LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
@@ -490,8 +484,6 @@ public final class WorkflowyDataConverter
             updatedMetadatas.addAll(this.nodeMetadatas.values());
             TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(NodeMetadataFinder.getFinderInstance());
             metadataMergeOptions.doNotCompare(
-                    NodeMetadataFinder.systemFrom(),
-                    NodeMetadataFinder.systemTo(),
                     NodeMetadataFinder.createdById(),
                     NodeMetadataFinder.createdOn(),
                     NodeMetadataFinder.lastUpdatedById());
@@ -501,45 +493,30 @@ public final class WorkflowyDataConverter
             NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
             TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions =
                     new TopLevelMergeOptions<>(NodeTagMappingFinder.getFinderInstance());
-            mappingMergeOptions.doNotCompare(
-                    NodeTagMappingFinder.systemFrom(),
-                    NodeTagMappingFinder.systemTo());
             existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
             LOGGER.info("Merging {} mirrors", this.mirrors.size());
             MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
             TopLevelMergeOptions<Mirror> mirrorMergeOptions =
                     new TopLevelMergeOptions<>(MirrorFinder.getFinderInstance());
-            mirrorMergeOptions.doNotCompare(
-                    MirrorFinder.systemFrom(),
-                    MirrorFinder.systemTo());
             existingMirrors.merge(this.mirrors, mirrorMergeOptions);
 
             LOGGER.info("Merging {} node dates", this.nodeDates.size());
             NodeDateList existingDates = NodeDateFinder.findMany(NodeDateFinder.all());
             TopLevelMergeOptions<NodeDate> dateMergeOptions =
                     new TopLevelMergeOptions<>(NodeDateFinder.getFinderInstance());
-            dateMergeOptions.doNotCompare(
-                    NodeDateFinder.systemFrom(),
-                    NodeDateFinder.systemTo());
             existingDates.merge(this.nodeDates, dateMergeOptions);
 
             LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
             NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());
             TopLevelMergeOptions<NodeS3File> s3FileMergeOptions =
                     new TopLevelMergeOptions<>(NodeS3FileFinder.getFinderInstance());
-            s3FileMergeOptions.doNotCompare(
-                    NodeS3FileFinder.systemFrom(),
-                    NodeS3FileFinder.systemTo());
             existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
 
             LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
             VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(VirtualRootMappingFinder.all());
             TopLevelMergeOptions<VirtualRootMapping> virtualRootMergeOptions =
                     new TopLevelMergeOptions<>(VirtualRootMappingFinder.getFinderInstance());
-            virtualRootMergeOptions.doNotCompare(
-                    VirtualRootMappingFinder.systemFrom(),
-                    VirtualRootMappingFinder.systemTo());
             existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
 
             WorkflowyDataConverter.storeHighWatermark(backupInstant);

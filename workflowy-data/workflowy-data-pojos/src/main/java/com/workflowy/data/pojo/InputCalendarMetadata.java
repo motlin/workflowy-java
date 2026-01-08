@@ -28,7 +28,11 @@ public record InputCalendarMetadata(
         String dateId,
 
         @Nullable
-        Long timestamp
+        Long timestamp,
+
+        @JsonProperty("found_dates")
+        @Nullable
+        Object foundDates
 )
 {
 }

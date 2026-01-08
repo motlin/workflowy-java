@@ -19,6 +19,9 @@ public record InputCalendarMetadata(
         String level,
 
         @Nullable
+        Object levels,
+
+        @Nullable
         Object value,
 
         @Nullable

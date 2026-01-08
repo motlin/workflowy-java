@@ -38,7 +38,7 @@
         <app.rootPackageName>com.workflowy</app.rootPackageName>
         <app.name>Workflowy</app.name>
         <mainClass>${app.rootPackageName}.dropwizard.application.WorkflowyApplication</mainClass>
-        <liftwizard.version>2.1.39</liftwizard.version>
+        <liftwizard.version>2.1.40</liftwizard.version>
     </properties>
     <dependencyManagement>
         <dependencies>

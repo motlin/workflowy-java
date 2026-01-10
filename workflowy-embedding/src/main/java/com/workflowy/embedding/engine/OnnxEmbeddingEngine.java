@@ -16,6 +16,7 @@ import ai.djl.ndarray.NDManager;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ModelNotFoundException;
 import ai.djl.repository.zoo.ZooModel;
+import ai.djl.translate.Batchifier;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
 import com.workflowy.embedding.model.EmbeddingModel;
@@ -116,6 +117,11 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 		}
 
 		@Override
+		public Batchifier getBatchifier() {
+			return null;
+		}
+
+		@Override
 		public void prepare(TranslatorContext ctx) {
 			try {
 				this.tokenizer = HuggingFaceTokenizer.newInstance(this.model.getModelName());
@@ -132,8 +138,10 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 			long[] inputIds = encoding.getIds();
 			long[] attentionMask = encoding.getAttentionMask();
 
-			NDArray inputIdsArray = manager.create(new long[][] { inputIds });
-			NDArray attentionMaskArray = manager.create(new long[][] { attentionMask });
+			NDArray inputIdsArray = manager.create(inputIds).reshape(1, inputIds.length);
+			inputIdsArray.setName("input_ids");
+			NDArray attentionMaskArray = manager.create(attentionMask).reshape(1, attentionMask.length);
+			attentionMaskArray.setName("attention_mask");
 
 			return new NDList(inputIdsArray, attentionMaskArray);
 		}
@@ -144,9 +152,19 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 
 			NDArray meanPooled = lastHiddenState.mean(new int[] { 1 });
 
-			NDArray normalized = meanPooled.div(meanPooled.norm());
+			float[] values = meanPooled.toFloatArray();
+			float sumOfSquares = 0;
+			for (float v : values) {
+				sumOfSquares += v * v;
+			}
+			float l2Norm = (float) Math.sqrt(sumOfSquares);
 
-			return normalized.toFloatArray();
+			float[] normalized = new float[values.length];
+			for (int i = 0; i < values.length; i++) {
+				normalized[i] = values[i] / l2Norm;
+			}
+
+			return normalized;
 		}
 	}
 }

@@ -13,7 +13,7 @@
 				port: 0,
 			},
 		],
-		rootPath: "/api/*",
+		rootPath: "/*",
 		requestLog: {
 			appenders: [
 				{
@@ -58,8 +58,9 @@
 		],
 	},
 	clock: {
-		type: "fixed",
+		type: "incrementing",
 		instant: "2000-12-31T23:59:59Z",
+		incrementAmount: "1 day",
 	},
 	klass: {
 		domainModel: {
@@ -86,47 +87,32 @@
 		},
 	],
 	h2: {
-		enabled: true,
-		webPort: 8080,
-		tcpPort: 9090,
+		enabled: false,
 	},
 	cors: {
 		enabled: false,
 	},
-	dataSources: [
-		{
-			name: "h2-mem",
-			driverClass: "com.p6spy.engine.spy.P6SpyDriver",
-			readOnlyByDefault: false,
-			user: "sa",
-			password: "",
-			url: "jdbc:p6spy:h2:mem:",
-			properties: {
-				charSet: "UTF-8",
+	liquibase: {
+		enabled: true,
+		dropEntireSchemaOnStartupAndShutdown: true,
+		dataSourceMigrations: [
+			{
+				dataSourceName: "h2-tcp",
+				migrationFileName: "migrations.xml",
+				migrationFileLocation: "classpath",
+				contexts: [],
 			},
-			logValidationErrors: true,
-			maxWaitForConnection: "1 second",
-		},
+		],
+		dryRun: false,
+	},
+	dataSources: [
 		{
 			name: "h2-tcp",
 			driverClass: "com.p6spy.engine.spy.P6SpyDriver",
 			readOnlyByDefault: false,
 			user: "sa",
 			password: "",
-			url: "jdbc:p6spy:h2:tcp://localhost:9090/workflowy-h2",
-			properties: {
-				charSet: "UTF-8",
-			},
-			logValidationErrors: true,
-			maxWaitForConnection: "1 second",
-		},
-		{
-			name: "h2-file",
-			driverClass: "com.p6spy.engine.spy.P6SpyDriver",
-			readOnlyByDefault: false,
-			user: "sa",
-			password: "",
-			url: "jdbc:p6spy:h2:file:./target/h2db/workflowy-h2",
+			url: "jdbc:p6spy:h2:mem:testdb;DB_CLOSE_DELAY=-1",
 			properties: {
 				charSet: "UTF-8",
 			},
@@ -134,30 +120,17 @@
 			maxWaitForConnection: "1 second",
 		},
 	],
-	ddlExecutors: [
-		{
-			dataSourceName: "h2-tcp",
-		},
-	],
+	ddlExecutors: [],
+	sampleData: {
+		enabled: false,
+	},
 	reladomo: {
 		runtimeConfigurationPaths: ["reladomo-runtime-configuration/ReladomoRuntimeConfiguration.xml"],
 	},
 	connectionManagers: [
 		{
-			connectionManagerName: "h2-mem",
-			dataSourceName: "h2-mem",
-			databaseType: "H2",
-			schemaName: "workflowy-h2",
-		},
-		{
 			connectionManagerName: "h2-tcp",
 			dataSourceName: "h2-tcp",
-			databaseType: "H2",
-			schemaName: "workflowy-h2",
-		},
-		{
-			connectionManagerName: "h2-file",
-			dataSourceName: "h2-file",
 			databaseType: "H2",
 			schemaName: "workflowy-h2",
 		},
@@ -167,7 +140,7 @@
 		maxEntitySize: "1 kilobyte",
 	},
 	bootstrap: {
-		enabled: true,
+		enabled: false,
 	},
 	graphQL: {
 		enableTracing: false,

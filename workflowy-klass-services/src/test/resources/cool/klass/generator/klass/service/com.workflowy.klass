@@ -40,24 +40,6 @@ service NodeContentResource on NodeContent
         }
 }
 
-service NodeMetadataResource on NodeMetadata
-{
-    /nodeMetadata/{nodeId: String[1..1]}
-        GET
-        {
-            multiplicity: one;
-            criteria    : this.nodeId == nodeId;
-            projection  : NodeMetadataProjection;
-        }
-    /nodeMetadata
-        GET
-        {
-            multiplicity: many;
-            criteria    : all;
-            projection  : NodeMetadataProjection;
-        }
-}
-
 service MirrorResource on Mirror
 {
     /mirror/{id: String[1..1]}
@@ -91,60 +73,6 @@ service TagResource on Tag
             multiplicity: many;
             criteria    : all;
             projection  : TagProjection;
-        }
-}
-
-service SharedNodeResource on SharedNode
-{
-    /sharedNode/{id: String[1..1]}
-        GET
-        {
-            multiplicity: one;
-            criteria    : this.id == id;
-            projection  : SharedNodeProjection;
-        }
-    /sharedNode
-        GET
-        {
-            multiplicity: many;
-            criteria    : all;
-            projection  : SharedNodeProjection;
-        }
-}
-
-service NodeDateResource on NodeDate
-{
-    /nodeDate/{id: String[1..1]}
-        GET
-        {
-            multiplicity: one;
-            criteria    : this.id == id;
-            projection  : NodeDateProjection;
-        }
-    /nodeDate
-        GET
-        {
-            multiplicity: many;
-            criteria    : all;
-            projection  : NodeDateProjection;
-        }
-}
-
-service NodeS3FileResource on NodeS3File
-{
-    /nodeS3File/{id: String[1..1]}
-        GET
-        {
-            multiplicity: one;
-            criteria    : this.id == id;
-            projection  : NodeS3FileProjection;
-        }
-    /nodeS3File
-        GET
-        {
-            multiplicity: many;
-            criteria    : all;
-            projection  : NodeS3FileProjection;
         }
 }
 

@@ -14,30 +14,48 @@ projection UserProjection on User
     lastName: "User lastName",
 }
 
-projection ItemProjection on Item
+projection NodeContentProjection on NodeContent
 {
-    id: "Item id",
-    systemFrom: "Item systemFrom",
-    systemTo: "Item systemTo",
-    createdOn: "Item createdOn",
-    name: "Item name",
-    note: "Item note",
-    completed: "Item completed",
-    completedAt: "Item completedAt",
-    priority: "Item priority",
-    collapsed: "Item collapsed",
-    children: ItemProjection,
+    id: "NodeContent id",
+    systemFrom: "NodeContent systemFrom",
+    systemTo: "NodeContent systemTo",
+    name: "NodeContent name",
+    note: "NodeContent note",
+    metadata: NodeMetadataProjection,
+    children: {
+        id: "NodeContent id",
+    },
     parent: {
-        id: "Item id",
+        id: "NodeContent id",
     },
     mirrors: {
         id: "Mirror id",
     },
     asMirror: MirrorProjection,
-    shares: SharedItemProjection,
-    tags: ItemTagMappingProjection,
-    dates: ItemDateProjection,
-    version: ItemVersionProjection,
+    shares: SharedNodeProjection,
+    tags: NodeTagMappingProjection,
+    dates: NodeDateProjection,
+    s3File: NodeS3FileProjection,
+    virtualRoots: VirtualRootMappingProjection,
+}
+
+projection NodeMetadataProjection on NodeMetadata
+{
+    systemFrom: "NodeMetadata systemFrom",
+    systemTo: "NodeMetadata systemTo",
+    createdOn: "NodeMetadata createdOn",
+    priority: "NodeMetadata priority",
+    completed: "NodeMetadata completed",
+    completedAt: "NodeMetadata completedAt",
+    collapsed: "NodeMetadata collapsed",
+    lastModified: "NodeMetadata lastModified",
+    layoutMode: "NodeMetadata layoutMode",
+    isVirtualRoot: "NodeMetadata isVirtualRoot",
+    isReferencesRoot: "NodeMetadata isReferencesRoot",
+    inChat: "NodeMetadata inChat",
+    isMirrorRoot: "NodeMetadata isMirrorRoot",
+    originalId: "NodeMetadata originalId",
+    changes: "NodeMetadata changes",
     createdBy: {
         userId: "User userId",
     },
@@ -51,15 +69,16 @@ projection MirrorProjection on Mirror
     id: "Mirror id",
     systemFrom: "Mirror systemFrom",
     systemTo: "Mirror systemTo",
+    isBacklink: "Mirror isBacklink",
 }
 
-projection SharedItemProjection on SharedItem
+projection SharedNodeProjection on SharedNode
 {
-    id: "SharedItem id",
-    systemFrom: "SharedItem systemFrom",
-    systemTo: "SharedItem systemTo",
-    permission: "SharedItem permission",
-    shareUrl: "SharedItem shareUrl",
+    id: "SharedNode id",
+    systemFrom: "SharedNode systemFrom",
+    systemTo: "SharedNode systemTo",
+    permission: "SharedNode permission",
+    shareUrl: "SharedNode shareUrl",
     recipient: {
         userId: "User userId",
     },
@@ -73,21 +92,50 @@ projection TagProjection on Tag
     color: "Tag color",
 }
 
-projection ItemTagMappingProjection on ItemTagMapping
+projection NodeTagMappingProjection on NodeTagMapping
 {
-    systemFrom: "ItemTagMapping systemFrom",
-    systemTo: "ItemTagMapping systemTo",
+    systemFrom: "NodeTagMapping systemFrom",
+    systemTo: "NodeTagMapping systemTo",
     tag: {
         name: "Tag name",
     },
 }
 
-projection ItemDateProjection on ItemDate
+projection NodeDateProjection on NodeDate
 {
-    id: "ItemDate id",
-    systemFrom: "ItemDate systemFrom",
-    systemTo: "ItemDate systemTo",
-    dateValue: "ItemDate dateValue",
+    id: "NodeDate id",
+    systemFrom: "NodeDate systemFrom",
+    systemTo: "NodeDate systemTo",
+    dateValue: "NodeDate dateValue",
+    isRoot: "NodeDate isRoot",
+    level: "NodeDate level",
+    dateId: "NodeDate dateId",
+    timestamp: "NodeDate timestamp",
+    value: "NodeDate value",
+}
+
+projection NodeS3FileProjection on NodeS3File
+{
+    id: "NodeS3File id",
+    systemFrom: "NodeS3File systemFrom",
+    systemTo: "NodeS3File systemTo",
+    isFile: "NodeS3File isFile",
+    fileName: "NodeS3File fileName",
+    fileType: "NodeS3File fileType",
+    objectFolder: "NodeS3File objectFolder",
+    isAnimatedGIF: "NodeS3File isAnimatedGIF",
+    imageOriginalWidth: "NodeS3File imageOriginalWidth",
+    imageOriginalHeight: "NodeS3File imageOriginalHeight",
+    imageOriginalPixels: "NodeS3File imageOriginalPixels",
+}
+
+projection VirtualRootMappingProjection on VirtualRootMapping
+{
+    systemFrom: "VirtualRootMapping systemFrom",
+    systemTo: "VirtualRootMapping systemTo",
+    virtualRoot: {
+        id: "NodeContent id",
+    },
 }
 
 projection DataImportTimestampProjection on DataImportTimestamp
@@ -96,18 +144,4 @@ projection DataImportTimestampProjection on DataImportTimestamp
     systemFrom: "DataImportTimestamp systemFrom",
     systemTo: "DataImportTimestamp systemTo",
     timestamp: "DataImportTimestamp timestamp",
-}
-
-projection ItemVersionProjection on ItemVersion
-{
-    systemFrom: "ItemVersion systemFrom",
-    systemTo: "ItemVersion systemTo",
-    createdOn: "ItemVersion createdOn",
-    number: "ItemVersion number",
-    createdBy: {
-        userId: "User userId",
-    },
-    lastUpdatedBy: {
-        userId: "User userId",
-    },
 }

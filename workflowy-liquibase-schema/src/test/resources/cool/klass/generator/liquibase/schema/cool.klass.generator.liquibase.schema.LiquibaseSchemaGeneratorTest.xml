@@ -27,10 +27,10 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-2-ITEM">
-        <createTable tableName="ITEM">
+    <changeSet author="Klass" id="initial-table-2-NODE_CONTENT">
+        <createTable tableName="NODE_CONTENT">
             <column name="ID" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_CONTENT_PK" />
             </column>
 
             <column name="PARENT_ID" type="varchar(36)" />
@@ -40,7 +40,29 @@
             </column>
 
             <column name="SYSTEM_TO" type="timestamp">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_CONTENT_PK" />
+            </column>
+
+            <column name="NAME" type="varchar(1000000)">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="NOTE" type="varchar(100000000)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-table-3-NODE_METADATA">
+        <createTable tableName="NODE_METADATA">
+            <column name="NODE_ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_METADATA_PK" />
+            </column>
+
+            <column name="SYSTEM_FROM" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_TO" type="timestamp">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_METADATA_PK" />
             </column>
 
             <column name="CREATED_BY_ID" type="varchar(256)">
@@ -55,11 +77,9 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="NAME" type="varchar(1000000)">
+            <column name="PRIORITY" type="int">
                 <constraints nullable="false" />
             </column>
-
-            <column name="NOTE" type="varchar(1000000)" />
 
             <column name="COMPLETED" type="boolean">
                 <constraints nullable="false" />
@@ -67,27 +87,39 @@
 
             <column name="COMPLETED_AT" type="timestamp" />
 
-            <column name="PRIORITY" type="int">
-                <constraints nullable="false" />
-            </column>
-
             <column name="COLLAPSED" type="boolean">
                 <constraints nullable="false" />
             </column>
+
+            <column name="LAST_MODIFIED" type="timestamp" />
+
+            <column name="LAYOUT_MODE" type="varchar(32)" />
+
+            <column name="IS_VIRTUAL_ROOT" type="boolean" />
+
+            <column name="IS_REFERENCES_ROOT" type="boolean" />
+
+            <column name="IN_CHAT" type="boolean" />
+
+            <column name="IS_MIRROR_ROOT" type="boolean" />
+
+            <column name="ORIGINAL_ID" type="varchar(64)" />
+
+            <column name="CHANGES" type="varchar(10000)" />
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-3-MIRROR">
+    <changeSet author="Klass" id="initial-table-4-MIRROR">
         <createTable tableName="MIRROR">
             <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="MIRROR_PK" />
             </column>
 
-            <column name="SOURCE_ITEM_ID" type="varchar(36)">
+            <column name="MIRROR_ROOT_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
-            <column name="VIRTUAL_ITEM_ID" type="varchar(36)">
+            <column name="MIRROR_NODE_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
@@ -98,16 +130,20 @@
             <column name="SYSTEM_TO" type="timestamp">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="MIRROR_PK" />
             </column>
+
+            <column name="IS_BACKLINK" type="boolean">
+                <constraints nullable="false" />
+            </column>
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-4-SHARED_ITEM">
-        <createTable tableName="SHARED_ITEM">
+    <changeSet author="Klass" id="initial-table-5-SHARED_NODE">
+        <createTable tableName="SHARED_NODE">
             <column name="ID" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="SHARED_ITEM_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="SHARED_NODE_PK" />
             </column>
 
-            <column name="ITEM_ID" type="varchar(36)">
+            <column name="NODE_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
@@ -120,7 +156,7 @@
             </column>
 
             <column name="SYSTEM_TO" type="timestamp">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="SHARED_ITEM_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="SHARED_NODE_PK" />
             </column>
 
             <column name="PERMISSION" type="varchar(255)">
@@ -131,7 +167,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-5-TAG">
+    <changeSet author="Klass" id="initial-table-6-TAG">
         <createTable tableName="TAG">
             <column name="NAME" type="varchar(128)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="TAG_PK" />
@@ -149,14 +185,14 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-6-ITEM_TAG_MAPPING">
-        <createTable tableName="ITEM_TAG_MAPPING">
-            <column name="ITEM_ID" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_TAG_MAPPING_PK" />
+    <changeSet author="Klass" id="initial-table-7-NODE_TAG_MAPPING">
+        <createTable tableName="NODE_TAG_MAPPING">
+            <column name="NODE_ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_TAG_MAPPING_PK" />
             </column>
 
             <column name="TAG_NAME" type="varchar(128)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_TAG_MAPPING_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_TAG_MAPPING_PK" />
             </column>
 
             <column name="SYSTEM_FROM" type="timestamp">
@@ -164,18 +200,18 @@
             </column>
 
             <column name="SYSTEM_TO" type="timestamp">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_TAG_MAPPING_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_TAG_MAPPING_PK" />
             </column>
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-7-ITEM_DATE">
-        <createTable tableName="ITEM_DATE">
+    <changeSet author="Klass" id="initial-table-8-NODE_DATE">
+        <createTable tableName="NODE_DATE">
             <column name="ID" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_DATE_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_DATE_PK" />
             </column>
 
-            <column name="ITEM_ID" type="varchar(36)">
+            <column name="NODE_ID" type="varchar(36)">
                 <constraints nullable="false" />
             </column>
 
@@ -184,16 +220,84 @@
             </column>
 
             <column name="SYSTEM_TO" type="timestamp">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_DATE_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_DATE_PK" />
             </column>
 
             <column name="DATE_VALUE" type="timestamp">
                 <constraints nullable="false" />
             </column>
+
+            <column name="IS_ROOT" type="boolean" />
+
+            <column name="LEVEL" type="varchar(32)" />
+
+            <column name="DATE_ID" type="varchar(64)" />
+
+            <column name="TIMESTAMP" type="bigint" />
+
+            <column name="VALUE" type="varchar(1024)" />
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-8-DATA_IMPORT_TIMESTAMP">
+    <changeSet author="Klass" id="initial-table-9-NODE_S3_FILE">
+        <createTable tableName="NODE_S3_FILE">
+            <column name="ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_S3_FILE_PK" />
+            </column>
+
+            <column name="NODE_ID" type="varchar(36)">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_FROM" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_TO" type="timestamp">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_S3_FILE_PK" />
+            </column>
+
+            <column name="IS_FILE" type="boolean">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="FILE_NAME" type="varchar(1024)" />
+
+            <column name="FILE_TYPE" type="varchar(128)" />
+
+            <column name="OBJECT_FOLDER" type="varchar(1024)" />
+
+            <column name="IS_ANIMATED_G_I_F" type="boolean" />
+
+            <column name="IMAGE_ORIGINAL_WIDTH" type="int" />
+
+            <column name="IMAGE_ORIGINAL_HEIGHT" type="int" />
+
+            <column name="IMAGE_ORIGINAL_PIXELS" type="int" />
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-table-10-VIRTUAL_ROOT_MAPPING">
+        <createTable tableName="VIRTUAL_ROOT_MAPPING">
+            <column name="NODE_ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="VIRTUAL_ROOT_MAPPING_PK" />
+            </column>
+
+            <column name="VIRTUAL_ROOT_ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="VIRTUAL_ROOT_MAPPING_PK" />
+            </column>
+
+            <column name="SYSTEM_FROM" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_TO" type="timestamp">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="VIRTUAL_ROOT_MAPPING_PK" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-table-11-DATA_IMPORT_TIMESTAMP">
         <createTable tableName="DATA_IMPORT_TIMESTAMP">
             <column name="NAME" type="varchar(64)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="DATA_IMPORT_TIMESTAMP_PK" />
@@ -213,142 +317,119 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-9-ITEM_VERSION">
-        <createTable tableName="ITEM_VERSION">
-            <column name="ID" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_VERSION_PK" />
-            </column>
-
-            <column name="SYSTEM_FROM" type="timestamp">
-                <constraints nullable="false" />
-            </column>
-
-            <column name="SYSTEM_TO" type="timestamp">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="ITEM_VERSION_PK" />
-            </column>
-
-            <column name="CREATED_BY_ID" type="varchar(256)">
-                <constraints nullable="false" />
-            </column>
-
-            <column name="CREATED_ON" type="timestamp">
-                <constraints nullable="false" />
-            </column>
-
-            <column name="LAST_UPDATED_BY_ID" type="varchar(256)">
-                <constraints nullable="false" />
-            </column>
-
-            <column name="NUMBER" type="int">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet author="Klass" id="initial-indices-2-ITEM_IDX_PARENT">
+    <changeSet author="Klass" id="initial-indices-2-NODE_CONTENT_IDX_PARENT">
         <createIndex
-                indexName="ITEM_IDX_PARENT"
-                tableName="ITEM">
+                indexName="NODE_CONTENT_IDX_PARENT"
+                tableName="NODE_CONTENT">
             <column name="PARENT_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-2-ITEM_IDX_CREATED_BY">
+    <changeSet author="Klass" id="initial-indices-3-NODE_METADATA_IDX_CREATED_BY">
         <createIndex
-                indexName="ITEM_IDX_CREATED_BY"
-                tableName="ITEM">
+                indexName="NODE_METADATA_IDX_CREATED_BY"
+                tableName="NODE_METADATA">
             <column name="CREATED_BY_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-2-ITEM_IDX_LAST_UPDATED_BY">
+    <changeSet author="Klass" id="initial-indices-3-NODE_METADATA_IDX_LAST_UPDATED_BY">
         <createIndex
-                indexName="ITEM_IDX_LAST_UPDATED_BY"
-                tableName="ITEM">
+                indexName="NODE_METADATA_IDX_LAST_UPDATED_BY"
+                tableName="NODE_METADATA">
             <column name="LAST_UPDATED_BY_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-3-MIRROR_IDX_SOURCE_ITEM">
+    <changeSet author="Klass" id="initial-indices-4-MIRROR_IDX_MIRROR_ROOT">
         <createIndex
-                indexName="MIRROR_IDX_SOURCE_ITEM"
+                indexName="MIRROR_IDX_MIRROR_ROOT"
                 tableName="MIRROR">
-            <column name="SOURCE_ITEM_ID" />
+            <column name="MIRROR_ROOT_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-3-MIRROR_IDX_VIRTUAL_ITEM">
+    <changeSet author="Klass" id="initial-indices-4-MIRROR_IDX_MIRROR_NODE">
         <createIndex
-                indexName="MIRROR_IDX_VIRTUAL_ITEM"
+                indexName="MIRROR_IDX_MIRROR_NODE"
                 tableName="MIRROR">
-            <column name="VIRTUAL_ITEM_ID" />
+            <column name="MIRROR_NODE_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-4-SHARED_ITEM_IDX_ITEM">
+    <changeSet author="Klass" id="initial-indices-5-SHARED_NODE_IDX_NODE">
         <createIndex
-                indexName="SHARED_ITEM_IDX_ITEM"
-                tableName="SHARED_ITEM">
-            <column name="ITEM_ID" />
+                indexName="SHARED_NODE_IDX_NODE"
+                tableName="SHARED_NODE">
+            <column name="NODE_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-4-SHARED_ITEM_IDX_RECIPIENT">
+    <changeSet author="Klass" id="initial-indices-5-SHARED_NODE_IDX_RECIPIENT">
         <createIndex
-                indexName="SHARED_ITEM_IDX_RECIPIENT"
-                tableName="SHARED_ITEM">
+                indexName="SHARED_NODE_IDX_RECIPIENT"
+                tableName="SHARED_NODE">
             <column name="SHARED_WITH" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-6-ITEM_TAG_MAPPING_IDX_ITEM">
+    <changeSet author="Klass" id="initial-indices-7-NODE_TAG_MAPPING_IDX_NODE">
         <createIndex
-                indexName="ITEM_TAG_MAPPING_IDX_ITEM"
-                tableName="ITEM_TAG_MAPPING">
-            <column name="ITEM_ID" />
+                indexName="NODE_TAG_MAPPING_IDX_NODE"
+                tableName="NODE_TAG_MAPPING">
+            <column name="NODE_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-6-ITEM_TAG_MAPPING_IDX_TAG">
+    <changeSet author="Klass" id="initial-indices-7-NODE_TAG_MAPPING_IDX_TAG">
         <createIndex
-                indexName="ITEM_TAG_MAPPING_IDX_TAG"
-                tableName="ITEM_TAG_MAPPING">
+                indexName="NODE_TAG_MAPPING_IDX_TAG"
+                tableName="NODE_TAG_MAPPING">
             <column name="TAG_NAME" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-7-ITEM_DATE_IDX_ITEM">
+    <changeSet author="Klass" id="initial-indices-8-NODE_DATE_IDX_NODE">
         <createIndex
-                indexName="ITEM_DATE_IDX_ITEM"
-                tableName="ITEM_DATE">
-            <column name="ITEM_ID" />
+                indexName="NODE_DATE_IDX_NODE"
+                tableName="NODE_DATE">
+            <column name="NODE_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-9-ITEM_VERSION_IDX_CREATED_BY">
+    <changeSet author="Klass" id="initial-indices-9-NODE_S3_FILE_IDX_NODE">
         <createIndex
-                indexName="ITEM_VERSION_IDX_CREATED_BY"
-                tableName="ITEM_VERSION">
-            <column name="CREATED_BY_ID" />
+                indexName="NODE_S3_FILE_IDX_NODE"
+                tableName="NODE_S3_FILE">
+            <column name="NODE_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-9-ITEM_VERSION_IDX_LAST_UPDATED_BY">
+    <changeSet author="Klass" id="initial-indices-10-VIRTUAL_ROOT_MAPPING_IDX_NODE">
         <createIndex
-                indexName="ITEM_VERSION_IDX_LAST_UPDATED_BY"
-                tableName="ITEM_VERSION">
-            <column name="LAST_UPDATED_BY_ID" />
+                indexName="VIRTUAL_ROOT_MAPPING_IDX_NODE"
+                tableName="VIRTUAL_ROOT_MAPPING">
+            <column name="NODE_ID" />
+            <column name="SYSTEM_TO" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-indices-10-VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT">
+        <createIndex
+                indexName="VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT"
+                tableName="VIRTUAL_ROOT_MAPPING">
+            <column name="VIRTUAL_ROOT_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>

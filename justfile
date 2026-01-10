@@ -53,6 +53,62 @@ markdownlint:
 precommit: mvn
     uv tool run pre-commit run --all-files
 
+# Demo CLI commands (shows JSON output from all 4 commands)
+[group('cli')]
+demo MVN=default_mvn:
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+    echo "🔨 Building application..."
+    {{MVN}} compile -pl workflowy-dropwizard-application -am -DskipTests -q
+
+    cd workflowy-dropwizard-application
+
+    echo ""
+    echo "📊 cache-status: Show cache statistics"
+    {{MVN}} exec:java \
+        -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+        -Dexec.args="cache-status config.json5" -q 2>&1 | tail -10 | head -8
+
+    echo ""
+    echo "📂 list-by-id: List root nodes"
+    ROOT_OUTPUT=$({{MVN}} exec:java \
+        -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+        -Dexec.args="list-by-id config.json5" -q 2>&1 | tail -50)
+    echo "$ROOT_OUTPUT" | tail -30 | head -20
+
+    # Extract JSON portion and parse with jq
+    JSON_OUTPUT=$(echo "$ROOT_OUTPUT" | sed -n '/^\[$/,/^\]$/p')
+    FIRST_ID=$(echo "$JSON_OUTPUT" | jq -r '.[0].id // empty' 2>/dev/null)
+    FIRST_NAME=$(echo "$JSON_OUTPUT" | jq -r '.[0].name // empty' 2>/dev/null)
+
+    # Only run read-node/list-by-path demos if ID is a proper UUID (no spaces)
+    if [[ -n "$FIRST_ID" && ! "$FIRST_ID" =~ [[:space:]] ]]; then
+        echo ""
+        echo "📖 read-node: Read node '$FIRST_ID' with depth=1"
+        {{MVN}} exec:java \
+            -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+            -Dexec.args="read-node config.json5 --id $FIRST_ID --depth 1" -q 2>&1 | tail -40 | head -30
+
+        if [[ -n "$FIRST_NAME" && ! "$FIRST_NAME" =~ [[:space:]] ]]; then
+            echo ""
+            echo "🗂️ list-by-path: Navigate to '$FIRST_NAME'"
+            {{MVN}} exec:java \
+                -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+                -Dexec.args="list-by-path config.json5 --path $FIRST_NAME" -q 2>&1 | tail -20 | head -15
+        fi
+    else
+        echo ""
+        echo "ℹ️  Note: read-node and list-by-path demos require real imported data."
+        echo "   Run 'just import-data' to import your Workflowy backups first."
+    fi
+
+# Run a CLI command (e.g., `just cli cache-status`)
+[group('cli')]
+cli +ARGS:
+    cd workflowy-dropwizard-application && mvn exec:java \
+        -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+        -Dexec.args="{{ARGS}} config.json5" -q
+
 # Override this with a command called `woof` which notifies you in whatever ways you prefer.
 # My `woof` command uses `echo`, `say`, and sends a Pushover notification.
 echo_command := env('ECHO_COMMAND', "echo")

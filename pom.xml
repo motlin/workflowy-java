@@ -31,6 +31,7 @@
         <module>workflowy-reladomo-runtime-configuration</module>
         <module>workflowy-services</module>
         <module>workflowy-uml-nomnoml</module>
+        <module>workflowy-embedding</module>
     </modules>
     <properties>
         <klass.version>0.6.0-SNAPSHOT</klass.version>

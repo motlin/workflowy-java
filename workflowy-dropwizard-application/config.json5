@@ -238,4 +238,10 @@
 			"/graphql-playground/",
 		],
 	},
+	embedding: {
+		openaiApiKey: "${OPENAI_API_KEY:-}",
+		defaultModel: "minilm",
+		databasePath: "./embeddings.sqlite",
+		modelCachePath: "./models",
+	},
 }

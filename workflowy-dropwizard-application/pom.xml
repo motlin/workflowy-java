@@ -25,6 +25,12 @@
             <artifactId>${app.artifactId}-data-converter</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${app.artifactId}-embedding</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--endregion-->
 
         <!--region Project runtime dependencies -->

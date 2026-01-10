@@ -8,6 +8,8 @@ import com.workflowy.dropwizard.application.cli.CacheStatusCommand;
 import com.workflowy.dropwizard.application.cli.ListByIdCommand;
 import com.workflowy.dropwizard.application.cli.ListByPathCommand;
 import com.workflowy.dropwizard.application.cli.ReadNodeCommand;
+import com.workflowy.embedding.command.EmbedGenerateCommand;
+import com.workflowy.embedding.command.SearchCommand;
 import cool.klass.dropwizard.bundle.graphql.KlassGraphQLBundle;
 import cool.klass.serialization.jackson.module.meta.model.module.KlassMetaModelJacksonModule;
 import io.dropwizard.db.DataSourceFactory;
@@ -43,6 +45,8 @@ public class WorkflowyApplication
         bootstrap.addCommand(new ReadNodeCommand(this));
         bootstrap.addCommand(new ListByIdCommand(this));
         bootstrap.addCommand(new ListByPathCommand(this));
+        bootstrap.addCommand(new EmbedGenerateCommand<>(this));
+        bootstrap.addCommand(new SearchCommand<>(this));
     }
 
     @Override

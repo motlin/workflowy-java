@@ -18,155 +18,146 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("integration")
-class OnnxEmbeddingEngineTest
-{
-    private static OnnxEmbeddingEngine engine;
-    private static Path modelCachePath;
+class OnnxEmbeddingEngineTest {
 
-    @BeforeAll
-    static void setUpClass() throws IOException
-    {
-        modelCachePath = Files.createTempDirectory("onnx-test-cache");
-        engine = new OnnxEmbeddingEngine(EmbeddingModel.MINILM, modelCachePath.toString());
-    }
+	private static OnnxEmbeddingEngine engine;
+	private static Path modelCachePath;
 
-    @AfterAll
-    static void tearDownClass()
-    {
-        if (engine != null)
-        {
-            engine.close();
-        }
-    }
+	@BeforeAll
+	static void setUpClass() throws IOException {
+		modelCachePath = Files.createTempDirectory("onnx-test-cache");
+		engine = new OnnxEmbeddingEngine(EmbeddingModel.MINILM, modelCachePath.toString());
+	}
 
-    @Test
-    void constructor_withOpenAIModel_throwsException()
-    {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new OnnxEmbeddingEngine(EmbeddingModel.OPENAI_SMALL, modelCachePath.toString()));
-    }
+	@AfterAll
+	static void tearDownClass() {
+		if (engine != null) {
+			engine.close();
+		}
+	}
 
-    @Test
-    void generateEmbedding_withShortText_returnsCorrectDimensions()
-    {
-        float[] embedding = engine.generateEmbedding("Hello world", false);
+	@Test
+	void constructor_withOpenAIModel_throwsException() {
+		assertThrows(IllegalArgumentException.class, () ->
+			new OnnxEmbeddingEngine(EmbeddingModel.OPENAI_SMALL, modelCachePath.toString())
+		);
+	}
 
-        assertNotNull(embedding);
-        assertEquals(EmbeddingModel.MINILM.getDimensions(), embedding.length);
-    }
+	@Test
+	void generateEmbedding_withShortText_returnsCorrectDimensions() {
+		float[] embedding = engine.generateEmbedding("Hello world", false);
 
-    @Test
-    void generateEmbedding_withLongText_returnsCorrectDimensions()
-    {
-        String longText = "This is a very long text that contains many words. ".repeat(50);
+		assertNotNull(embedding);
+		assertEquals(EmbeddingModel.MINILM.getDimensions(), embedding.length);
+	}
 
-        float[] embedding = engine.generateEmbedding(longText, false);
+	@Test
+	void generateEmbedding_withLongText_returnsCorrectDimensions() {
+		String longText = "This is a very long text that contains many words. ".repeat(50);
 
-        assertNotNull(embedding);
-        assertEquals(EmbeddingModel.MINILM.getDimensions(), embedding.length);
-    }
+		float[] embedding = engine.generateEmbedding(longText, false);
 
-    @Test
-    void generateEmbedding_outputIsNormalized()
-    {
-        float[] embedding = engine.generateEmbedding("Test sentence for normalization", false);
+		assertNotNull(embedding);
+		assertEquals(EmbeddingModel.MINILM.getDimensions(), embedding.length);
+	}
 
-        double norm = 0.0;
-        for (float value : embedding)
-        {
-            norm += value * value;
-        }
-        norm = Math.sqrt(norm);
+	@Test
+	void generateEmbedding_outputIsNormalized() {
+		float[] embedding = engine.generateEmbedding("Test sentence for normalization", false);
 
-        assertEquals(1.0, norm, 0.01);
-    }
+		double norm = 0.0;
+		for (float value : embedding) {
+			norm += value * value;
+		}
+		norm = Math.sqrt(norm);
 
-    @Test
-    void generateEmbedding_similarTextProducesSimilarEmbeddings()
-    {
-        float[] embedding1 = engine.generateEmbedding("The cat sat on the mat", false);
-        float[] embedding2 = engine.generateEmbedding("A cat is sitting on a mat", false);
-        float[] embedding3 = engine.generateEmbedding("Quantum physics and thermodynamics", false);
+		assertEquals(1.0, norm, 0.01);
+	}
 
-        double similarityCats = cosineSimilarity(embedding1, embedding2);
-        double similarityDifferent = cosineSimilarity(embedding1, embedding3);
+	@Test
+	void generateEmbedding_similarTextProducesSimilarEmbeddings() {
+		float[] embedding1 = engine.generateEmbedding("The cat sat on the mat", false);
+		float[] embedding2 = engine.generateEmbedding("A cat is sitting on a mat", false);
+		float[] embedding3 = engine.generateEmbedding("Quantum physics and thermodynamics", false);
 
-        assertTrue(
-                similarityCats > similarityDifferent,
-                String.format(
-                        "Similar sentences (%.3f) should have higher similarity than unrelated ones (%.3f)",
-                        similarityCats,
-                        similarityDifferent));
-        assertTrue(
-                similarityCats > 0.7,
-                String.format("Very similar sentences should have similarity > 0.7, got %.3f", similarityCats));
-        assertTrue(
-                similarityDifferent < similarityCats,
-                String.format("Unrelated sentences (%.3f) should have lower similarity than related ones (%.3f)",
-                        similarityDifferent,
-                        similarityCats));
-    }
+		double similarityCats = cosineSimilarity(embedding1, embedding2);
+		double similarityDifferent = cosineSimilarity(embedding1, embedding3);
 
-    @Test
-    void generateEmbeddings_withMultipleTexts_returnsAll()
-    {
-        List<String> texts = List.of("First sentence", "Second sentence", "Third sentence");
+		assertTrue(
+			similarityCats > similarityDifferent,
+			String.format(
+				"Similar sentences (%.3f) should have higher similarity than unrelated ones (%.3f)",
+				similarityCats,
+				similarityDifferent
+			)
+		);
+		assertTrue(
+			similarityCats > 0.7,
+			String.format("Very similar sentences should have similarity > 0.7, got %.3f", similarityCats)
+		);
+		assertTrue(
+			similarityDifferent < similarityCats,
+			String.format(
+				"Unrelated sentences (%.3f) should have lower similarity than related ones (%.3f)",
+				similarityDifferent,
+				similarityCats
+			)
+		);
+	}
 
-        List<float[]> embeddings = engine.generateEmbeddings(texts, false);
+	@Test
+	void generateEmbeddings_withMultipleTexts_returnsAll() {
+		List<String> texts = List.of("First sentence", "Second sentence", "Third sentence");
 
-        assertEquals(3, embeddings.size());
-        for (float[] embedding : embeddings)
-        {
-            assertEquals(EmbeddingModel.MINILM.getDimensions(), embedding.length);
-        }
-    }
+		List<float[]> embeddings = engine.generateEmbeddings(texts, false);
 
-    @Test
-    void generateEmbedding_sameTextProducesSameEmbedding()
-    {
-        String text = "Deterministic embedding test";
+		assertEquals(3, embeddings.size());
+		for (float[] embedding : embeddings) {
+			assertEquals(EmbeddingModel.MINILM.getDimensions(), embedding.length);
+		}
+	}
 
-        float[] embedding1 = engine.generateEmbedding(text, false);
-        float[] embedding2 = engine.generateEmbedding(text, false);
+	@Test
+	void generateEmbedding_sameTextProducesSameEmbedding() {
+		String text = "Deterministic embedding test";
 
-        assertArrayEquals(embedding1, embedding2, 0.0001f);
-    }
+		float[] embedding1 = engine.generateEmbedding(text, false);
+		float[] embedding2 = engine.generateEmbedding(text, false);
 
-    @Test
-    void generateEmbedding_queryVsPassage_producesSlightlyDifferentResults()
-    {
-        String text = "Search query about machine learning";
+		assertArrayEquals(embedding1, embedding2, 0.0001f);
+	}
 
-        float[] queryEmbedding = engine.generateEmbedding(text, true);
-        float[] passageEmbedding = engine.generateEmbedding(text, false);
+	@Test
+	void generateEmbedding_queryVsPassage_producesSlightlyDifferentResults() {
+		String text = "Search query about machine learning";
 
-        assertArrayEquals(
-                queryEmbedding,
-                passageEmbedding,
-                0.0001f,
-                "MINILM has no query/passage prefix, so embeddings should be identical");
-    }
+		float[] queryEmbedding = engine.generateEmbedding(text, true);
+		float[] passageEmbedding = engine.generateEmbedding(text, false);
 
-    @Test
-    void getModel_returnsConfiguredModel()
-    {
-        assertEquals(EmbeddingModel.MINILM, engine.getModel());
-    }
+		assertArrayEquals(
+			queryEmbedding,
+			passageEmbedding,
+			0.0001f,
+			"MINILM has no query/passage prefix, so embeddings should be identical"
+		);
+	}
 
-    private static double cosineSimilarity(float[] a, float[] b)
-    {
-        double dotProduct = 0.0;
-        double normA = 0.0;
-        double normB = 0.0;
+	@Test
+	void getModel_returnsConfiguredModel() {
+		assertEquals(EmbeddingModel.MINILM, engine.getModel());
+	}
 
-        for (int i = 0; i < a.length; i++)
-        {
-            dotProduct += a[i] * b[i];
-            normA += a[i] * a[i];
-            normB += b[i] * b[i];
-        }
+	private static double cosineSimilarity(float[] a, float[] b) {
+		double dotProduct = 0.0;
+		double normA = 0.0;
+		double normB = 0.0;
 
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-    }
+		for (int i = 0; i < a.length; i++) {
+			dotProduct += a[i] * b[i];
+			normA += a[i] * a[i];
+			normB += b[i] * b[i];
+		}
+
+		return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+	}
 }

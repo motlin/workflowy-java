@@ -12,113 +12,99 @@ import com.workflowy.embedding.model.EmbeddingModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HuggingFaceModelDownloader
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(HuggingFaceModelDownloader.class);
+public final class HuggingFaceModelDownloader {
 
-    private static final String HUGGINGFACE_BASE_URL = "https://huggingface.co";
-    private static final String MODEL_FILENAME = "model.onnx";
-    private static final String TOKENIZER_FILENAME = "tokenizer.json";
+	private static final Logger LOGGER = LoggerFactory.getLogger(HuggingFaceModelDownloader.class);
 
-    private HuggingFaceModelDownloader()
-    {
-    }
+	private static final String HUGGINGFACE_BASE_URL = "https://huggingface.co";
+	private static final String MODEL_FILENAME = "model.onnx";
+	private static final String TOKENIZER_FILENAME = "tokenizer.json";
 
-    public static Path ensureModelDownloaded(EmbeddingModel model, String cachePath) throws IOException
-    {
-        Path modelDir = Path.of(cachePath, model.getKey());
-        Path modelFile = modelDir.resolve(MODEL_FILENAME);
-        Path tokenizerFile = modelDir.resolve(TOKENIZER_FILENAME);
+	private HuggingFaceModelDownloader() {}
 
-        if (Files.exists(modelFile) && Files.exists(tokenizerFile))
-        {
-            LOGGER.info("Model {} already downloaded at {}", model.getKey(), modelDir);
-            return modelDir;
-        }
+	public static Path ensureModelDownloaded(EmbeddingModel model, String cachePath) throws IOException {
+		Path modelDir = Path.of(cachePath, model.getKey());
+		Path modelFile = modelDir.resolve(MODEL_FILENAME);
+		Path tokenizerFile = modelDir.resolve(TOKENIZER_FILENAME);
 
-        Files.createDirectories(modelDir);
+		if (Files.exists(modelFile) && Files.exists(tokenizerFile)) {
+			LOGGER.info("Model {} already downloaded at {}", model.getKey(), modelDir);
+			return modelDir;
+		}
 
-        String modelName = model.getModelName();
+		Files.createDirectories(modelDir);
 
-        if (!Files.exists(modelFile))
-        {
-            String modelUrl = buildModelUrl(modelName);
-            LOGGER.info("Downloading ONNX model from {}", modelUrl);
-            downloadFile(modelUrl, modelFile);
-            LOGGER.info("Downloaded model to {}", modelFile);
-        }
+		String modelName = model.getModelName();
 
-        if (!Files.exists(tokenizerFile))
-        {
-            String tokenizerUrl = buildTokenizerUrl(modelName);
-            LOGGER.info("Downloading tokenizer from {}", tokenizerUrl);
-            downloadFile(tokenizerUrl, tokenizerFile);
-            LOGGER.info("Downloaded tokenizer to {}", tokenizerFile);
-        }
+		if (!Files.exists(modelFile)) {
+			String modelUrl = buildModelUrl(modelName);
+			LOGGER.info("Downloading ONNX model from {}", modelUrl);
+			downloadFile(modelUrl, modelFile);
+			LOGGER.info("Downloaded model to {}", modelFile);
+		}
 
-        return modelDir;
-    }
+		if (!Files.exists(tokenizerFile)) {
+			String tokenizerUrl = buildTokenizerUrl(modelName);
+			LOGGER.info("Downloading tokenizer from {}", tokenizerUrl);
+			downloadFile(tokenizerUrl, tokenizerFile);
+			LOGGER.info("Downloaded tokenizer to {}", tokenizerFile);
+		}
 
-    private static String buildModelUrl(String modelName)
-    {
-        return HUGGINGFACE_BASE_URL + "/" + modelName + "/resolve/main/onnx/" + MODEL_FILENAME;
-    }
+		return modelDir;
+	}
 
-    private static String buildTokenizerUrl(String modelName)
-    {
-        return HUGGINGFACE_BASE_URL + "/" + modelName + "/resolve/main/" + TOKENIZER_FILENAME;
-    }
+	private static String buildModelUrl(String modelName) {
+		return HUGGINGFACE_BASE_URL + "/" + modelName + "/resolve/main/onnx/" + MODEL_FILENAME;
+	}
 
-    private static void downloadFile(String urlString, Path destination) throws IOException
-    {
-        URI uri = URI.create(urlString);
-        HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
-        connection.setRequestProperty("User-Agent", "workflowy-java/1.0");
-        connection.setConnectTimeout(30000);
-        connection.setReadTimeout(300000);
+	private static String buildTokenizerUrl(String modelName) {
+		return HUGGINGFACE_BASE_URL + "/" + modelName + "/resolve/main/" + TOKENIZER_FILENAME;
+	}
 
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
-                || responseCode == HttpURLConnection.HTTP_MOVED_PERM
-                || responseCode == 307
-                || responseCode == 308)
-        {
-            String newUrl = connection.getHeaderField("Location");
-            LOGGER.debug("Following redirect to {}", newUrl);
-            connection.disconnect();
-            downloadFile(newUrl, destination);
-            return;
-        }
+	private static void downloadFile(String urlString, Path destination) throws IOException {
+		URI uri = URI.create(urlString);
+		HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+		connection.setRequestProperty("User-Agent", "workflowy-java/1.0");
+		connection.setConnectTimeout(30000);
+		connection.setReadTimeout(300000);
 
-        if (responseCode != HttpURLConnection.HTTP_OK)
-        {
-            connection.disconnect();
-            throw new IOException("Failed to download " + urlString + ": HTTP " + responseCode);
-        }
+		int responseCode = connection.getResponseCode();
+		if (
+			responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+			|| responseCode == HttpURLConnection.HTTP_MOVED_PERM
+			|| responseCode == 307
+			|| responseCode == 308
+		) {
+			String newUrl = connection.getHeaderField("Location");
+			LOGGER.debug("Following redirect to {}", newUrl);
+			connection.disconnect();
+			downloadFile(newUrl, destination);
+			return;
+		}
 
-        long contentLength = connection.getContentLengthLong();
-        LOGGER.info("Downloading {} bytes...", contentLength > 0 ? contentLength : "unknown");
+		if (responseCode != HttpURLConnection.HTTP_OK) {
+			connection.disconnect();
+			throw new IOException("Failed to download " + urlString + ": HTTP " + responseCode);
+		}
 
-        try (InputStream in = connection.getInputStream())
-        {
-            Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
-        }
-        finally
-        {
-            connection.disconnect();
-        }
-    }
+		long contentLength = connection.getContentLengthLong();
+		LOGGER.info("Downloading {} bytes...", contentLength > 0 ? contentLength : "unknown");
 
-    public static Path getModelPath(EmbeddingModel model, String cachePath)
-    {
-        return Path.of(cachePath, model.getKey());
-    }
+		try (InputStream in = connection.getInputStream()) {
+			Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
+		} finally {
+			connection.disconnect();
+		}
+	}
 
-    public static boolean isModelDownloaded(EmbeddingModel model, String cachePath)
-    {
-        Path modelDir = getModelPath(model, cachePath);
-        Path modelFile = modelDir.resolve(MODEL_FILENAME);
-        Path tokenizerFile = modelDir.resolve(TOKENIZER_FILENAME);
-        return Files.exists(modelFile) && Files.exists(tokenizerFile);
-    }
+	public static Path getModelPath(EmbeddingModel model, String cachePath) {
+		return Path.of(cachePath, model.getKey());
+	}
+
+	public static boolean isModelDownloaded(EmbeddingModel model, String cachePath) {
+		Path modelDir = getModelPath(model, cachePath);
+		Path modelFile = modelDir.resolve(MODEL_FILENAME);
+		Path tokenizerFile = modelDir.resolve(TOKENIZER_FILENAME);
+		return Files.exists(modelFile) && Files.exists(tokenizerFile);
+	}
 }

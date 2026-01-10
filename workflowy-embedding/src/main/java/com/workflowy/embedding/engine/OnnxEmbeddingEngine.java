@@ -150,7 +150,14 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 		public float[] processOutput(TranslatorContext ctx, NDList list) {
 			NDArray lastHiddenState = list.get(0);
 
-			NDArray meanPooled = lastHiddenState.mean(new int[] { 1 });
+			// Mean pool over all dimensions except the last (hidden) dimension
+			// This handles both batched [batch, seq, hidden] and unbatched [seq, hidden] outputs
+			long[] shape = lastHiddenState.getShape().getShape();
+			int[] meanDims = new int[shape.length - 1];
+			for (int i = 0; i < meanDims.length; i++) {
+				meanDims[i] = i;
+			}
+			NDArray meanPooled = lastHiddenState.mean(meanDims);
 
 			float[] values = meanPooled.toFloatArray();
 			float sumOfSquares = 0;

@@ -220,8 +220,8 @@ public final class WorkflowyDataConverter
         if (metadata != null)
         {
             nodeMetadata.setLayoutMode(metadata.layoutMode());
-            nodeMetadata.setIsVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
-            nodeMetadata.setIsReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
+            nodeMetadata.setVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
+            nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
 
             if (metadata.ai() != null)
             {
@@ -232,7 +232,7 @@ public final class WorkflowyDataConverter
             {
                 if (metadata.mirror().isMirrorRoot() != null)
                 {
-                    nodeMetadata.setIsMirrorRoot(metadata.mirror().isMirrorRoot());
+                    nodeMetadata.setMirrorRoot(metadata.mirror().isMirrorRoot());
                 }
                 if (metadata.mirror().originalId() != null)
                 {
@@ -350,7 +350,7 @@ public final class WorkflowyDataConverter
             mirror.setId(UUID.randomUUID().toString());
             mirror.setMirrorRootId(sourceId);
             mirror.setMirrorNodeId(nodeId);
-            mirror.setIsBacklink(false);
+            mirror.setBacklink(false);
             this.mirrors.add(mirror);
         }
 
@@ -360,7 +360,7 @@ public final class WorkflowyDataConverter
             mirror.setId(UUID.randomUUID().toString());
             mirror.setMirrorRootId(sourceId);
             mirror.setMirrorNodeId(nodeId);
-            mirror.setIsBacklink(true);
+            mirror.setBacklink(true);
             this.mirrors.add(mirror);
         }
     }
@@ -373,7 +373,7 @@ public final class WorkflowyDataConverter
             mirror.setId(UUID.randomUUID().toString());
             mirror.setMirrorRootId(backlinkMeta.sourceId());
             mirror.setMirrorNodeId(backlinkMeta.targetId());
-            mirror.setIsBacklink(true);
+            mirror.setBacklink(true);
             this.mirrors.add(mirror);
         }
     }
@@ -389,7 +389,7 @@ public final class WorkflowyDataConverter
                 nodeDate.setId(UUID.randomUUID().toString());
                 nodeDate.setNodeId(nodeId);
                 nodeDate.setDateValue(dateValue);
-                nodeDate.setIsRoot(calendarMeta.isRoot());
+                nodeDate.setRoot(calendarMeta.isRoot());
                 nodeDate.setLevel(calendarMeta.level());
                 nodeDate.setDateId(calendarMeta.dateId());
                 nodeDate.setTimestamp(calendarMeta.timestamp());
@@ -407,13 +407,13 @@ public final class WorkflowyDataConverter
         NodeS3File nodeS3File = new NodeS3File();
         nodeS3File.setId(UUID.randomUUID().toString());
         nodeS3File.setNodeId(nodeId);
-        nodeS3File.setIsFile(s3FileMeta.isFile() != null && s3FileMeta.isFile());
+        nodeS3File.setFile(s3FileMeta.isFile() != null && s3FileMeta.isFile());
         nodeS3File.setFileName(s3FileMeta.fileName());
         nodeS3File.setFileType(s3FileMeta.fileType());
         nodeS3File.setObjectFolder(s3FileMeta.objectFolder());
         if (s3FileMeta.isAnimatedGIF() != null)
         {
-            nodeS3File.setIsAnimatedGIF(s3FileMeta.isAnimatedGIF());
+            nodeS3File.setAnimatedGIF(s3FileMeta.isAnimatedGIF());
         }
         if (s3FileMeta.imageOriginalWidth() != null)
         {

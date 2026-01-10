@@ -95,13 +95,13 @@
 
             <column name="LAYOUT_MODE" type="varchar(32)" />
 
-            <column name="IS_VIRTUAL_ROOT" type="boolean" />
+            <column name="VIRTUAL_ROOT" type="boolean" />
 
-            <column name="IS_REFERENCES_ROOT" type="boolean" />
+            <column name="REFERENCES_ROOT" type="boolean" />
 
             <column name="IN_CHAT" type="boolean" />
 
-            <column name="IS_MIRROR_ROOT" type="boolean" />
+            <column name="MIRROR_ROOT" type="boolean" />
 
             <column name="ORIGINAL_ID" type="varchar(64)" />
 
@@ -131,7 +131,7 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="MIRROR_PK" />
             </column>
 
-            <column name="IS_BACKLINK" type="boolean">
+            <column name="BACKLINK" type="boolean">
                 <constraints nullable="false" />
             </column>
         </createTable>
@@ -227,7 +227,7 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="IS_ROOT" type="boolean" />
+            <column name="ROOT" type="boolean" />
 
             <column name="LEVEL" type="varchar(32)" />
 
@@ -257,7 +257,7 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_S3_FILE_PK" />
             </column>
 
-            <column name="IS_FILE" type="boolean">
+            <column name="FILE" type="boolean">
                 <constraints nullable="false" />
             </column>
 
@@ -267,7 +267,7 @@
 
             <column name="OBJECT_FOLDER" type="varchar(1024)" />
 
-            <column name="IS_ANIMATED_G_I_F" type="boolean" />
+            <column name="ANIMATED_G_I_F" type="boolean" />
 
             <column name="IMAGE_ORIGINAL_WIDTH" type="int" />
 

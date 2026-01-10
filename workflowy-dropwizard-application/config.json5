@@ -1,7 +1,7 @@
 {
 	server: {
 		detailedJsonProcessingExceptionMapper: true,
-		rootPath: "/api/*",
+		rootPath: "/*",
 		requestLog: {
 			appenders: [
 				{

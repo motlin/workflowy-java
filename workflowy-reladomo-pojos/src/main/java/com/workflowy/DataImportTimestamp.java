@@ -1,5 +1,8 @@
 package com.workflowy;
 import java.sql.Timestamp;
+
+import com.gs.fw.common.mithra.util.DefaultInfinityTimestamp;
+
 public class DataImportTimestamp extends DataImportTimestampAbstract
 {
 	public DataImportTimestamp(Timestamp system
@@ -13,6 +16,6 @@ public class DataImportTimestamp extends DataImportTimestampAbstract
 
 	public DataImportTimestamp()
 	{
-		this(com.gs.fw.common.mithra.util.DefaultInfinityTimestamp.getDefaultInfinity());
+		this(DefaultInfinityTimestamp.getDefaultInfinity());
 	}
 }

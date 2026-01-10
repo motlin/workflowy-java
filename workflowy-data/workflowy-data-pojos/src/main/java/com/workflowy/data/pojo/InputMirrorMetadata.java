@@ -23,18 +23,18 @@ public record InputMirrorMetadata(
 {
     public Set<String> getMirrorSourceIds()
     {
-        if (mirrorRootIds != null)
+        if (this.mirrorRootIds != null)
         {
-            return mirrorRootIds.keySet();
+            return this.mirrorRootIds.keySet();
         }
         return Set.of();
     }
 
     public Set<String> getBacklinkMirrorIds()
     {
-        if (backlinkMirrorRootIds != null)
+        if (this.backlinkMirrorRootIds != null)
         {
-            return backlinkMirrorRootIds.keySet();
+            return this.backlinkMirrorRootIds.keySet();
         }
         return Set.of();
     }

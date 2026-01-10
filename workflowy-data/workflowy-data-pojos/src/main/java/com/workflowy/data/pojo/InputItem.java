@@ -67,11 +67,11 @@ public record InputItem(
 
     public boolean isCompleted()
     {
-        return completedTimestamp != null;
+        return this.completedTimestamp != null;
     }
 
     public boolean hasChildren()
     {
-        return children != null && !children.isEmpty();
+        return !this.children.isEmpty();
     }
 }

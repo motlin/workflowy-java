@@ -1,9 +1,11 @@
 package com.workflowy.data.converter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 
 /**
  * Extracts hashtags from Workflowy item names.
@@ -25,7 +27,7 @@ public final class HashtagExtractor
      */
     public static List<String> extractHashtags(String text)
     {
-        List<String> hashtags = new ArrayList<>();
+        MutableList<String> hashtags = Lists.mutable.empty();
 
         if (text == null || text.isEmpty())
         {

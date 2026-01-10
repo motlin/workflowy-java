@@ -67,39 +67,34 @@ demo MVN=default_mvn:
     echo "📊 cache-status: Show cache statistics"
     {{MVN}} exec:java \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="cache-status config.json5" -q 2>&1 | tail -10 | head -8
+        -Dexec.args="cache-status config.json5" -q 2>&1 | sed -n '/^{$/,/^}$/p' | jq --color-output
 
     echo ""
     echo "📂 list-by-id: List root nodes"
     ROOT_OUTPUT=$({{MVN}} exec:java \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="list-by-id config.json5" -q 2>&1 | tail -50)
-    echo "$ROOT_OUTPUT" | tail -30 | head -20
+        -Dexec.args="list-by-id config.json5" -q 2>&1 | sed -n '/^\[$/,/^\]$/p')
+    echo "$ROOT_OUTPUT" | jq --color-output
+    FIRST_ID=$(echo "$ROOT_OUTPUT" | jq -r '.[0].id // empty' 2>/dev/null)
+    FIRST_NAME=$(echo "$ROOT_OUTPUT" | jq -r '.[0].name // empty' 2>/dev/null)
 
-    # Extract JSON portion and parse with jq
-    JSON_OUTPUT=$(echo "$ROOT_OUTPUT" | sed -n '/^\[$/,/^\]$/p')
-    FIRST_ID=$(echo "$JSON_OUTPUT" | jq -r '.[0].id // empty' 2>/dev/null)
-    FIRST_NAME=$(echo "$JSON_OUTPUT" | jq -r '.[0].name // empty' 2>/dev/null)
-
-    # Only run read-node/list-by-path demos if ID is a proper UUID (no spaces)
-    if [[ -n "$FIRST_ID" && ! "$FIRST_ID" =~ [[:space:]] ]]; then
+    if [[ -n "$FIRST_ID" ]]; then
         echo ""
         echo "📖 read-node: Read node '$FIRST_ID' with depth=1"
         {{MVN}} exec:java \
             -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-            -Dexec.args="read-node config.json5 --id $FIRST_ID --depth 1" -q 2>&1 | tail -40 | head -30
+            -Dexec.args="read-node config.json5 --id \"$FIRST_ID\" --depth 1" -q 2>&1 | sed -n '/^{$/,/^}$/p' | jq --color-output
 
-        if [[ -n "$FIRST_NAME" && ! "$FIRST_NAME" =~ [[:space:]] ]]; then
+        if [[ -n "$FIRST_NAME" ]]; then
             echo ""
             echo "🗂️ list-by-path: Navigate to '$FIRST_NAME'"
             {{MVN}} exec:java \
                 -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-                -Dexec.args="list-by-path config.json5 --path $FIRST_NAME" -q 2>&1 | tail -20 | head -15
+                -Dexec.args="list-by-path config.json5 --path \"$FIRST_NAME\"" -q 2>&1 | sed -n '/^\[$/,/^\]$/p' | jq --color-output
         fi
     else
         echo ""
-        echo "ℹ️  Note: read-node and list-by-path demos require real imported data."
-        echo "   Run 'just import-data' to import your Workflowy backups first."
+        echo "ℹ️  Note: No nodes found. Run 'just import-data' to import your Workflowy backups first."
     fi
 
 # Run a CLI command (e.g., `just cli cache-status`)

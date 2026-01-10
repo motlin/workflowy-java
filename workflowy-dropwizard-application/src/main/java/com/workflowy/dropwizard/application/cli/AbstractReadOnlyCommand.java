@@ -1,9 +1,12 @@
 package com.workflowy.dropwizard.application.cli;
 
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sourceforge.argparse4j.impl.Arguments;
+import net.sourceforge.argparse4j.inf.Subparser;
 import com.gs.fw.common.mithra.finder.Operation;
 import com.workflowy.NodeContent;
 import com.workflowy.NodeContentFinder;
@@ -25,6 +28,7 @@ public abstract class AbstractReadOnlyCommand
 
     private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
     protected ObjectMapper objectMapper;
+    private boolean colorOutput;
 
     protected AbstractReadOnlyCommand(
             Application<WorkflowyConfiguration> application,
@@ -32,6 +36,21 @@ public abstract class AbstractReadOnlyCommand
             String description)
     {
         super(application, name, description);
+    }
+
+    @Override
+    public void configure(Subparser subparser)
+    {
+        super.configure(subparser);
+        subparser.addArgument("--color")
+                .action(Arguments.storeTrue())
+                .setDefault(false)
+                .dest("color")
+                .help("Enable colored JSON output");
+        subparser.addArgument("--no-color")
+                .action(Arguments.storeFalse())
+                .dest("color")
+                .help("Disable colored JSON output");
     }
 
     @Override
@@ -48,6 +67,7 @@ public abstract class AbstractReadOnlyCommand
         this.containerLifeCycle.start();
 
         this.objectMapper = environment.getObjectMapper();
+        this.colorOutput = namespace.getBoolean("color");
 
         try
         {
@@ -69,14 +89,20 @@ public abstract class AbstractReadOnlyCommand
     protected abstract Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
             throws CommandException;
 
-    protected void writeJsonOutput(Object result) throws JsonProcessingException
+    protected void writeJsonOutput(Object result) throws IOException
     {
         String json = this.objectMapper.writerWithDefaultPrettyPrinter()
                 .writeValueAsString(result);
+
+        if (this.colorOutput)
+        {
+            json = JsonSyntaxHighlighter.highlight(json);
+        }
+
         System.out.println(json);
     }
 
-    protected void writeErrorOutput(CommandException e) throws JsonProcessingException
+    protected void writeErrorOutput(CommandException e) throws IOException
     {
         ErrorResponse error = new ErrorResponse(e.getCode(), e.getMessage());
         this.writeJsonOutput(error);

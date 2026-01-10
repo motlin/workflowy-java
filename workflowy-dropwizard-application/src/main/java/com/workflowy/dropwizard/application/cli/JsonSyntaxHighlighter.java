@@ -56,21 +56,30 @@ public final class JsonSyntaxHighlighter
         switch (token)
         {
             case FIELD_NAME:
-                return ansi.fgCyan().a('"').a(text).a('"').reset().toString();
+                // jq uses bold blue for field names
+                return ansi.bold().fgBlue().a('"').a(text).a('"').reset().toString();
 
             case VALUE_STRING:
+                // jq uses green for string values
                 return ansi.fgGreen().a('"').a(text).a('"').reset().toString();
 
             case VALUE_NUMBER_INT:
             case VALUE_NUMBER_FLOAT:
-                return ansi.fgBlue().a(text).reset().toString();
-
             case VALUE_TRUE:
             case VALUE_FALSE:
-                return ansi.fgYellow().a(text).reset().toString();
+                // jq uses default color for numbers and booleans
+                return ansi.fgDefault().a(text).reset().toString();
 
             case VALUE_NULL:
-                return ansi.fgMagenta().a(text).reset().toString();
+                // jq uses bright black (dark gray) for null
+                return ansi.fgBrightBlack().a(text).reset().toString();
+
+            case START_OBJECT:
+            case END_OBJECT:
+            case START_ARRAY:
+            case END_ARRAY:
+                // jq uses bold white for brackets and braces
+                return ansi.bold().fgDefault().a(text).reset().toString();
 
             default:
                 return text;

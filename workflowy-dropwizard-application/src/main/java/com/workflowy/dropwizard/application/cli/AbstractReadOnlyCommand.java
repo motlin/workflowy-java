@@ -91,7 +91,7 @@ public abstract class AbstractReadOnlyCommand
 
     protected void writeJsonOutput(Object result) throws IOException
     {
-        String json = this.objectMapper.writerWithDefaultPrettyPrinter()
+        String json = this.objectMapper.writer(new JsonPrettyPrinter())
                 .writeValueAsString(result);
 
         if (this.colorOutput)
@@ -99,7 +99,7 @@ public abstract class AbstractReadOnlyCommand
             json = JsonSyntaxHighlighter.highlight(json);
         }
 
-        System.out.println(json);
+        System.out.print(json);
     }
 
     protected void writeErrorOutput(CommandException e) throws IOException

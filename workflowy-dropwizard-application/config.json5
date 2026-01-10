@@ -110,7 +110,7 @@
 		},
 	},
 	configLogging: {
-		enabled: true,
+		enabled: false,
 	},
 	authFilters: [],
 	h2: {

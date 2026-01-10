@@ -13,30 +13,28 @@ import io.liftwizard.junit.extension.app.LiftwizardAppExtension;
 import io.liftwizard.junit.extension.match.file.FileMatchExtension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public abstract class AbstractWorkflowyAppTest extends AbstractDropwizardAppTest
-{
-    protected static final Instant START_TIME = Instant.parse("2000-12-31T23:59:59Z");
+public abstract class AbstractWorkflowyAppTest extends AbstractDropwizardAppTest {
 
-    @RegisterExtension
-    public final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
+	protected static final Instant START_TIME = Instant.parse("2000-12-31T23:59:59Z");
 
-    @Nonnull
-    @Override
-    protected LiftwizardAppExtension<?> getDropwizardAppExtension()
-    {
-        return new LiftwizardAppExtension<>(
-                WorkflowyApplication.class,
-                ResourceHelpers.resourceFilePath("config-test.json5"),
-                ConfigOverride.config("clock.instant", this.getClockTime().toString()));
-    }
+	@RegisterExtension
+	public final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
 
-    protected Instant getClockTime()
-    {
-        return START_TIME.plus(this.advanceClockNDays(), ChronoUnit.DAYS);
-    }
+	@Nonnull
+	@Override
+	protected LiftwizardAppExtension<?> getDropwizardAppExtension() {
+		return new LiftwizardAppExtension<>(
+			WorkflowyApplication.class,
+			ResourceHelpers.resourceFilePath("config-test.json5"),
+			ConfigOverride.config("clock.instant", this.getClockTime().toString())
+		);
+	}
 
-    protected int advanceClockNDays()
-    {
-        return 0;
-    }
+	protected Instant getClockTime() {
+		return START_TIME.plus(this.advanceClockNDays(), ChronoUnit.DAYS);
+	}
+
+	protected int advanceClockNDays() {
+		return 0;
+	}
 }

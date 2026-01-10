@@ -1,89 +1,85 @@
 package com.workflowy.dropwizard.test;
 
-import io.liftwizard.reladomo.test.extension.ReladomoTestFile;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import io.liftwizard.reladomo.test.extension.ReladomoTestFile;
 import org.junit.jupiter.api.Test;
 
-class NodeContentResourceTest extends AbstractWorkflowyAppTest
-{
-    @Test
-    @ReladomoTestFile("test-data/basic-hierarchy.txt")
-    void getNode_withExistingId_returnsNode()
-    {
-        Client client = this.getClient("getNode_withExistingId_returnsNode");
+class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 
-        Response response = client
-                .target("http://localhost:{port}/api/node/{id}")
-                .resolveTemplate("port", this.appExtension.getLocalPort())
-                .resolveTemplate("id", "00000000-0000-0000-0000-000000000001")
-                .request()
-                .get();
+	@Test
+	@ReladomoTestFile("test-data/basic-hierarchy.txt")
+	void getNode_withExistingId_returnsNode() {
+		Client client = this.getClient("getNode_withExistingId_returnsNode");
 
-        this.assertResponseStatus(response, Status.OK);
-    }
+		Response response = client
+			.target("http://localhost:{port}/api/node/{id}")
+			.resolveTemplate("port", this.appExtension.getLocalPort())
+			.resolveTemplate("id", "00000000-0000-0000-0000-000000000001")
+			.request()
+			.get();
 
-    @Test
-    @ReladomoTestFile("test-data/basic-hierarchy.txt")
-    void getNode_withNonExistentId_returnsGone()
-    {
-        Client client = this.getClient("getNode_withNonExistentId_returnsGone");
+		this.assertResponseStatus(response, Status.OK);
+	}
 
-        Response response = client
-                .target("http://localhost:{port}/api/node/{id}")
-                .resolveTemplate("port", this.appExtension.getLocalPort())
-                .resolveTemplate("id", "00000000-0000-0000-0000-nonexistent")
-                .request()
-                .get();
+	@Test
+	@ReladomoTestFile("test-data/basic-hierarchy.txt")
+	void getNode_withNonExistentId_returnsGone() {
+		Client client = this.getClient("getNode_withNonExistentId_returnsGone");
 
-        this.assertResponseStatus(response, Status.GONE);
-    }
+		Response response = client
+			.target("http://localhost:{port}/api/node/{id}")
+			.resolveTemplate("port", this.appExtension.getLocalPort())
+			.resolveTemplate("id", "00000000-0000-0000-0000-nonexistent")
+			.request()
+			.get();
 
-    @Test
-    @ReladomoTestFile("test-data/basic-hierarchy.txt")
-    void getChildren_withExistingParent_returnsChildren()
-    {
-        Client client = this.getClient("getChildren_withExistingParent_returnsChildren");
+		this.assertResponseStatus(response, Status.GONE);
+	}
 
-        Response response = client
-                .target("http://localhost:{port}/api/children/{parentId}")
-                .resolveTemplate("port", this.appExtension.getLocalPort())
-                .resolveTemplate("parentId", "00000000-0000-0000-0000-000000000001")
-                .request()
-                .get();
+	@Test
+	@ReladomoTestFile("test-data/basic-hierarchy.txt")
+	void getChildren_withExistingParent_returnsChildren() {
+		Client client = this.getClient("getChildren_withExistingParent_returnsChildren");
 
-        this.assertResponseStatus(response, Status.OK);
-    }
+		Response response = client
+			.target("http://localhost:{port}/api/children/{parentId}")
+			.resolveTemplate("port", this.appExtension.getLocalPort())
+			.resolveTemplate("parentId", "00000000-0000-0000-0000-000000000001")
+			.request()
+			.get();
 
-    @Test
-    @ReladomoTestFile("test-data/basic-hierarchy.txt")
-    void getRootNodes_returnsRootNodes()
-    {
-        Client client = this.getClient("getRootNodes_returnsRootNodes");
+		this.assertResponseStatus(response, Status.OK);
+	}
 
-        Response response = client
-                .target("http://localhost:{port}/api/nodes/root")
-                .resolveTemplate("port", this.appExtension.getLocalPort())
-                .request()
-                .get();
+	@Test
+	@ReladomoTestFile("test-data/basic-hierarchy.txt")
+	void getRootNodes_returnsRootNodes() {
+		Client client = this.getClient("getRootNodes_returnsRootNodes");
 
-        this.assertResponseStatus(response, Status.OK);
-    }
+		Response response = client
+			.target("http://localhost:{port}/api/nodes/root")
+			.resolveTemplate("port", this.appExtension.getLocalPort())
+			.request()
+			.get();
 
-    @Test
-    @ReladomoTestFile("test-data/basic-hierarchy.txt")
-    void searchNodes_withMatchingQuery_returnsResults()
-    {
-        Client client = this.getClient("searchNodes_withMatchingQuery_returnsResults");
+		this.assertResponseStatus(response, Status.OK);
+	}
 
-        Response response = client
-                .target("http://localhost:{port}/api/nodes/search")
-                .resolveTemplate("port", this.appExtension.getLocalPort())
-                .queryParam("query", "Child")
-                .request()
-                .get();
+	@Test
+	@ReladomoTestFile("test-data/basic-hierarchy.txt")
+	void searchNodes_withMatchingQuery_returnsResults() {
+		Client client = this.getClient("searchNodes_withMatchingQuery_returnsResults");
 
-        this.assertResponseStatus(response, Status.OK);
-    }
+		Response response = client
+			.target("http://localhost:{port}/api/nodes/search")
+			.resolveTemplate("port", this.appExtension.getLocalPort())
+			.queryParam("query", "Child")
+			.request()
+			.get();
+
+		this.assertResponseStatus(response, Status.OK);
+	}
 }

@@ -59,7 +59,7 @@ demo MVN=default_mvn:
     #!/usr/bin/env bash
     set -Eeuo pipefail
     echo "🔨 Building application..."
-    {{MVN}} compile -pl workflowy-dropwizard-application -am -DskipTests -q
+    {{MVN}} compile -pl workflowy-dropwizard-application -am -DskipTests --quiet
 
     cd workflowy-dropwizard-application
 
@@ -67,13 +67,13 @@ demo MVN=default_mvn:
     echo "📊 cache-status: Show cache statistics"
     {{MVN}} exec:java \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="cache-status config.json5 --color" -q 2>&1 | sed -n '/^{$/,/^}$/p'
+        -Dexec.args="cache-status config.json5 --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
 
     echo ""
     echo "📂 list-by-id: List root nodes"
     ROOT_OUTPUT=$({{MVN}} exec:java \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="list-by-id config.json5 --color" -q 2>&1 | sed -n '/^\[$/,/^\]$/p')
+        -Dexec.args="list-by-id config.json5 --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p')
     echo "$ROOT_OUTPUT"
     PLAIN_OUTPUT=$(echo "$ROOT_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g')
     FIRST_ID=$(echo "$PLAIN_OUTPUT" | jq -r '.[0].id // empty' 2>/dev/null)
@@ -84,14 +84,14 @@ demo MVN=default_mvn:
         echo "📖 read-node: Read node '$FIRST_ID' with depth=1"
         {{MVN}} exec:java \
             -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-            -Dexec.args="read-node config.json5 --id \"$FIRST_ID\" --depth 1 --color" -q 2>&1 | sed -n '/^{$/,/^}$/p'
+            -Dexec.args="read-node config.json5 --id \"$FIRST_ID\" --depth 1 --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
 
         if [[ -n "$FIRST_NAME" ]]; then
             echo ""
             echo "🗂️ list-by-path: Navigate to '$FIRST_NAME'"
             {{MVN}} exec:java \
                 -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-                -Dexec.args="list-by-path config.json5 --path \"$FIRST_NAME\" --color" -q 2>&1 | sed -n '/^\[$/,/^\]$/p'
+                -Dexec.args="list-by-path config.json5 --path \"$FIRST_NAME\" --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p'
         fi
     else
         echo ""
@@ -103,7 +103,7 @@ demo MVN=default_mvn:
 cli +ARGS:
     cd workflowy-dropwizard-application && mvn exec:java \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="{{ARGS}} config.json5" -q
+        -Dexec.args="{{ARGS}} config.json5" --quiet
 
 # Override this with a command called `woof` which notifies you in whatever ways you prefer.
 # My `woof` command uses `echo`, `say`, and sends a Pushover notification.

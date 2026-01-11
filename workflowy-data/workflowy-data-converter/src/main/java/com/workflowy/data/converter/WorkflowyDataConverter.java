@@ -437,13 +437,13 @@ public final class WorkflowyDataConverter
 
     private void mergeIntoDatabase(Instant backupInstant)
     {
+        this.ensureUserExists();
+
         long time = backupInstant.toEpochMilli();
 
         this.dataStore.runInTransaction(transaction ->
         {
             transaction.setSystemTime(time);
-
-            this.ensureUserExists();
 
             LOGGER.info("Merging {} tags", this.tags.size());
             TagList existingTags = TagFinder.findMany(TagFinder.all());

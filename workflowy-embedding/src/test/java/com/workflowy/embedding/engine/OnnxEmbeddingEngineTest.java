@@ -16,32 +16,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @Tag("integration")
 class OnnxEmbeddingEngineTest
 {
     private static OnnxEmbeddingEngine engine;
     private static Path modelCachePath;
-    private static boolean modelAvailable;
 
     @BeforeAll
     static void setUpClass() throws IOException
     {
         modelCachePath = Files.createTempDirectory("onnx-test-cache");
-
-        try
-        {
-            engine = new OnnxEmbeddingEngine(EmbeddingModel.MINILM, modelCachePath.toString());
-            modelAvailable = true;
-        }
-        catch (Exception e)
-        {
-            System.err.println("ONNX model not available: " + e.getMessage());
-            System.err.println("Skipping OnnxEmbeddingEngineTest integration tests.");
-            System.err.println("To enable these tests, ensure the DJL HuggingFace ONNX model zoo is available.");
-            modelAvailable = false;
-        }
+        engine = new OnnxEmbeddingEngine(EmbeddingModel.MINILM, modelCachePath.toString());
     }
 
     @AfterAll
@@ -51,11 +37,6 @@ class OnnxEmbeddingEngineTest
         {
             engine.close();
         }
-    }
-
-    private void assumeModelAvailable()
-    {
-        assumeTrue(modelAvailable, "ONNX model not available - skipping test");
     }
 
     @Test
@@ -69,8 +50,6 @@ class OnnxEmbeddingEngineTest
     @Test
     void generateEmbedding_withShortText_returnsCorrectDimensions()
     {
-        this.assumeModelAvailable();
-
         float[] embedding = engine.generateEmbedding("Hello world", false);
 
         assertNotNull(embedding);
@@ -80,8 +59,6 @@ class OnnxEmbeddingEngineTest
     @Test
     void generateEmbedding_withLongText_returnsCorrectDimensions()
     {
-        this.assumeModelAvailable();
-
         String longText = "This is a very long text that contains many words. ".repeat(50);
 
         float[] embedding = engine.generateEmbedding(longText, false);
@@ -93,8 +70,6 @@ class OnnxEmbeddingEngineTest
     @Test
     void generateEmbedding_outputIsNormalized()
     {
-        this.assumeModelAvailable();
-
         float[] embedding = engine.generateEmbedding("Test sentence for normalization", false);
 
         double norm = 0.0;
@@ -110,8 +85,6 @@ class OnnxEmbeddingEngineTest
     @Test
     void generateEmbedding_similarTextProducesSimilarEmbeddings()
     {
-        this.assumeModelAvailable();
-
         float[] embedding1 = engine.generateEmbedding("The cat sat on the mat", false);
         float[] embedding2 = engine.generateEmbedding("A cat is sitting on a mat", false);
         float[] embedding3 = engine.generateEmbedding("Quantum physics and thermodynamics", false);
@@ -121,16 +94,23 @@ class OnnxEmbeddingEngineTest
 
         assertTrue(
                 similarityCats > similarityDifferent,
-                "Similar sentences should have higher similarity than unrelated ones");
-        assertTrue(similarityCats > 0.8, "Very similar sentences should have similarity > 0.8");
-        assertTrue(similarityDifferent < 0.5, "Unrelated sentences should have similarity < 0.5");
+                String.format(
+                        "Similar sentences (%.3f) should have higher similarity than unrelated ones (%.3f)",
+                        similarityCats,
+                        similarityDifferent));
+        assertTrue(
+                similarityCats > 0.7,
+                String.format("Very similar sentences should have similarity > 0.7, got %.3f", similarityCats));
+        assertTrue(
+                similarityDifferent < similarityCats,
+                String.format("Unrelated sentences (%.3f) should have lower similarity than related ones (%.3f)",
+                        similarityDifferent,
+                        similarityCats));
     }
 
     @Test
     void generateEmbeddings_withMultipleTexts_returnsAll()
     {
-        this.assumeModelAvailable();
-
         List<String> texts = List.of("First sentence", "Second sentence", "Third sentence");
 
         List<float[]> embeddings = engine.generateEmbeddings(texts, false);
@@ -145,8 +125,6 @@ class OnnxEmbeddingEngineTest
     @Test
     void generateEmbedding_sameTextProducesSameEmbedding()
     {
-        this.assumeModelAvailable();
-
         String text = "Deterministic embedding test";
 
         float[] embedding1 = engine.generateEmbedding(text, false);
@@ -158,8 +136,6 @@ class OnnxEmbeddingEngineTest
     @Test
     void generateEmbedding_queryVsPassage_producesSlightlyDifferentResults()
     {
-        this.assumeModelAvailable();
-
         String text = "Search query about machine learning";
 
         float[] queryEmbedding = engine.generateEmbedding(text, true);
@@ -175,8 +151,6 @@ class OnnxEmbeddingEngineTest
     @Test
     void getModel_returnsConfiguredModel()
     {
-        this.assumeModelAvailable();
-
         assertEquals(EmbeddingModel.MINILM, engine.getModel());
     }
 

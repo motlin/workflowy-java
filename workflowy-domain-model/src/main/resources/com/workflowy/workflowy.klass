@@ -240,8 +240,6 @@ association TagHasNodes
 {
     nodes : NodeTagMapping[0..*];
     tag   : Tag[1..1] final;
-
-    relationship this.tagName == Tag.name
 }
 
 /*

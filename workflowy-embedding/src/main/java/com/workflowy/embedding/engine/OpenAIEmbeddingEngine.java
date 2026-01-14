@@ -6,7 +6,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,153 +13,131 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.workflowy.embedding.model.EmbeddingModel;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpenAIEmbeddingEngine implements EmbeddingEngine
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAIEmbeddingEngine.class);
+public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 
-    private static final String OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
+	private static final Logger LOGGER = LoggerFactory.getLogger(OpenAIEmbeddingEngine.class);
 
-    private final EmbeddingModel model;
-    private final String apiKey;
-    private final HttpClient httpClient;
-    private final ObjectMapper objectMapper;
+	private static final String OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
 
-    public OpenAIEmbeddingEngine(EmbeddingModel model, String apiKey)
-    {
-        if (!model.isOpenAI())
-        {
-            throw new IllegalArgumentException("Model must be an OpenAI model: " + model);
-        }
-        if (apiKey == null || apiKey.isBlank())
-        {
-            throw new IllegalArgumentException("OpenAI API key is required");
-        }
+	private final EmbeddingModel model;
+	private final String apiKey;
+	private final HttpClient httpClient;
+	private final ObjectMapper objectMapper;
 
-        this.model = model;
-        this.apiKey = apiKey;
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(30))
-                .build();
-        this.objectMapper = new ObjectMapper();
-    }
+	public OpenAIEmbeddingEngine(EmbeddingModel model, String apiKey) {
+		if (!model.isOpenAI()) {
+			throw new IllegalArgumentException("Model must be an OpenAI model: " + model);
+		}
+		if (apiKey == null || apiKey.isBlank()) {
+			throw new IllegalArgumentException("OpenAI API key is required");
+		}
 
-    @Override
-    public float[] generateEmbedding(String text, boolean isQuery)
-    {
-        String prefixedText = this.applyPrefix(text, isQuery);
+		this.model = model;
+		this.apiKey = apiKey;
+		this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
+		this.objectMapper = new ObjectMapper();
+	}
 
-        try
-        {
-            ObjectNode requestBody = this.objectMapper.createObjectNode();
-            requestBody.put("input", prefixedText);
-            requestBody.put("model", this.model.getModelName());
+	@Override
+	public float[] generateEmbedding(String text, boolean isQuery) {
+		String prefixedText = this.applyPrefix(text, isQuery);
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(OPENAI_EMBEDDINGS_URL))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + this.apiKey)
-                    .POST(HttpRequest.BodyPublishers.ofString(this.objectMapper.writeValueAsString(requestBody)))
-                    .timeout(Duration.ofSeconds(60))
-                    .build();
+		try {
+			ObjectNode requestBody = this.objectMapper.createObjectNode();
+			requestBody.put("input", prefixedText);
+			requestBody.put("model", this.model.getModelName());
 
-            HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(OPENAI_EMBEDDINGS_URL))
+				.header("Content-Type", "application/json")
+				.header("Authorization", "Bearer " + this.apiKey)
+				.POST(HttpRequest.BodyPublishers.ofString(this.objectMapper.writeValueAsString(requestBody)))
+				.timeout(Duration.ofSeconds(60))
+				.build();
 
-            if (response.statusCode() != 200)
-            {
-                throw new RuntimeException("OpenAI API error: " + response.statusCode() + " " + response.body());
-            }
+			HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            JsonNode responseJson = this.objectMapper.readTree(response.body());
-            JsonNode embeddingArray = responseJson.get("data").get(0).get("embedding");
+			if (response.statusCode() != 200) {
+				throw new RuntimeException("OpenAI API error: " + response.statusCode() + " " + response.body());
+			}
 
-            float[] embedding = new float[embeddingArray.size()];
-            for (int i = 0; i < embeddingArray.size(); i++)
-            {
-                embedding[i] = (float) embeddingArray.get(i).asDouble();
-            }
+			JsonNode responseJson = this.objectMapper.readTree(response.body());
+			JsonNode embeddingArray = responseJson.get("data").get(0).get("embedding");
 
-            return embedding;
-        }
-        catch (IOException | InterruptedException e)
-        {
-            throw new RuntimeException("Failed to generate embedding", e);
-        }
-    }
+			float[] embedding = new float[embeddingArray.size()];
+			for (int i = 0; i < embeddingArray.size(); i++) {
+				embedding[i] = (float) embeddingArray.get(i).asDouble();
+			}
 
-    @Override
-    public List<float[]> generateEmbeddings(List<String> texts, boolean isQuery)
-    {
-        List<String> prefixedTexts = texts.stream()
-                .map(text -> this.applyPrefix(text, isQuery))
-                .toList();
+			return embedding;
+		} catch (IOException | InterruptedException e) {
+			throw new RuntimeException("Failed to generate embedding", e);
+		}
+	}
 
-        try
-        {
-            ObjectNode requestBody = this.objectMapper.createObjectNode();
-            ArrayNode inputArray = requestBody.putArray("input");
-            for (String text : prefixedTexts)
-            {
-                inputArray.add(text);
-            }
-            requestBody.put("model", this.model.getModelName());
+	@Override
+	public List<float[]> generateEmbeddings(List<String> texts, boolean isQuery) {
+		List<String> prefixedTexts = texts
+			.stream()
+			.map((text) -> this.applyPrefix(text, isQuery))
+			.toList();
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(OPENAI_EMBEDDINGS_URL))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + this.apiKey)
-                    .POST(HttpRequest.BodyPublishers.ofString(this.objectMapper.writeValueAsString(requestBody)))
-                    .timeout(Duration.ofSeconds(120))
-                    .build();
+		try {
+			ObjectNode requestBody = this.objectMapper.createObjectNode();
+			ArrayNode inputArray = requestBody.putArray("input");
+			for (String text : prefixedTexts) {
+				inputArray.add(text);
+			}
+			requestBody.put("model", this.model.getModelName());
 
-            HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(OPENAI_EMBEDDINGS_URL))
+				.header("Content-Type", "application/json")
+				.header("Authorization", "Bearer " + this.apiKey)
+				.POST(HttpRequest.BodyPublishers.ofString(this.objectMapper.writeValueAsString(requestBody)))
+				.timeout(Duration.ofSeconds(120))
+				.build();
 
-            if (response.statusCode() != 200)
-            {
-                throw new RuntimeException("OpenAI API error: " + response.statusCode() + " " + response.body());
-            }
+			HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            JsonNode responseJson = this.objectMapper.readTree(response.body());
-            JsonNode dataArray = responseJson.get("data");
+			if (response.statusCode() != 200) {
+				throw new RuntimeException("OpenAI API error: " + response.statusCode() + " " + response.body());
+			}
 
-            List<float[]> embeddings = new ArrayList<>();
-            for (JsonNode item : dataArray)
-            {
-                JsonNode embeddingArray = item.get("embedding");
-                float[] embedding = new float[embeddingArray.size()];
-                for (int i = 0; i < embeddingArray.size(); i++)
-                {
-                    embedding[i] = (float) embeddingArray.get(i).asDouble();
-                }
-                embeddings.add(embedding);
-            }
+			JsonNode responseJson = this.objectMapper.readTree(response.body());
+			JsonNode dataArray = responseJson.get("data");
 
-            return embeddings;
-        }
-        catch (IOException | InterruptedException e)
-        {
-            throw new RuntimeException("Failed to generate embeddings", e);
-        }
-    }
+			MutableList<float[]> embeddings = Lists.mutable.empty();
+			for (JsonNode item : dataArray) {
+				JsonNode embeddingArray = item.get("embedding");
+				float[] embedding = new float[embeddingArray.size()];
+				for (int i = 0; i < embeddingArray.size(); i++) {
+					embedding[i] = (float) embeddingArray.get(i).asDouble();
+				}
+				embeddings.add(embedding);
+			}
 
-    private String applyPrefix(String text, boolean isQuery)
-    {
-        String prefix = isQuery
-                ? this.model.getQueryPrefix().orElse("")
-                : this.model.getPassagePrefix().orElse("");
-        return prefix + text;
-    }
+			return embeddings;
+		} catch (IOException | InterruptedException e) {
+			throw new RuntimeException("Failed to generate embeddings", e);
+		}
+	}
 
-    @Override
-    public EmbeddingModel getModel()
-    {
-        return this.model;
-    }
+	private String applyPrefix(String text, boolean isQuery) {
+		String prefix = isQuery ? this.model.getQueryPrefix().orElse("") : this.model.getPassagePrefix().orElse("");
+		return prefix + text;
+	}
 
-    @Override
-    public void close()
-    {
-    }
+	@Override
+	public EmbeddingModel getModel() {
+		return this.model;
+	}
+
+	@Override
+	public void close() {}
 }

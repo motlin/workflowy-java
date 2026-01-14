@@ -6,7 +6,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.workflowy.embedding.model.EmbeddingModel;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +126,7 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine
             JsonNode responseJson = this.objectMapper.readTree(response.body());
             JsonNode dataArray = responseJson.get("data");
 
-            List<float[]> embeddings = new ArrayList<>();
+            MutableList<float[]> embeddings = Lists.mutable.empty();
             for (JsonNode item : dataArray)
             {
                 JsonNode embeddingArray = item.get("embedding");

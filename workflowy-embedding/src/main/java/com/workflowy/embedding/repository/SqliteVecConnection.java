@@ -35,7 +35,7 @@ public class SqliteVecConnection implements AutoCloseable
 
     private final Connection connection;
     private final String databasePath;
-    private boolean sqliteVecLoaded = false;
+    private boolean sqliteVecLoaded;
 
     public SqliteVecConnection(String databasePath) throws SQLException
     {

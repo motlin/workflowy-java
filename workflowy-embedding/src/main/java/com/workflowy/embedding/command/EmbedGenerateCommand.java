@@ -99,15 +99,13 @@ public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & Embeddi
             EmbeddingGenerator generator = new EmbeddingGenerator(engine, repository, batchSize, force);
 
             GenerationResult result = generator.generate(progress ->
-            {
                 LOGGER.info("Progress: {}% ({}/{}) - Processed: {}, Skipped: {}, Errors: {}",
                         progress.percentage(),
                         progress.current(),
                         progress.total(),
                         progress.processed(),
                         progress.skipped(),
-                        progress.errors());
-            });
+                        progress.errors()));
 
             LOGGER.info("Generation complete!");
             LOGGER.info("Total nodes: {}", result.totalNodes());

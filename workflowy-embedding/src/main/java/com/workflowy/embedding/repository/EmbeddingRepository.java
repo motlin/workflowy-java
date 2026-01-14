@@ -5,15 +5,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.workflowy.embedding.model.EmbeddingModel;
 import com.workflowy.embedding.model.NodeEmbedding;
 import com.workflowy.embedding.search.SearchResult;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Sets;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.set.MutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +72,7 @@ public class EmbeddingRepository
     public void save(NodeEmbedding embedding) throws SQLException
     {
         Connection conn = this.sqliteVecConnection.getConnection();
-        String now = DATETIME_FORMATTER.format(Instant.now().atZone(java.time.ZoneOffset.UTC));
+        String now = DATETIME_FORMATTER.format(Instant.now().atZone(ZoneOffset.UTC));
 
         try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_SYSTEM_TO_SQL))
         {
@@ -94,7 +97,7 @@ public class EmbeddingRepository
     public void saveBatch(List<NodeEmbedding> embeddings) throws SQLException
     {
         Connection conn = this.sqliteVecConnection.getConnection();
-        String now = DATETIME_FORMATTER.format(Instant.now().atZone(java.time.ZoneOffset.UTC));
+        String now = DATETIME_FORMATTER.format(Instant.now().atZone(ZoneOffset.UTC));
 
         conn.setAutoCommit(false);
         try
@@ -141,7 +144,7 @@ public class EmbeddingRepository
 
     public Set<String> getExistingNodeIds(EmbeddingModel model) throws SQLException
     {
-        Set<String> existingIds = new HashSet<>();
+        MutableSet<String> existingIds = Sets.mutable.empty();
         Connection conn = this.sqliteVecConnection.getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(GET_EXISTING_IDS_SQL))
@@ -172,7 +175,7 @@ public class EmbeddingRepository
             throw new SQLException("sqlite-vec extension not loaded. Vector search is not available.");
         }
 
-        List<SearchResult> results = new ArrayList<>();
+        MutableList<SearchResult> results = Lists.mutable.empty();
         Connection conn = this.sqliteVecConnection.getConnection();
 
         byte[] queryBytes = floatArrayToBytes(queryEmbedding);

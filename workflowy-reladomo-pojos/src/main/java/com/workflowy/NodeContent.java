@@ -1,5 +1,8 @@
 package com.workflowy;
 import java.sql.Timestamp;
+
+import com.gs.fw.common.mithra.util.DefaultInfinityTimestamp;
+
 public class NodeContent extends NodeContentAbstract
 {
 	public NodeContent(Timestamp system
@@ -13,6 +16,6 @@ public class NodeContent extends NodeContentAbstract
 
 	public NodeContent()
 	{
-		this(com.gs.fw.common.mithra.util.DefaultInfinityTimestamp.getDefaultInfinity());
+		this(DefaultInfinityTimestamp.getDefaultInfinity());
 	}
 }

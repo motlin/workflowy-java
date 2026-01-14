@@ -1,6 +1,5 @@
 package com.workflowy.dropwizard.application.cli;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +10,9 @@ import com.workflowy.NodeContentList;
 import com.workflowy.NodeMetadata;
 import com.workflowy.dto.NodeContentDTO;
 import com.workflowy.dto.NodeMetadataDTO;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.utility.Iterate;
 
 public final class NodeContentDTOMapper
 {
@@ -44,7 +46,7 @@ public final class NodeContentDTOMapper
 
     public static List<NodeContentDTO> toDTOList(NodeContentList nodes, int depth)
     {
-        List<NodeContentDTO> result = new ArrayList<>();
+        MutableList<NodeContentDTO> result = Lists.mutable.empty();
         for (NodeContent node : nodes)
         {
             result.add(toDTO(node, depth));
@@ -59,9 +61,9 @@ public final class NodeContentDTOMapper
 
     private static List<NodeContentDTO> mapChildren(NodeContentList children, int remainingDepth)
     {
-        if (children == null || children.isEmpty())
+        if (Iterate.isEmpty(children))
         {
-            return new ArrayList<>();
+            return Lists.mutable.empty();
         }
         return toDTOList(children, remainingDepth);
     }

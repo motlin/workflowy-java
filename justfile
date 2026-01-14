@@ -11,7 +11,7 @@ import ".just/git-test.just"
 default:
     @just --list --unsorted
 
-workflowy_backups_path := env('WORKFLOWY_BACKUPS_PATH')
+workflowy_backups_path := env('WORKFLOWY_BACKUPS_PATH', '')
 
 # Full data pipeline: download backups, import data
 [group('data')]

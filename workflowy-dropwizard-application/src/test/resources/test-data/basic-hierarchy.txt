@@ -1,0 +1,17 @@
+class com.workflowy.User
+systemFrom               , systemTo               , userId       , email               , firstName  , lastName
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "test-user-1", "test@example.com"  , "Test"     , "User"
+
+class com.workflowy.NodeContent
+systemFrom               , systemTo               , id                                    , parentId                              , name              , note
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000001", null                                  , "Root Node"       , "This is the root"
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000001", "Child 1"         , "First child note"
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000003", "00000000-0000-0000-0000-000000000001", "Child 2"         , null
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000004", "00000000-0000-0000-0000-000000000002", "Grandchild 1"    , "Nested note"
+
+class com.workflowy.NodeMetadata
+systemFrom               , systemTo               , nodeId                                , priority, completed, completedAt, collapsed, lastModified             , layoutMode, virtualRoot, referencesRoot, inChat, mirrorRoot, originalId, changes, createdOn                , createdById  , lastUpdatedById
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000001", 0       , false    , null       , false    , "1999-12-31 23:59:59.999", null      , null       , null          , null  , null      , null      , null   , "1999-12-31 23:59:59.999", "test-user-1", "test-user-1"
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000002", 0       , false    , null       , false    , "1999-12-31 23:59:59.999", null      , null       , null          , null  , null      , null      , null   , "1999-12-31 23:59:59.999", "test-user-1", "test-user-1"
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000003", 1       , true     , "2000-01-15 10:30:00.000", false, "2000-01-15 10:30:00.000", null      , null       , null          , null  , null      , null      , null   , "1999-12-31 23:59:59.999", "test-user-1", "test-user-1"
+"1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000004", 0       , false    , null       , false    , "1999-12-31 23:59:59.999", null      , null       , null          , null  , null      , null      , null   , "1999-12-31 23:59:59.999", "test-user-1", "test-user-1"

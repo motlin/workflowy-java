@@ -5,16 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 
@@ -61,6 +52,7 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.list.fixed.ArrayAdapter;
 import org.eclipse.collections.impl.map.mutable.MapAdapter;
+import org.eclipse.collections.impl.utility.MapIterate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,9 +60,6 @@ public final class WorkflowyDataConverter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowyDataConverter.class);
 
-    private static final long WORKFLOWY_EPOCH_OFFSET = 1262304000L;
-    private static final Pattern FILE_DATE_PATTERN = Pattern.compile("\\.(\\d{4}-\\d{2}-\\d{2})\\.");
-    private static final Pattern FILE_EMAIL_PATTERN = Pattern.compile("^\\((.+?)\\)\\.");
 
     private final ObjectMapper objectMapper;
     private final DataStore dataStore;
@@ -94,18 +83,7 @@ public final class WorkflowyDataConverter
         this.objectMapper = Objects.requireNonNull(objectMapper);
         this.dataStore = Objects.requireNonNull(dataStore);
         this.backupFile = Objects.requireNonNull(backupFile);
-        this.userId = extractUserIdFromFilename(backupFile);
-    }
-
-    private static String extractUserIdFromFilename(File file)
-    {
-        String fileName = file.getName();
-        Matcher matcher = FILE_EMAIL_PATTERN.matcher(fileName);
-        if (matcher.find())
-        {
-            return matcher.group(1);
-        }
-        throw new IllegalArgumentException("Could not extract email from filename: " + fileName);
+        this.userId = WorkflowyFileUtils.extractUserIdFromFile(backupFile);
     }
 
     public static void convert(
@@ -117,7 +95,7 @@ public final class WorkflowyDataConverter
         Instant highWatermark = WorkflowyDataConverter.getHighWatermark();
 
         ImmutableList<File> filesToProcess = WorkflowyDataConverter.getBackupFiles(backupsPath)
-                .selectWith(WorkflowyDataConverter::isAfterHighWatermark, highWatermark)
+                .selectWith(WorkflowyFileUtils::isAfterHighWatermark, highWatermark)
                 .take(daysLimit);
 
         if (filesToProcess.isEmpty())
@@ -139,7 +117,7 @@ public final class WorkflowyDataConverter
     {
         try
         {
-            processBackupFileOrThrow();
+            this.processBackupFileOrThrow();
         }
         catch (IOException e)
         {
@@ -157,7 +135,7 @@ public final class WorkflowyDataConverter
                 {
                 });
 
-        Instant backupInstant = getFileTimestamp(this.backupFile);
+        Instant backupInstant = WorkflowyFileUtils.getFileTimestamp(this.backupFile);
 
         LOGGER.info("Pass 1: Creating nodes from {} root items", rootItems.size());
         this.processNodesPass1(rootItems, null, 0);
@@ -209,11 +187,11 @@ public final class WorkflowyDataConverter
         nodeMetadata.setNodeId(inputItem.id());
         nodeMetadata.setPriority(priority);
         nodeMetadata.setCompleted(inputItem.isCompleted());
-        nodeMetadata.setCompletedAt(convertWorkflowyTimestamp(inputItem.completedTimestamp()));
+        nodeMetadata.setCompletedAt(WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.completedTimestamp()));
         nodeMetadata.setCollapsed(false);
-        nodeMetadata.setLastModified(convertWorkflowyTimestamp(inputItem.lastModifiedTimestamp()));
+        nodeMetadata.setLastModified(WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.lastModifiedTimestamp()));
         nodeMetadata.setCreatedById(this.userId);
-        nodeMetadata.setCreatedOn(convertWorkflowyTimestamp(inputItem.createdTimestamp()));
+        nodeMetadata.setCreatedOn(WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.createdTimestamp()));
         nodeMetadata.setLastUpdatedById(this.userId);
 
         InputMetadata metadata = inputItem.metadata();
@@ -246,7 +224,7 @@ public final class WorkflowyDataConverter
                 nodeMetadata.setOriginalId(metadata.originalId());
             }
 
-            if (metadata.changes() != null && !metadata.changes().isEmpty())
+            if (MapIterate.notEmpty(metadata.changes()))
             {
                 try
                 {
@@ -336,7 +314,7 @@ public final class WorkflowyDataConverter
             this.processS3FileMetadata(inputItem.id(), metadata.s3File());
         }
 
-        if (metadata.virtualRootIds() != null && !metadata.virtualRootIds().isEmpty())
+        if (MapIterate.notEmpty(metadata.virtualRootIds()))
         {
             this.processVirtualRootIds(inputItem.id(), metadata.virtualRootIds());
         }
@@ -382,7 +360,7 @@ public final class WorkflowyDataConverter
     {
         if (calendarMeta.date() != null)
         {
-            Timestamp dateValue = parseCalendarDate(calendarMeta.date());
+            Timestamp dateValue = WorkflowyTimestampConverter.parseCalendarDate(calendarMeta.date());
             if (dateValue != null)
             {
                 NodeDate nodeDate = new NodeDate();
@@ -430,7 +408,7 @@ public final class WorkflowyDataConverter
         this.nodeS3Files.add(nodeS3File);
     }
 
-    private void processVirtualRootIds(String nodeId, java.util.Map<String, Boolean> virtualRootIds)
+    private void processVirtualRootIds(String nodeId, Map<String, Boolean> virtualRootIds)
     {
         for (String virtualRootId : virtualRootIds.keySet())
         {
@@ -568,43 +546,5 @@ public final class WorkflowyDataConverter
                 pathname -> pathname.getName().endsWith(".workflowy.backup"));
         Objects.requireNonNull(files, backupsPath::toString);
         return ArrayAdapter.adapt(files).toSortedListBy(File::getName).toImmutable();
-    }
-
-    private static boolean isAfterHighWatermark(File file, Instant highWatermark)
-    {
-        Instant fileTimestamp = getFileTimestamp(file);
-        return fileTimestamp.isAfter(highWatermark);
-    }
-
-    private static Instant getFileTimestamp(File file)
-    {
-        String fileName = file.getName();
-        Matcher matcher = FILE_DATE_PATTERN.matcher(fileName);
-        if (matcher.find())
-        {
-            LocalDate date = LocalDate.parse(matcher.group(1), DateTimeFormatter.ISO_LOCAL_DATE);
-            return date.atStartOfDay().toInstant(ZoneOffset.UTC);
-        }
-        return Instant.MIN;
-    }
-
-    private static Timestamp convertWorkflowyTimestamp(Long workflowyTimestamp)
-    {
-        if (workflowyTimestamp == null)
-        {
-            return null;
-        }
-        long epochSeconds = workflowyTimestamp + WORKFLOWY_EPOCH_OFFSET;
-        return Timestamp.from(Instant.ofEpochSecond(epochSeconds));
-    }
-
-    private static Timestamp parseCalendarDate(Object dateValue)
-    {
-        if (dateValue instanceof Number number)
-        {
-            long epochSeconds = number.longValue();
-            return Timestamp.from(Instant.ofEpochSecond(epochSeconds));
-        }
-        return null;
     }
 }

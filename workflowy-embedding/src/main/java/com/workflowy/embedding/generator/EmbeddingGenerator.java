@@ -2,7 +2,6 @@ package com.workflowy.embedding.generator;
 
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -14,6 +13,8 @@ import com.workflowy.embedding.engine.EmbeddingEngine;
 import com.workflowy.embedding.model.EmbeddingModel;
 import com.workflowy.embedding.model.NodeEmbedding;
 import com.workflowy.embedding.repository.EmbeddingRepository;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public class EmbeddingGenerator
         int processedCount = 0;
         int errorCount = 0;
 
-        List<NodeContent> batch = new ArrayList<>(this.batchSize);
+        MutableList<NodeContent> batch = Lists.mutable.withInitialCapacity(this.batchSize);
 
         for (int i = 0; i < allNodes.size(); i++)
         {
@@ -114,7 +115,7 @@ public class EmbeddingGenerator
 
         List<float[]> embeddings = this.engine.generateEmbeddings(texts, false);
 
-        List<NodeEmbedding> nodeEmbeddings = new ArrayList<>();
+        MutableList<NodeEmbedding> nodeEmbeddings = Lists.mutable.empty();
         for (int i = 0; i < nodes.size(); i++)
         {
             NodeContent node = nodes.get(i);
@@ -141,7 +142,7 @@ public class EmbeddingGenerator
     {
         public int percentage()
         {
-            return total > 0 ? (current * 100) / total : 0;
+            return this.total > 0 ? (this.current * 100) / this.total : 0;
         }
     }
 

@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 
 import cool.klass.data.store.DataStore;
 import cool.klass.dropwizard.configuration.AbstractKlassConfiguration;
+import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -23,13 +24,13 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration>
 
     private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-    public ImportWorkflowyCommand(io.dropwizard.Application<T> application)
+    public ImportWorkflowyCommand(Application<T> application)
     {
         this(application, "import-workflowy", "Import Workflowy backup files into the database.");
     }
 
     protected ImportWorkflowyCommand(
-            io.dropwizard.Application<T> application,
+            Application<T> application,
             String name,
             String description)
     {

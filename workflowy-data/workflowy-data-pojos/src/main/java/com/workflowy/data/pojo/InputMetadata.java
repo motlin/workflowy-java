@@ -63,16 +63,16 @@ public record InputMetadata(
 
     public boolean hasMirror()
     {
-        return mirror != null;
+        return this.mirror != null;
     }
 
     public boolean hasBacklink()
     {
-        return backlink != null;
+        return this.backlink != null;
     }
 
     public boolean hasCalendar()
     {
-        return calendar != null;
+        return this.calendar != null;
     }
 }

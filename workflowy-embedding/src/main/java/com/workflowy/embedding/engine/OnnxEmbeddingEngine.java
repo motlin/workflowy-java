@@ -1,12 +1,13 @@
 package com.workflowy.embedding.engine;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import ai.djl.Application;
 import ai.djl.MalformedModelException;
+import ai.djl.huggingface.tokenizers.Encoding;
 import ai.djl.huggingface.tokenizers.HuggingFaceTokenizer;
 import ai.djl.inference.Predictor;
 import ai.djl.ndarray.NDArray;
@@ -18,6 +19,8 @@ import ai.djl.repository.zoo.ZooModel;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
 import com.workflowy.embedding.model.EmbeddingModel;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +66,7 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine
 
             LOGGER.info("ONNX model loaded: {}", this.model.getModelName());
         }
-        catch (ModelNotFoundException | MalformedModelException | java.io.IOException e)
+        catch (ModelNotFoundException | MalformedModelException | IOException e)
         {
             throw new RuntimeException("Failed to load ONNX model: " + this.model.getModelName(), e);
         }
@@ -87,7 +90,7 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine
     @Override
     public List<float[]> generateEmbeddings(List<String> texts, boolean isQuery)
     {
-        List<float[]> embeddings = new ArrayList<>();
+        MutableList<float[]> embeddings = Lists.mutable.empty();
         for (String text : texts)
         {
             embeddings.add(this.generateEmbedding(text, isQuery));
@@ -148,7 +151,7 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine
         @Override
         public NDList processInput(TranslatorContext ctx, String input)
         {
-            ai.djl.huggingface.tokenizers.Encoding encoding = this.tokenizer.encode(input);
+            Encoding encoding = this.tokenizer.encode(input);
 
             NDManager manager = ctx.getNDManager();
             long[] inputIds = encoding.getIds();

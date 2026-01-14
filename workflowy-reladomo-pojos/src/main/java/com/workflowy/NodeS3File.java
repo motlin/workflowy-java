@@ -1,5 +1,8 @@
 package com.workflowy;
 import java.sql.Timestamp;
+
+import com.gs.fw.common.mithra.util.DefaultInfinityTimestamp;
+
 public class NodeS3File extends NodeS3FileAbstract
 {
 	public NodeS3File(Timestamp system
@@ -13,6 +16,6 @@ public class NodeS3File extends NodeS3FileAbstract
 
 	public NodeS3File()
 	{
-		this(com.gs.fw.common.mithra.util.DefaultInfinityTimestamp.getDefaultInfinity());
+		this(DefaultInfinityTimestamp.getDefaultInfinity());
 	}
 }

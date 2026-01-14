@@ -1,4 +1,3 @@
 package com.workflowy;
-public class DataImportTimestampDatabaseObject extends DataImportTimestampDatabaseObjectAbstract
-{
-}
+
+public class DataImportTimestampDatabaseObject extends DataImportTimestampDatabaseObjectAbstract {}

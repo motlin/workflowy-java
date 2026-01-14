@@ -1,25 +1,24 @@
 package com.workflowy;
-import com.gs.fw.finder.Operation;
+
 import java.util.*;
-public class NodeDateList extends NodeDateListAbstract
-{
-	public NodeDateList()
-	{
+
+import com.gs.fw.finder.Operation;
+
+public class NodeDateList extends NodeDateListAbstract {
+
+	public NodeDateList() {
 		super();
 	}
 
-	public NodeDateList(int initialSize)
-	{
+	public NodeDateList(int initialSize) {
 		super(initialSize);
 	}
 
-	public NodeDateList(Collection c)
-	{
+	public NodeDateList(Collection c) {
 		super(c);
 	}
 
-	public NodeDateList(Operation operation)
-	{
+	public NodeDateList(Operation operation) {
 		super(operation);
 	}
 }

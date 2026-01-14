@@ -12,79 +12,77 @@ import com.workflowy.dto.NodeContentDTO;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class ListByPathCommand extends AbstractReadOnlyCommand
-{
-    public ListByPathCommand(WorkflowyApplication application)
-    {
-        super(application, "list-by-path", "Navigate to a path and list children");
-    }
+public class ListByPathCommand extends AbstractReadOnlyCommand {
 
-    @Override
-    public void configure(Subparser subparser)
-    {
-        super.configure(subparser);
+	public ListByPathCommand(WorkflowyApplication application) {
+		super(application, "list-by-path", "Navigate to a path and list children");
+	}
 
-        subparser.addArgument("--root-id")
-                .type(String.class)
-                .required(false)
-                .help("Starting node ID (optional, defaults to root)");
+	@Override
+	public void configure(Subparser subparser) {
+		super.configure(subparser);
 
-        subparser.addArgument("--path")
-                .type(String.class)
-                .required(true)
-                .help("Comma-separated path of node names to navigate");
-    }
+		subparser
+			.addArgument("--root-id")
+			.type(String.class)
+			.required(false)
+			.help("Starting node ID (optional, defaults to root)");
 
-    @Override
-    protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
-            throws CommandException
-    {
-        String rootId = namespace.getString("root_id");
-        String pathString = namespace.getString("path");
+		subparser
+			.addArgument("--path")
+			.type(String.class)
+			.required(true)
+			.help("Comma-separated path of node names to navigate");
+	}
 
-        String[] pathParts = pathString.split(",");
+	@Override
+	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
+		String rootId = namespace.getString("root_id");
+		String pathString = namespace.getString("path");
 
-        // Start from root or specified node
-        String currentParentId = rootId != null ? this.resolveNodeId(rootId) : null;
+		String[] pathParts = pathString.split(",");
 
-        // Navigate down the path
-        for (String pathPart : pathParts)
-        {
-            String targetName = pathPart.trim();
+		// Start from root or specified node
+		String currentParentId = rootId != null ? this.resolveNodeId(rootId) : null;
 
-            Operation operation;
-            if (currentParentId == null)
-            {
-                operation = NodeContentFinder.parentId().isNull()
-                        .and(NodeContentFinder.name().eq(targetName));
-            }
-            else
-            {
-                operation = NodeContentFinder.parentId().eq(currentParentId)
-                        .and(NodeContentFinder.name().eq(targetName));
-            }
+		// Navigate down the path
+		for (String pathPart : pathParts) {
+			String targetName = pathPart.trim();
 
-            NodeContent matchingNode = NodeContentFinder.findOne(operation);
+			Operation operation;
+			if (currentParentId == null) {
+				operation = NodeContentFinder.parentId().isNull().and(NodeContentFinder.name().eq(targetName));
+			} else {
+				operation = NodeContentFinder.parentId()
+					.eq(currentParentId)
+					.and(NodeContentFinder.name().eq(targetName));
+			}
 
-            if (matchingNode == null)
-            {
-                throw new CommandException("PATH_NOT_FOUND",
-                        "Path segment not found: " + targetName +
-                                " (at parent: " + (currentParentId != null ? currentParentId : "root") + ")");
-            }
+			NodeContent matchingNode = NodeContentFinder.findOne(operation);
 
-            currentParentId = matchingNode.getId();
-        }
+			if (matchingNode == null) {
+				throw new CommandException(
+					"PATH_NOT_FOUND",
+					"Path segment not found: "
+					+ targetName
+					+ " (at parent: "
+					+ (currentParentId != null ? currentParentId : "root")
+					+ ")"
+				);
+			}
 
-        // List children at final path location
-        Operation childrenOp = NodeContentFinder.parentId().eq(currentParentId);
-        NodeContentList children = NodeContentFinder.findMany(childrenOp);
+			currentParentId = matchingNode.getId();
+		}
 
-        // Deep fetch metadata
-        NodeContentDTOMapper.applyDeepFetch(children, 0);
+		// List children at final path location
+		Operation childrenOp = NodeContentFinder.parentId().eq(currentParentId);
+		NodeContentList children = NodeContentFinder.findMany(childrenOp);
 
-        List<NodeContentDTO> dtos = NodeContentDTOMapper.toDTOList(children, 0);
+		// Deep fetch metadata
+		NodeContentDTOMapper.applyDeepFetch(children, 0);
 
-        return dtos;
-    }
+		List<NodeContentDTO> dtos = NodeContentDTOMapper.toDTOList(children, 0);
+
+		return dtos;
+	}
 }

@@ -13,39 +13,36 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @ExtendWith(LogMarkerTestExtension.class)
-public class KlassServiceGeneratorTest
-{
-    public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
+public class KlassServiceGeneratorTest {
 
-    @RegisterExtension
-    final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
+	public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
 
-    @Test
-    public void smokeTest()
-    {
-        ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
+	@RegisterExtension
+	final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
 
-        var domainModelCompilerLoader = new DomainModelCompilerLoader(
-                klassSourcePackages,
-                Thread.currentThread().getContextClassLoader(),
-                DomainModelCompilerLoader::logCompilerError,
-                ColorSchemeProvider.getByName("dark"));
+	@Test
+	public void smokeTest() {
+		ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
 
-        DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
-        ImmutableList<String> packageNames = domainModel
-                .getClassifiers()
-                .asLazy()
-                .collect(PackageableElement::getPackageName)
-                .distinct()
-                .toImmutableList();
-        for (String packageName : packageNames)
-        {
-            String sourceCode                = KlassServiceSourceCodeGenerator.getPackageSourceCode(domainModel, packageName);
-            String resourceClassPathLocation = packageName + ".klass";
+		var domainModelCompilerLoader = new DomainModelCompilerLoader(
+			klassSourcePackages,
+			Thread.currentThread().getContextClassLoader(),
+			DomainModelCompilerLoader::logCompilerError,
+			ColorSchemeProvider.getByName("dark")
+		);
 
-            this.fileMatchExtension.assertFileContents(
-                    resourceClassPathLocation,
-                    sourceCode);
-        }
-    }
+		DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
+		ImmutableList<String> packageNames = domainModel
+			.getClassifiers()
+			.asLazy()
+			.collect(PackageableElement::getPackageName)
+			.distinct()
+			.toImmutableList();
+		for (String packageName : packageNames) {
+			String sourceCode = KlassServiceSourceCodeGenerator.getPackageSourceCode(domainModel, packageName);
+			String resourceClassPathLocation = packageName + ".klass";
+
+			this.fileMatchExtension.assertFileContents(resourceClassPathLocation, sourceCode);
+		}
+	}
 }

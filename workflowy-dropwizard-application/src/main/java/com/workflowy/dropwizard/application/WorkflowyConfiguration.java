@@ -13,59 +13,49 @@ import io.liftwizard.servlet.config.singlepage.SinglePageRedirectFilterFactory;
 import io.liftwizard.servlet.config.singlepage.SinglePageRedirectFilterFactoryProvider;
 
 public class WorkflowyConfiguration
-        extends AbstractKlassConfiguration
-        implements GraphQLFactoryProvider,
-        SinglePageRedirectFilterFactoryProvider,
-        EmbeddingConfigurationProvider
-{
-    @Nonnull
-    private @Valid GraphQLFactory graphQL = new GraphQLFactory();
+	extends AbstractKlassConfiguration
+	implements GraphQLFactoryProvider, SinglePageRedirectFilterFactoryProvider, EmbeddingConfigurationProvider {
 
-    private SinglePageRedirectFilterFactory singlePageRedirectFilterFactory =
-            new SinglePageRedirectFilterFactory();
+	@Nonnull
+	private @Valid GraphQLFactory graphQL = new GraphQLFactory();
 
-    @Nonnull
-    private @Valid EmbeddingConfiguration embedding = new EmbeddingConfiguration();
+	private SinglePageRedirectFilterFactory singlePageRedirectFilterFactory = new SinglePageRedirectFilterFactory();
 
-    @Override
-    @Nonnull
-    @JsonProperty("graphQL")
-    public GraphQLFactory getGraphQLFactory()
-    {
-        return this.graphQL;
-    }
+	@Nonnull
+	private @Valid EmbeddingConfiguration embedding = new EmbeddingConfiguration();
 
-    @JsonProperty("graphQL")
-    public void setGraphQLFactory(@Nonnull GraphQLFactory factory)
-    {
-        this.graphQL = factory;
-    }
+	@Override
+	@Nonnull
+	@JsonProperty("graphQL")
+	public GraphQLFactory getGraphQLFactory() {
+		return this.graphQL;
+	}
 
-    @Override
-    @JsonProperty("singlePageRedirectFilter")
-    public SinglePageRedirectFilterFactory getSinglePageRedirectFilterFactory()
-    {
-        return this.singlePageRedirectFilterFactory;
-    }
+	@JsonProperty("graphQL")
+	public void setGraphQLFactory(@Nonnull GraphQLFactory factory) {
+		this.graphQL = factory;
+	}
 
-    @JsonProperty("singlePageRedirectFilter")
-    public void setSinglePageRedirectFilterFactory(
-            SinglePageRedirectFilterFactory singlePageRedirectFilterFactory)
-    {
-        this.singlePageRedirectFilterFactory = singlePageRedirectFilterFactory;
-    }
+	@Override
+	@JsonProperty("singlePageRedirectFilter")
+	public SinglePageRedirectFilterFactory getSinglePageRedirectFilterFactory() {
+		return this.singlePageRedirectFilterFactory;
+	}
 
-    @Override
-    @Nonnull
-    @JsonProperty("embedding")
-    public EmbeddingConfiguration getEmbeddingConfiguration()
-    {
-        return this.embedding;
-    }
+	@JsonProperty("singlePageRedirectFilter")
+	public void setSinglePageRedirectFilterFactory(SinglePageRedirectFilterFactory singlePageRedirectFilterFactory) {
+		this.singlePageRedirectFilterFactory = singlePageRedirectFilterFactory;
+	}
 
-    @JsonProperty("embedding")
-    public void setEmbeddingConfiguration(@Nonnull EmbeddingConfiguration embedding)
-    {
-        this.embedding = embedding;
-    }
+	@Override
+	@Nonnull
+	@JsonProperty("embedding")
+	public EmbeddingConfiguration getEmbeddingConfiguration() {
+		return this.embedding;
+	}
+
+	@JsonProperty("embedding")
+	public void setEmbeddingConfiguration(@Nonnull EmbeddingConfiguration embedding) {
+		this.embedding = embedding;
+	}
 }

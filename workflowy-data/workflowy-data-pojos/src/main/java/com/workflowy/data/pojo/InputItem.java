@@ -1,6 +1,7 @@
 package com.workflowy.data.pojo;
 
 import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -22,48 +23,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * </ul>
  */
 public record InputItem(
-        @JsonProperty("id")
-        String id,
+	@JsonProperty("id") String id,
 
-        @JsonProperty("nm")
-        String name,
+	@JsonProperty("nm") String name,
 
-        @JsonProperty("no")
-        @Nullable
-        String note,
+	@JsonProperty("no") @Nullable String note,
 
-        @JsonProperty("ct")
-        @Nullable
-        Long createdTimestamp,
+	@JsonProperty("ct") @Nullable Long createdTimestamp,
 
-        @JsonProperty("lm")
-        @Nullable
-        Long lastModifiedTimestamp,
+	@JsonProperty("lm") @Nullable Long lastModifiedTimestamp,
 
-        @JsonProperty("cp")
-        @Nullable
-        Long completedTimestamp,
+	@JsonProperty("cp") @Nullable Long completedTimestamp,
 
-        @JsonProperty("metadata")
-        @Nonnull
-        InputMetadata metadata,
+	@JsonProperty("metadata") @Nonnull InputMetadata metadata,
 
-        @JsonProperty("ch")
-        @Nullable
-        List<InputItem> children
-)
-{
-    public InputItem
-    {
-        if (metadata == null)
-        {
-            metadata = InputMetadata.empty();
-        }
-        if (children == null)
-        {
-            children = List.of();
-        }
-    }
+	@JsonProperty("ch") @Nullable List<InputItem> children
+) {
+	public InputItem {
+		if (metadata == null) {
+			metadata = InputMetadata.empty();
+		}
+		if (children == null) {
+			children = List.of();
+		}
+	}
 
     public boolean isCompleted()
     {

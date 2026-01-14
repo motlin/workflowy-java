@@ -1,4 +1,3 @@
 package com.workflowy;
-public class SharedNodeDatabaseObject extends SharedNodeDatabaseObjectAbstract
-{
-}
+
+public class SharedNodeDatabaseObject extends SharedNodeDatabaseObjectAbstract {}

@@ -11,49 +11,43 @@ import com.workflowy.dto.NodeContentDTO;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class ListByIdCommand extends AbstractReadOnlyCommand
-{
-    public ListByIdCommand(WorkflowyApplication application)
-    {
-        super(application, "list-by-id", "List children of a parent node by ID");
-    }
+public class ListByIdCommand extends AbstractReadOnlyCommand {
 
-    @Override
-    public void configure(Subparser subparser)
-    {
-        super.configure(subparser);
+	public ListByIdCommand(WorkflowyApplication application) {
+		super(application, "list-by-id", "List children of a parent node by ID");
+	}
 
-        subparser.addArgument("--parent-id")
-                .type(String.class)
-                .required(false)
-                .help("Parent node ID (omit for root nodes)");
-    }
+	@Override
+	public void configure(Subparser subparser) {
+		super.configure(subparser);
 
-    @Override
-    protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
-            throws CommandException
-    {
-        String parentId = namespace.getString("parent_id");
+		subparser
+			.addArgument("--parent-id")
+			.type(String.class)
+			.required(false)
+			.help("Parent node ID (omit for root nodes)");
+	}
 
-        Operation operation;
-        if (parentId == null)
-        {
-            // List root nodes (parentId is null)
-            operation = NodeContentFinder.parentId().isNull();
-        }
-        else
-        {
-            String fullParentId = this.resolveNodeId(parentId);
-            operation = NodeContentFinder.parentId().eq(fullParentId);
-        }
+	@Override
+	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
+		String parentId = namespace.getString("parent_id");
 
-        NodeContentList nodes = NodeContentFinder.findMany(operation);
+		Operation operation;
+		if (parentId == null) {
+			// List root nodes (parentId is null)
+			operation = NodeContentFinder.parentId().isNull();
+		} else {
+			String fullParentId = this.resolveNodeId(parentId);
+			operation = NodeContentFinder.parentId().eq(fullParentId);
+		}
 
-        // Deep fetch metadata for all nodes (depth 0 = no children)
-        NodeContentDTOMapper.applyDeepFetch(nodes, 0);
+		NodeContentList nodes = NodeContentFinder.findMany(operation);
 
-        List<NodeContentDTO> dtos = NodeContentDTOMapper.toDTOList(nodes, 0);
+		// Deep fetch metadata for all nodes (depth 0 = no children)
+		NodeContentDTOMapper.applyDeepFetch(nodes, 0);
 
-        return dtos;
-    }
+		List<NodeContentDTO> dtos = NodeContentDTOMapper.toDTOList(nodes, 0);
+
+		return dtos;
+	}
 }

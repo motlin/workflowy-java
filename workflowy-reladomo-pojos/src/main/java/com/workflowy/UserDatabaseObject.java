@@ -1,5 +1,3 @@
 package com.workflowy;
 
-public class UserDatabaseObject extends UserDatabaseObjectAbstract
-{
-}
+public class UserDatabaseObject extends UserDatabaseObjectAbstract {}

@@ -12,28 +12,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @ExtendWith(LogMarkerTestExtension.class)
-public class LiquibaseSchemaGeneratorTest
-{
-    public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
+public class LiquibaseSchemaGeneratorTest {
 
-    @RegisterExtension
-    final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
+	public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
 
-    @Test
-    void smokeTest()
-    {
-        ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
+	@RegisterExtension
+	final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
 
-        var domainModelCompilerLoader = new DomainModelCompilerLoader(
-                klassSourcePackages,
-                Thread.currentThread().getContextClassLoader(),
-                DomainModelCompilerLoader::logCompilerError,
-                ColorSchemeProvider.getByName("dark"));
+	@Test
+	void smokeTest() {
+		ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
 
-        DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
+		var domainModelCompilerLoader = new DomainModelCompilerLoader(
+			klassSourcePackages,
+			Thread.currentThread().getContextClassLoader(),
+			DomainModelCompilerLoader::logCompilerError,
+			ColorSchemeProvider.getByName("dark")
+		);
 
-        this.fileMatchExtension.assertFileContents(
-                this.getClass().getCanonicalName() + ".xml",
-                SchemaGenerator.getSourceCode(domainModel, FULLY_QUALIFIED_PACKAGE));
-    }
+		DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
+
+		this.fileMatchExtension.assertFileContents(
+			this.getClass().getCanonicalName() + ".xml",
+			SchemaGenerator.getSourceCode(domainModel, FULLY_QUALIFIED_PACKAGE)
+		);
+	}
 }

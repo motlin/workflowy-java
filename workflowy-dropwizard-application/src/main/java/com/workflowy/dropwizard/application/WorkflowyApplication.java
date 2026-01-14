@@ -21,67 +21,59 @@ import io.liftwizard.servlet.logging.logstash.encoder.StructuredArgumentsLogstas
 import io.liftwizard.servlet.logging.mdc.StructuredArgumentsMDCLogger;
 import io.liftwizard.servlet.logging.typesafe.StructuredArguments;
 
-public class WorkflowyApplication
-        extends AbstractWorkflowyApplication
-{
-    public static void main(String[] args)
-            throws Exception
-    {
-        new WorkflowyApplication().run(args);
-    }
+public class WorkflowyApplication extends AbstractWorkflowyApplication {
 
-    @Override
-    public void initialize(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap)
-    {
-        super.initialize(bootstrap);
-    }
+	public static void main(String[] args) throws Exception {
+		new WorkflowyApplication().run(args);
+	}
 
-    @Override
-    protected void initializeCommands(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap)
-    {
-        super.initializeCommands(bootstrap);
-        bootstrap.addCommand(new WorkflowyImportCommand(this));
-        bootstrap.addCommand(new CacheStatusCommand(this));
-        bootstrap.addCommand(new ReadNodeCommand(this));
-        bootstrap.addCommand(new ListByIdCommand(this));
-        bootstrap.addCommand(new ListByPathCommand(this));
-        bootstrap.addCommand(new EmbedGenerateCommand<>(this));
-        bootstrap.addCommand(new SearchCommand<>(this));
-    }
+	@Override
+	public void initialize(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap) {
+		super.initialize(bootstrap);
+	}
 
-    @Override
-    protected void initializeBundles(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap)
-    {
-        super.initializeBundles(bootstrap);
+	@Override
+	protected void initializeCommands(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap) {
+		super.initializeCommands(bootstrap);
+		bootstrap.addCommand(new WorkflowyImportCommand(this));
+		bootstrap.addCommand(new CacheStatusCommand(this));
+		bootstrap.addCommand(new ReadNodeCommand(this));
+		bootstrap.addCommand(new ListByIdCommand(this));
+		bootstrap.addCommand(new ListByPathCommand(this));
+		bootstrap.addCommand(new EmbedGenerateCommand<>(this));
+		bootstrap.addCommand(new SearchCommand<>(this));
+	}
 
-        var mdcLogger = new StructuredArgumentsMDCLogger(bootstrap.getObjectMapper());
-        var logstashLogger = new StructuredArgumentsLogstashEncoderLogger();
+	@Override
+	protected void initializeBundles(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap) {
+		super.initializeBundles(bootstrap);
 
-        Consumer<StructuredArguments> structuredLogger = structuredArguments ->
-        {
-            mdcLogger.accept(structuredArguments);
-            logstashLogger.accept(structuredArguments);
-        };
+		var mdcLogger = new StructuredArgumentsMDCLogger(bootstrap.getObjectMapper());
+		var logstashLogger = new StructuredArgumentsLogstashEncoderLogger();
 
-        bootstrap.addBundle(new JerseyHttpLoggingBundle(structuredLogger));
+		Consumer<StructuredArguments> structuredLogger = (structuredArguments) -> {
+			mdcLogger.accept(structuredArguments);
+			logstashLogger.accept(structuredArguments);
+		};
 
-        bootstrap.addBundle(new KlassGraphQLBundle<>());
+		bootstrap.addBundle(new JerseyHttpLoggingBundle(structuredLogger));
 
-        bootstrap.addBundle(new MigrationsBundle<>()
-        {
-            @Override
-            public DataSourceFactory getDataSourceFactory(WorkflowyConfiguration configuration)
-            {
-                return configuration.getNamedDataSourcesFactory().getNamedDataSourceFactoryByName("h2-tcp");
-            }
-        });
-    }
+		bootstrap.addBundle(new KlassGraphQLBundle<>());
 
-    @Override
-    protected void registerJacksonModules(@Nonnull Environment environment)
-    {
-        super.registerJacksonModules(environment);
+		bootstrap.addBundle(
+			new MigrationsBundle<>() {
+				@Override
+				public DataSourceFactory getDataSourceFactory(WorkflowyConfiguration configuration) {
+					return configuration.getNamedDataSourcesFactory().getNamedDataSourceFactoryByName("h2-tcp");
+				}
+			}
+		);
+	}
 
-        environment.getObjectMapper().registerModule(new KlassMetaModelJacksonModule());
-    }
+	@Override
+	protected void registerJacksonModules(@Nonnull Environment environment) {
+		super.registerJacksonModules(environment);
+
+		environment.getObjectMapper().registerModule(new KlassMetaModelJacksonModule());
+	}
 }

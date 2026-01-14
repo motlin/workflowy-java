@@ -2,35 +2,31 @@ package com.workflowy.embedding.util;
 
 import java.util.regex.Pattern;
 
-public final class HtmlStripper
-{
-    private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<[^>]*>");
-    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
+public final class HtmlStripper {
 
-    private HtmlStripper()
-    {
-    }
+	private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<[^>]*>");
+	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
-    public static String stripHtmlTags(String html)
-    {
-        if (html == null || html.isEmpty())
-        {
-            return "";
-        }
+	private HtmlStripper() {}
 
-        String withoutTags = HTML_TAG_PATTERN.matcher(html).replaceAll("");
+	public static String stripHtmlTags(String html) {
+		if (html == null || html.isEmpty()) {
+			return "";
+		}
 
-        withoutTags = withoutTags
-                .replace("&nbsp;", " ")
-                .replace("&amp;", "&")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&quot;", "\"")
-                .replace("&#39;", "'")
-                .replace("&apos;", "'");
+		String withoutTags = HTML_TAG_PATTERN.matcher(html).replaceAll("");
 
-        withoutTags = WHITESPACE_PATTERN.matcher(withoutTags).replaceAll(" ");
+		withoutTags = withoutTags
+			.replace("&nbsp;", " ")
+			.replace("&amp;", "&")
+			.replace("&lt;", "<")
+			.replace("&gt;", ">")
+			.replace("&quot;", "\"")
+			.replace("&#39;", "'")
+			.replace("&apos;", "'");
 
-        return withoutTags.trim();
-    }
+		withoutTags = WHITESPACE_PATTERN.matcher(withoutTags).replaceAll(" ");
+
+		return withoutTags.trim();
+	}
 }

@@ -1,9 +1,9 @@
 package com.workflowy.data.pojo;
 
 import java.util.Map;
+
 import javax.annotation.Nullable;
 
-// TODO 2025-12-30: JsonProperty is not necessary in java record DTOs
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**

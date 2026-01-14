@@ -1,4 +1,5 @@
 package com.workflowy;
+
 import java.sql.Timestamp;
 public class SharedNode extends SharedNodeAbstract
 {

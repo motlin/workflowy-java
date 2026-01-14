@@ -13,53 +13,44 @@ import com.workflowy.embedding.util.HtmlStripper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SearchEngine
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(SearchEngine.class);
+public class SearchEngine {
 
-    private final EmbeddingEngine engine;
-    private final EmbeddingRepository repository;
-    private final PathBuilder pathBuilder;
+	private static final Logger LOGGER = LoggerFactory.getLogger(SearchEngine.class);
 
-    public SearchEngine(EmbeddingEngine engine, EmbeddingRepository repository)
-    {
-        this.engine = engine;
-        this.repository = repository;
-        this.pathBuilder = new PathBuilder();
-    }
+	private final EmbeddingEngine engine;
+	private final EmbeddingRepository repository;
+	private final PathBuilder pathBuilder;
 
-    public List<SearchResult> search(String query, int limit, Double threshold) throws SQLException
-    {
-        EmbeddingModel model = this.engine.getModel();
+	public SearchEngine(EmbeddingEngine engine, EmbeddingRepository repository) {
+		this.engine = engine;
+		this.repository = repository;
+		this.pathBuilder = new PathBuilder();
+	}
 
-        double effectiveThreshold = threshold != null ? threshold : model.getDefaultThreshold();
+	public List<SearchResult> search(String query, int limit, Double threshold) throws SQLException {
+		EmbeddingModel model = this.engine.getModel();
 
-        float[] queryEmbedding = this.engine.generateEmbedding(query, true);
+		double effectiveThreshold = threshold != null ? threshold : model.getDefaultThreshold();
 
-        List<SearchResult> results = this.repository.search(
-                queryEmbedding,
-                model,
-                limit,
-                effectiveThreshold);
+		float[] queryEmbedding = this.engine.generateEmbedding(query, true);
 
-        for (SearchResult result : results)
-        {
-            this.enrichResult(result);
-        }
+		List<SearchResult> results = this.repository.search(queryEmbedding, model, limit, effectiveThreshold);
 
-        return results;
-    }
+		for (SearchResult result : results) {
+			this.enrichResult(result);
+		}
 
-    private void enrichResult(SearchResult result)
-    {
-        NodeContent node = NodeContentFinder.findOne(NodeContentFinder.id().eq(result.getNodeId()));
+		return results;
+	}
 
-        if (node != null)
-        {
-            result.setName(HtmlStripper.stripHtmlTags(node.getName()));
-            result.setNote(node.getNote() != null ? HtmlStripper.stripHtmlTags(node.getNote()) : null);
-            result.setFullPath(this.pathBuilder.buildFullPath(result.getNodeId()));
-            result.setTextContent(this.pathBuilder.buildTextContent(result.getNodeId()));
-        }
-    }
+	private void enrichResult(SearchResult result) {
+		NodeContent node = NodeContentFinder.findOne(NodeContentFinder.id().eq(result.getNodeId()));
+
+		if (node != null) {
+			result.setName(HtmlStripper.stripHtmlTags(node.getName()));
+			result.setNote(node.getNote() != null ? HtmlStripper.stripHtmlTags(node.getNote()) : null);
+			result.setFullPath(this.pathBuilder.buildFullPath(result.getNodeId()));
+			result.setTextContent(this.pathBuilder.buildTextContent(result.getNodeId()));
+		}
+	}
 }

@@ -1,18 +1,16 @@
 package com.workflowy.embedding.generator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.workflowy.NodeContent;
 import com.workflowy.NodeContentFinder;
 import com.workflowy.embedding.util.HtmlStripper;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 
-public class PathBuilder
-{
-    public String buildFullPath(String nodeId)
-    {
-        List<String> path = new ArrayList<>();
-        String currentId = nodeId;
+public class PathBuilder {
+
+	public String buildFullPath(String nodeId) {
+		MutableList<String> path = Lists.mutable.empty();
+		String currentId = nodeId;
 
 		while (currentId != null) {
 			NodeContent node = NodeContentFinder.findOne(NodeContentFinder.id().eq(currentId));

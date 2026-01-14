@@ -1,6 +1,5 @@
 package com.workflowy.dropwizard.application.cli;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +10,9 @@ import com.workflowy.NodeContentList;
 import com.workflowy.NodeMetadata;
 import com.workflowy.dto.NodeContentDTO;
 import com.workflowy.dto.NodeMetadataDTO;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.utility.Iterate;
 
 public final class NodeContentDTOMapper {
 
@@ -18,51 +20,48 @@ public final class NodeContentDTOMapper {
 		throw new AssertionError("Utility class");
 	}
 
-	public static NodeContentDTO toDTO(NodeContent content, int depth)
-    {
-        NodeContentDTO dto = new NodeContentDTO();
-        dto.setId(content.getId());
-        dto.setName(content.getName());
-        dto.setNote(content.getNote());
-        dto.setSystemFrom(content.getSystemFrom().toInstant());
-        dto.setSystemTo(content.getSystemTo().toInstant());
+	public static NodeContentDTO toDTO(NodeContent content, int depth) {
+		NodeContentDTO dto = new NodeContentDTO();
+		dto.setId(content.getId());
+		dto.setName(content.getName());
+		dto.setNote(content.getNote());
+		dto.setSystemFrom(content.getSystemFrom().toInstant());
+		dto.setSystemTo(content.getSystemTo().toInstant());
 
-        // Metadata MUST be present - data integrity error if null
-        NodeMetadata metadata = content.getMetadata();
-        Objects.requireNonNull(metadata, "NodeMetadata missing for node: " + content.getId());
-        dto.setMetadata(toMetadataDTO(metadata));
+		// Metadata MUST be present - data integrity error if null
+		NodeMetadata metadata = content.getMetadata();
+		Objects.requireNonNull(metadata, "NodeMetadata missing for node: " + content.getId());
+		dto.setMetadata(toMetadataDTO(metadata));
 
-        // Recursively map children if depth > 0
-        if (depth > 0)
-        {
-            dto.setChildren(mapChildren(content.getChildren(), depth - 1));
-        }
-        return dto;
-    }
+		// Recursively map children if depth > 0
+		if (depth > 0) {
+			dto.setChildren(mapChildren(content.getChildren(), depth - 1));
+		}
+		return dto;
+	}
 
-    public static List<NodeContentDTO> toDTOList(NodeContentList nodes, int depth)
-    {
-        List<NodeContentDTO> result = new ArrayList<>();
-        for (NodeContent node : nodes)
-        {
-            result.add(toDTO(node, depth));
-        }
-        // Sort by priority
-        result.sort(Comparator.comparingInt(dto ->
-                dto.getMetadata() != null && dto.getMetadata().getPriority() != null
-                        ? dto.getMetadata().getPriority()
-                        : 0));
-        return result;
-    }
+	public static List<NodeContentDTO> toDTOList(NodeContentList nodes, int depth) {
+		MutableList<NodeContentDTO> result = Lists.mutable.empty();
+		for (NodeContent node : nodes) {
+			result.add(toDTO(node, depth));
+		}
+		// Sort by priority
+		result.sort(
+			Comparator.comparingInt((dto) ->
+				dto.getMetadata() != null && dto.getMetadata().getPriority() != null
+					? dto.getMetadata().getPriority()
+					: 0
+			)
+		);
+		return result;
+	}
 
-    private static List<NodeContentDTO> mapChildren(NodeContentList children, int remainingDepth)
-    {
-        if (children == null || children.isEmpty())
-        {
-            return new ArrayList<>();
-        }
-        return toDTOList(children, remainingDepth);
-    }
+	private static List<NodeContentDTO> mapChildren(NodeContentList children, int remainingDepth) {
+		if (Iterate.isEmpty(children)) {
+			return Lists.mutable.empty();
+		}
+		return toDTOList(children, remainingDepth);
+	}
 
 	private static NodeMetadataDTO toMetadataDTO(NodeMetadata metadata) {
 		NodeMetadataDTO dto = new NodeMetadataDTO();

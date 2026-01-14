@@ -7,9 +7,9 @@ import com.workflowy.embedding.model.EmbeddingModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmbeddingEngineFactory
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddingEngineFactory.class);
+public final class EmbeddingEngineFactory {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddingEngineFactory.class);
 
 	private EmbeddingEngineFactory() {}
 

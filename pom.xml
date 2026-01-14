@@ -34,7 +34,7 @@
         <module>workflowy-embedding</module>
     </modules>
     <properties>
-        <klass.version>0.6.0-SNAPSHOT</klass.version>
+        <klass.version>0.6.0</klass.version>
         <app.artifactId>workflowy</app.artifactId>
         <app.rootPackageName>com.workflowy</app.rootPackageName>
         <app.name>Workflowy</app.name>
@@ -63,7 +63,7 @@
             <dependency>
                 <groupId>cool.klass</groupId>
                 <artifactId>klass-bom</artifactId>
-                <version>0.6.0-SNAPSHOT</version>
+                <version>${klass.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

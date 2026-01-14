@@ -15,25 +15,19 @@ public record InputMirrorMetadata(
 
 	@Nullable Map<String, Boolean> mirrorRootIds,
 
-        @Nullable
-        Map<String, Boolean> backlinkMirrorRootIds
-)
-{
-    public Set<String> getMirrorSourceIds()
-    {
-        if (mirrorRootIds != null)
-        {
-            return mirrorRootIds.keySet();
-        }
-        return Set.of();
-    }
+	@Nullable Map<String, Boolean> backlinkMirrorRootIds
+) {
+	public Set<String> getMirrorSourceIds() {
+		if (this.mirrorRootIds != null) {
+			return this.mirrorRootIds.keySet();
+		}
+		return Set.of();
+	}
 
-    public Set<String> getBacklinkMirrorIds()
-    {
-        if (backlinkMirrorRootIds != null)
-        {
-            return backlinkMirrorRootIds.keySet();
-        }
-        return Set.of();
-    }
+	public Set<String> getBacklinkMirrorIds() {
+		if (this.backlinkMirrorRootIds != null) {
+			return this.backlinkMirrorRootIds.keySet();
+		}
+		return Set.of();
+	}
 }

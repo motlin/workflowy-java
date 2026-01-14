@@ -2,7 +2,6 @@ package com.workflowy.embedding.generator;
 
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -14,142 +13,118 @@ import com.workflowy.embedding.engine.EmbeddingEngine;
 import com.workflowy.embedding.model.EmbeddingModel;
 import com.workflowy.embedding.model.NodeEmbedding;
 import com.workflowy.embedding.repository.EmbeddingRepository;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmbeddingGenerator
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddingGenerator.class);
+public class EmbeddingGenerator {
 
-    private static final Instant FAR_FUTURE = Instant.parse("9999-12-31T23:59:59Z");
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddingGenerator.class);
 
-    private final EmbeddingEngine engine;
-    private final EmbeddingRepository repository;
-    private final PathBuilder pathBuilder;
-    private final int batchSize;
-    private final boolean force;
+	private static final Instant FAR_FUTURE = Instant.parse("9999-12-31T23:59:59Z");
 
-    public EmbeddingGenerator(
-            EmbeddingEngine engine,
-            EmbeddingRepository repository,
-            int batchSize,
-            boolean force)
-    {
-        this.engine = engine;
-        this.repository = repository;
-        this.pathBuilder = new PathBuilder();
-        this.batchSize = batchSize;
-        this.force = force;
-    }
+	private final EmbeddingEngine engine;
+	private final EmbeddingRepository repository;
+	private final PathBuilder pathBuilder;
+	private final int batchSize;
+	private final boolean force;
 
-    public GenerationResult generate(Consumer<ProgressUpdate> progressCallback)
-    {
-        EmbeddingModel model = this.engine.getModel();
+	public EmbeddingGenerator(EmbeddingEngine engine, EmbeddingRepository repository, int batchSize, boolean force) {
+		this.engine = engine;
+		this.repository = repository;
+		this.pathBuilder = new PathBuilder();
+		this.batchSize = batchSize;
+		this.force = force;
+	}
 
-        Set<String> existingNodeIds;
-        try
-        {
-            existingNodeIds = this.force ? Set.of() : this.repository.getExistingNodeIds(model);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException("Failed to get existing node IDs", e);
-        }
+	public GenerationResult generate(Consumer<ProgressUpdate> progressCallback) {
+		EmbeddingModel model = this.engine.getModel();
 
-        NodeContentList allNodes = NodeContentFinder.findMany(NodeContentFinder.all());
-        int totalNodes = allNodes.size();
-        int skippedCount = 0;
-        int processedCount = 0;
-        int errorCount = 0;
+		Set<String> existingNodeIds;
+		try {
+			existingNodeIds = this.force ? Set.of() : this.repository.getExistingNodeIds(model);
+		} catch (SQLException e) {
+			throw new RuntimeException("Failed to get existing node IDs", e);
+		}
 
-        List<NodeContent> batch = new ArrayList<>(this.batchSize);
+		NodeContentList allNodes = NodeContentFinder.findMany(NodeContentFinder.all());
+		int totalNodes = allNodes.size();
+		int skippedCount = 0;
+		int processedCount = 0;
+		int errorCount = 0;
 
-        for (int i = 0; i < allNodes.size(); i++)
-        {
-            NodeContent node = allNodes.get(i);
+		MutableList<NodeContent> batch = Lists.mutable.withInitialCapacity(this.batchSize);
 
-            if (!this.force && existingNodeIds.contains(node.getId()))
-            {
-                skippedCount++;
-                continue;
-            }
+		for (int i = 0; i < allNodes.size(); i++) {
+			NodeContent node = allNodes.get(i);
 
-            batch.add(node);
+			if (!this.force && existingNodeIds.contains(node.getId())) {
+				skippedCount++;
+				continue;
+			}
 
-            if (batch.size() >= this.batchSize || i == allNodes.size() - 1)
-            {
-                try
-                {
-                    this.processBatch(batch, model);
-                    processedCount += batch.size();
+			batch.add(node);
 
-                    if (progressCallback != null)
-                    {
-                        progressCallback.accept(new ProgressUpdate(
-                                processedCount + skippedCount,
-                                totalNodes,
-                                processedCount,
-                                skippedCount,
-                                errorCount));
-                    }
-                }
-                catch (Exception e)
-                {
-                    LOGGER.error("Error processing batch", e);
-                    errorCount += batch.size();
-                }
+			if (batch.size() >= this.batchSize || i == allNodes.size() - 1) {
+				try {
+					this.processBatch(batch, model);
+					processedCount += batch.size();
 
-                batch.clear();
-            }
-        }
+					if (progressCallback != null) {
+						progressCallback.accept(
+							new ProgressUpdate(
+								processedCount + skippedCount,
+								totalNodes,
+								processedCount,
+								skippedCount,
+								errorCount
+							)
+						);
+					}
+				} catch (Exception e) {
+					LOGGER.error("Error processing batch", e);
+					errorCount += batch.size();
+				}
 
-        return new GenerationResult(totalNodes, processedCount, skippedCount, errorCount);
-    }
+				batch.clear();
+			}
+		}
 
-    private void processBatch(List<NodeContent> nodes, EmbeddingModel model) throws SQLException
-    {
-        List<String> texts = nodes.stream()
-                .map(node -> this.pathBuilder.buildEmbeddingText(node.getId()))
-                .toList();
+		return new GenerationResult(totalNodes, processedCount, skippedCount, errorCount);
+	}
 
-        List<float[]> embeddings = this.engine.generateEmbeddings(texts, false);
+	private void processBatch(List<NodeContent> nodes, EmbeddingModel model) throws SQLException {
+		List<String> texts = nodes
+			.stream()
+			.map((node) -> this.pathBuilder.buildEmbeddingText(node.getId()))
+			.toList();
 
-        List<NodeEmbedding> nodeEmbeddings = new ArrayList<>();
-        for (int i = 0; i < nodes.size(); i++)
-        {
-            NodeContent node = nodes.get(i);
-            float[] embedding = embeddings.get(i);
+		List<float[]> embeddings = this.engine.generateEmbeddings(texts, false);
 
-            NodeEmbedding nodeEmbedding = new NodeEmbedding(
-                    node.getId(),
-                    model.getKey(),
-                    embedding,
-                    Instant.now(),
-                    FAR_FUTURE);
-            nodeEmbeddings.add(nodeEmbedding);
-        }
+		MutableList<NodeEmbedding> nodeEmbeddings = Lists.mutable.empty();
+		for (int i = 0; i < nodes.size(); i++) {
+			NodeContent node = nodes.get(i);
+			float[] embedding = embeddings.get(i);
 
-        this.repository.saveBatch(nodeEmbeddings);
-    }
+			NodeEmbedding nodeEmbedding = new NodeEmbedding(
+				node.getId(),
+				model.getKey(),
+				embedding,
+				Instant.now(),
+				FAR_FUTURE
+			);
+			nodeEmbeddings.add(nodeEmbedding);
+		}
 
-    public record ProgressUpdate(
-            int current,
-            int total,
-            int processed,
-            int skipped,
-            int errors)
-    {
-        public int percentage()
-        {
-            return total > 0 ? (current * 100) / total : 0;
-        }
-    }
+		this.repository.saveBatch(nodeEmbeddings);
+	}
 
-    public record GenerationResult(
-            int totalNodes,
-            int processedCount,
-            int skippedCount,
-            int errorCount)
-    {
-    }
+	public record ProgressUpdate(int current, int total, int processed, int skipped, int errors) {
+		public int percentage() {
+			return this.total > 0 ? (this.current * 100) / this.total : 0;
+		}
+	}
+
+	public record GenerationResult(int totalNodes, int processedCount, int skippedCount, int errorCount) {}
 }

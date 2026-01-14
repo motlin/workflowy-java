@@ -24,100 +24,96 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider>
-        extends EnvironmentCommand<T>
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmbedGenerateCommand.class);
+	extends EnvironmentCommand<T> {
 
-    private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmbedGenerateCommand.class);
 
-    public EmbedGenerateCommand(Application<T> application)
-    {
-        super(application, "embed-generate", "Generate embeddings for all nodes");
-    }
+	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-    @Override
-    public void configure(Subparser subparser)
-    {
-        super.configure(subparser);
+	public EmbedGenerateCommand(Application<T> application) {
+		super(application, "embed-generate", "Generate embeddings for all nodes");
+	}
 
-        subparser.addArgument("--model")
-                .type(String.class)
-                .setDefault("minilm")
-                .help("Embedding model to use: minilm, mpnet, bge, openai-small, openai-large");
+	@Override
+	public void configure(Subparser subparser) {
+		super.configure(subparser);
 
-        subparser.addArgument("--batch-size")
-                .type(Integer.class)
-                .setDefault(100)
-                .help("Number of nodes to process in each batch");
+		subparser
+			.addArgument("--model")
+			.type(String.class)
+			.setDefault("minilm")
+			.help("Embedding model to use: minilm, mpnet, bge, openai-small, openai-large");
 
-        subparser.addArgument("--force")
-                .action(Arguments.storeTrue())
-                .setDefault(false)
-                .help("Force regeneration of all embeddings");
+		subparser
+			.addArgument("--batch-size")
+			.type(Integer.class)
+			.setDefault(100)
+			.help("Number of nodes to process in each batch");
 
-        subparser.addArgument("--db-path")
-                .type(String.class)
-                .help("Override path to the embeddings SQLite database");
-    }
+		subparser
+			.addArgument("--force")
+			.action(Arguments.storeTrue())
+			.setDefault(false)
+			.help("Force regeneration of all embeddings");
 
-    @Override
-    protected void run(
-            @Nonnull Environment environment,
-            Namespace namespace,
-            @Nonnull T configuration)
-            throws Exception
-    {
-        LOGGER.info("Running {}.", this.getClass().getSimpleName());
+		subparser.addArgument("--db-path").type(String.class).help("Override path to the embeddings SQLite database");
+	}
 
-        environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
-        ShutdownThread.register(this.containerLifeCycle);
-        this.containerLifeCycle.start();
+	@Override
+	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
+		throws Exception {
+		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
-        EmbeddingConfiguration embeddingConfig = configuration.getEmbeddingConfiguration();
+		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
+		ShutdownThread.register(this.containerLifeCycle);
+		this.containerLifeCycle.start();
 
-        String modelKey = namespace.getString("model");
-        int batchSize = namespace.getInt("batch_size");
-        boolean force = namespace.getBoolean("force");
-        String dbPath = namespace.getString("db_path");
+		EmbeddingConfiguration embeddingConfig = configuration.getEmbeddingConfiguration();
 
-        if (dbPath == null)
-        {
-            dbPath = embeddingConfig.getDatabasePath();
-        }
+		String modelKey = namespace.getString("model");
+		int batchSize = namespace.getInt("batch_size");
+		boolean force = namespace.getBoolean("force");
+		String dbPath = namespace.getString("db_path");
 
-        EmbeddingModel model = EmbeddingModel.fromKey(modelKey);
+		if (dbPath == null) {
+			dbPath = embeddingConfig.getDatabasePath();
+		}
 
-        LOGGER.info("Model: {}", model.getKey());
-        LOGGER.info("Database path: {}", dbPath);
-        LOGGER.info("Batch size: {}", batchSize);
-        LOGGER.info("Force: {}", force);
+		EmbeddingModel model = EmbeddingModel.fromKey(modelKey);
 
-        try (SqliteVecConnection sqliteConnection = new SqliteVecConnection(dbPath);
-             EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig))
-        {
-            EmbeddingRepository repository = new EmbeddingRepository(sqliteConnection);
-            EmbeddingGenerator generator = new EmbeddingGenerator(engine, repository, batchSize, force);
+		LOGGER.info("Model: {}", model.getKey());
+		LOGGER.info("Database path: {}", dbPath);
+		LOGGER.info("Batch size: {}", batchSize);
+		LOGGER.info("Force: {}", force);
 
-            GenerationResult result = generator.generate(progress ->
-            {
-                LOGGER.info("Progress: {}% ({}/{}) - Processed: {}, Skipped: {}, Errors: {}",
-                        progress.percentage(),
-                        progress.current(),
-                        progress.total(),
-                        progress.processed(),
-                        progress.skipped(),
-                        progress.errors());
-            });
+		try (
+			SqliteVecConnection sqliteConnection = new SqliteVecConnection(dbPath);
+			EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig)
+		) {
+			EmbeddingRepository repository = new EmbeddingRepository(sqliteConnection);
+			EmbeddingGenerator generator = new EmbeddingGenerator(engine, repository, batchSize, force);
 
-            LOGGER.info("Generation complete!");
-            LOGGER.info("Total nodes: {}", result.totalNodes());
-            LOGGER.info("Processed: {}", result.processedCount());
-            LOGGER.info("Skipped: {}", result.skippedCount());
-            LOGGER.info("Errors: {}", result.errorCount());
-        }
+			GenerationResult result = generator.generate((progress) ->
+				LOGGER.info(
+					"Progress: {}% ({}/{}) - Processed: {}, Skipped: {}, Errors: {}",
+					progress.percentage(),
+					progress.current(),
+					progress.total(),
+					progress.processed(),
+					progress.skipped(),
+					progress.errors()
+				)
+			);
 
-        this.containerLifeCycle.stop();
+			LOGGER.info("Generation complete!");
+			LOGGER.info("Total nodes: {}", result.totalNodes());
+			LOGGER.info("Processed: {}", result.processedCount());
+			LOGGER.info("Skipped: {}", result.skippedCount());
+			LOGGER.info("Errors: {}", result.errorCount());
+		}
 
-        LOGGER.info("Completing {}.", this.getClass().getSimpleName());
-    }
+		this.containerLifeCycle.stop();
+
+		LOGGER.info("Completing {}.", this.getClass().getSimpleName());
+	}
 }

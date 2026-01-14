@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 
 import cool.klass.data.store.DataStore;
 import cool.klass.dropwizard.configuration.AbstractKlassConfiguration;
+import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -16,72 +17,59 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration>
-        extends EnvironmentCommand<T>
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportWorkflowyCommand.class);
+public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extends EnvironmentCommand<T> {
 
-    private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImportWorkflowyCommand.class);
 
-    public ImportWorkflowyCommand(io.dropwizard.Application<T> application)
-    {
-        this(application, "import-workflowy", "Import Workflowy backup files into the database.");
-    }
+	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-    protected ImportWorkflowyCommand(
-            io.dropwizard.Application<T> application,
-            String name,
-            String description)
-    {
-        super(application, name, description);
-    }
+	public ImportWorkflowyCommand(Application<T> application) {
+		this(application, "import-workflowy", "Import Workflowy backup files into the database.");
+	}
 
-    @Override
-    public void configure(Subparser subparser)
-    {
-        super.configure(subparser);
+	protected ImportWorkflowyCommand(Application<T> application, String name, String description) {
+		super(application, name, description);
+	}
 
-        subparser.addArgument("--backups-path")
-                .type(String.class)
-                .required(true)
-                .help("Path to the directory containing Workflowy backup files.");
+	@Override
+	public void configure(Subparser subparser) {
+		super.configure(subparser);
 
-        subparser.addArgument("--days-limit")
-                .type(Integer.class)
-                .setDefault(Integer.MAX_VALUE)
-                .help("Maximum number of backup files to process (default: all).");
-    }
+		subparser
+			.addArgument("--backups-path")
+			.type(String.class)
+			.required(true)
+			.help("Path to the directory containing Workflowy backup files.");
 
-    @Override
-    protected void run(
-            @Nonnull Environment environment,
-            Namespace namespace,
-            @Nonnull T configuration)
-            throws Exception
-    {
-        LOGGER.info("Running {}.", this.getClass().getSimpleName());
+		subparser
+			.addArgument("--days-limit")
+			.type(Integer.class)
+			.setDefault(Integer.MAX_VALUE)
+			.help("Maximum number of backup files to process (default: all).");
+	}
 
-        environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
-        ShutdownThread.register(this.containerLifeCycle);
-        this.containerLifeCycle.start();
+	@Override
+	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
+		throws Exception {
+		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
-        DataStore dataStore = configuration.getKlassFactory().getDataStoreFactory().createDataStore();
+		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
+		ShutdownThread.register(this.containerLifeCycle);
+		this.containerLifeCycle.start();
 
-        String backupsPathString = namespace.getString("backups_path");
-        Path backupsPath = Paths.get(backupsPathString);
-        Integer daysLimit = namespace.getInt("days_limit");
+		DataStore dataStore = configuration.getKlassFactory().getDataStoreFactory().createDataStore();
 
-        LOGGER.info("backupsPath = {}", backupsPath);
-        LOGGER.info("daysLimit = {}", daysLimit);
+		String backupsPathString = namespace.getString("backups_path");
+		Path backupsPath = Paths.get(backupsPathString);
+		Integer daysLimit = namespace.getInt("days_limit");
 
-        WorkflowyDataConverter.convert(
-                backupsPath,
-                environment.getObjectMapper(),
-                dataStore,
-                daysLimit);
+		LOGGER.info("backupsPath = {}", backupsPath);
+		LOGGER.info("daysLimit = {}", daysLimit);
 
-        this.containerLifeCycle.stop();
+		WorkflowyDataConverter.convert(backupsPath, environment.getObjectMapper(), dataStore, daysLimit);
 
-        LOGGER.info("Completing {}.", this.getClass().getSimpleName());
-    }
+		this.containerLifeCycle.stop();
+
+		LOGGER.info("Completing {}.", this.getClass().getSimpleName());
+	}
 }

@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.collections.impl.utility.Iterate;
 
 /**
  * Represents a single Workflowy item from the backup JSON.
@@ -48,13 +49,11 @@ public record InputItem(
 		}
 	}
 
-    public boolean isCompleted()
-    {
-        return completedTimestamp != null;
-    }
+	public boolean isCompleted() {
+		return this.completedTimestamp != null;
+	}
 
-    public boolean hasChildren()
-    {
-        return children != null && !children.isEmpty();
-    }
+	public boolean hasChildren() {
+		return Iterate.notEmpty(this.children);
+	}
 }

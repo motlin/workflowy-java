@@ -11,54 +11,51 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class ReadNodeCommand extends AbstractReadOnlyCommand
-{
-    public ReadNodeCommand(WorkflowyApplication application)
-    {
-        super(application, "read-node", "Read a node by ID with optional child depth");
-    }
+public class ReadNodeCommand extends AbstractReadOnlyCommand {
 
-    @Override
-    public void configure(Subparser subparser)
-    {
-        super.configure(subparser);
+	public ReadNodeCommand(WorkflowyApplication application) {
+		super(application, "read-node", "Read a node by ID with optional child depth");
+	}
 
-        subparser.addArgument("--id")
-                .type(String.class)
-                .required(true)
-                .help("Node ID (full UUID or first 12+ hex characters)");
+	@Override
+	public void configure(Subparser subparser) {
+		super.configure(subparser);
 
-        subparser.addArgument("--depth")
-                .type(Integer.class)
-                .setDefault(0)
-                .choices(Arguments.range(0, 10))
-                .help("Depth of children to include (0-10, default: 0)");
-    }
+		subparser
+			.addArgument("--id")
+			.type(String.class)
+			.required(true)
+			.help("Node ID (full UUID or first 12+ hex characters)");
 
-    @Override
-    protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
-            throws CommandException
-    {
-        String inputId = namespace.getString("id");
-        int depth = namespace.getInt("depth");
+		subparser
+			.addArgument("--depth")
+			.type(Integer.class)
+			.setDefault(0)
+			.choices(Arguments.range(0, 10))
+			.help("Depth of children to include (0-10, default: 0)");
+	}
 
-        String fullId = this.resolveNodeId(inputId);
+	@Override
+	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
+		String inputId = namespace.getString("id");
+		int depth = namespace.getInt("depth");
 
-        // Find the node
-        Operation operation = NodeContentFinder.id().eq(fullId);
-        NodeContentList nodes = NodeContentFinder.findMany(operation);
+		String fullId = this.resolveNodeId(inputId);
 
-        if (nodes.isEmpty())
-        {
-            throw new CommandException("NOT_FOUND", "Node not found: " + fullId);
-        }
+		// Find the node
+		Operation operation = NodeContentFinder.id().eq(fullId);
+		NodeContentList nodes = NodeContentFinder.findMany(operation);
 
-        // Apply deep fetch based on depth
-        NodeContentDTOMapper.applyDeepFetch(nodes, depth);
+		if (nodes.isEmpty()) {
+			throw new CommandException("NOT_FOUND", "Node not found: " + fullId);
+		}
 
-        NodeContent node = nodes.get(0);
-        NodeContentDTO dto = NodeContentDTOMapper.toDTO(node, depth);
+		// Apply deep fetch based on depth
+		NodeContentDTOMapper.applyDeepFetch(nodes, depth);
 
-        return dto;
-    }
+		NodeContent node = nodes.get(0);
+		NodeContentDTO dto = NodeContentDTOMapper.toDTO(node, depth);
+
+		return dto;
+	}
 }

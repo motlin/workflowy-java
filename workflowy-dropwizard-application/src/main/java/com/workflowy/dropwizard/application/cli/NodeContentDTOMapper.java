@@ -12,14 +12,13 @@ import com.workflowy.NodeMetadata;
 import com.workflowy.dto.NodeContentDTO;
 import com.workflowy.dto.NodeMetadataDTO;
 
-public final class NodeContentDTOMapper
-{
-    private NodeContentDTOMapper()
-    {
-        throw new AssertionError("Utility class");
-    }
+public final class NodeContentDTOMapper {
 
-    public static NodeContentDTO toDTO(NodeContent content, int depth)
+	private NodeContentDTOMapper() {
+		throw new AssertionError("Utility class");
+	}
+
+	public static NodeContentDTO toDTO(NodeContent content, int depth)
     {
         NodeContentDTO dto = new NodeContentDTO();
         dto.setId(content.getId());
@@ -38,7 +37,6 @@ public final class NodeContentDTOMapper
         {
             dto.setChildren(mapChildren(content.getChildren(), depth - 1));
         }
-
         return dto;
     }
 
@@ -66,83 +64,147 @@ public final class NodeContentDTOMapper
         return toDTOList(children, remainingDepth);
     }
 
-    private static NodeMetadataDTO toMetadataDTO(NodeMetadata metadata)
-    {
-        NodeMetadataDTO dto = new NodeMetadataDTO();
-        dto.setPriority(metadata.getPriority());
-        dto.setCompleted(metadata.isCompleted());
-        dto.setCompletedAt(metadata.getCompletedAt() != null ? metadata.getCompletedAt().toInstant() : null);
-        dto.setCollapsed(metadata.isCollapsed());
-        dto.setLastModified(metadata.getLastModified() != null ? metadata.getLastModified().toInstant() : null);
-        dto.setLayoutMode(metadata.getLayoutMode());
-        // Handle nullable boolean fields - check isXxxNull() before calling isXxx()
-        dto.setVirtualRoot(metadata.isVirtualRootNull() ? null : metadata.isVirtualRoot());
-        dto.setReferencesRoot(metadata.isReferencesRootNull() ? null : metadata.isReferencesRoot());
-        dto.setInChat(metadata.isInChatNull() ? null : metadata.isInChat());
-        dto.setMirrorRoot(metadata.isMirrorRootNull() ? null : metadata.isMirrorRoot());
-        dto.setOriginalId(metadata.getOriginalId());
-        dto.setChanges(metadata.getChanges());
-        dto.setCreatedOn(metadata.getCreatedOn() != null ? metadata.getCreatedOn().toInstant() : null);
-        dto.setSystemFrom(metadata.getSystemFrom().toInstant());
-        dto.setSystemTo(metadata.getSystemTo().toInstant());
-        return dto;
-    }
+	private static NodeMetadataDTO toMetadataDTO(NodeMetadata metadata) {
+		NodeMetadataDTO dto = new NodeMetadataDTO();
+		dto.setPriority(metadata.getPriority());
+		dto.setCompleted(metadata.isCompleted());
+		dto.setCompletedAt(metadata.getCompletedAt() != null ? metadata.getCompletedAt().toInstant() : null);
+		dto.setCollapsed(metadata.isCollapsed());
+		dto.setLastModified(metadata.getLastModified() != null ? metadata.getLastModified().toInstant() : null);
+		dto.setLayoutMode(metadata.getLayoutMode());
+		// Handle nullable boolean fields - check isXxxNull() before calling isXxx()
+		dto.setVirtualRoot(metadata.isVirtualRootNull() ? null : metadata.isVirtualRoot());
+		dto.setReferencesRoot(metadata.isReferencesRootNull() ? null : metadata.isReferencesRoot());
+		dto.setInChat(metadata.isInChatNull() ? null : metadata.isInChat());
+		dto.setMirrorRoot(metadata.isMirrorRootNull() ? null : metadata.isMirrorRoot());
+		dto.setOriginalId(metadata.getOriginalId());
+		dto.setChanges(metadata.getChanges());
+		dto.setCreatedOn(metadata.getCreatedOn() != null ? metadata.getCreatedOn().toInstant() : null);
+		dto.setSystemFrom(metadata.getSystemFrom().toInstant());
+		dto.setSystemTo(metadata.getSystemTo().toInstant());
+		return dto;
+	}
 
-    public static void applyDeepFetch(NodeContentList nodes, int depth)
-    {
-        // Always deep fetch metadata
-        nodes.deepFetch(NodeContentFinder.metadata());
+	public static void applyDeepFetch(NodeContentList nodes, int depth) {
+		// Always deep fetch metadata
+		nodes.deepFetch(NodeContentFinder.metadata());
 
-        if (depth >= 1)
-        {
-            nodes.deepFetch(NodeContentFinder.children());
-            nodes.deepFetch(NodeContentFinder.children().metadata());
-        }
-        if (depth >= 2)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().metadata());
-        }
-        if (depth >= 3)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().metadata());
-        }
-        if (depth >= 4)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().metadata());
-        }
-        if (depth >= 5)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().metadata());
-        }
-        // Continue for deeper levels as needed (up to 10)
-        if (depth >= 6)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().metadata());
-        }
-        if (depth >= 7)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children().metadata());
-        }
-        if (depth >= 8)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children().children().metadata());
-        }
-        if (depth >= 9)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children().children().children().metadata());
-        }
-        if (depth >= 10)
-        {
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children().children().children().children());
-            nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children().children().children().children().children().metadata());
-        }
-    }
+		if (depth >= 1) {
+			nodes.deepFetch(NodeContentFinder.children());
+			nodes.deepFetch(NodeContentFinder.children().metadata());
+		}
+		if (depth >= 2) {
+			nodes.deepFetch(NodeContentFinder.children().children());
+			nodes.deepFetch(NodeContentFinder.children().children().metadata());
+		}
+		if (depth >= 3) {
+			nodes.deepFetch(NodeContentFinder.children().children().children());
+			nodes.deepFetch(NodeContentFinder.children().children().children().metadata());
+		}
+		if (depth >= 4) {
+			nodes.deepFetch(NodeContentFinder.children().children().children().children());
+			nodes.deepFetch(NodeContentFinder.children().children().children().children().metadata());
+		}
+		if (depth >= 5) {
+			nodes.deepFetch(NodeContentFinder.children().children().children().children().children());
+			nodes.deepFetch(NodeContentFinder.children().children().children().children().children().metadata());
+		}
+		// Continue for deeper levels as needed (up to 10)
+		if (depth >= 6) {
+			nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children());
+			nodes.deepFetch(
+				NodeContentFinder.children().children().children().children().children().children().metadata()
+			);
+		}
+		if (depth >= 7) {
+			nodes.deepFetch(
+				NodeContentFinder.children().children().children().children().children().children().children()
+			);
+			nodes.deepFetch(
+				NodeContentFinder.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.metadata()
+			);
+		}
+		if (depth >= 8) {
+			nodes.deepFetch(
+				NodeContentFinder.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+			);
+			nodes.deepFetch(
+				NodeContentFinder.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.metadata()
+			);
+		}
+		if (depth >= 9) {
+			nodes.deepFetch(
+				NodeContentFinder.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+			);
+			nodes.deepFetch(
+				NodeContentFinder.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.metadata()
+			);
+		}
+		if (depth >= 10) {
+			nodes.deepFetch(
+				NodeContentFinder.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+			);
+			nodes.deepFetch(
+				NodeContentFinder.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.children()
+					.metadata()
+			);
+		}
+	}
 }

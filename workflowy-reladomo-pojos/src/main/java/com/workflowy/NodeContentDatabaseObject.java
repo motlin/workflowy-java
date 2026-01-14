@@ -1,4 +1,3 @@
 package com.workflowy;
-public class NodeContentDatabaseObject extends NodeContentDatabaseObjectAbstract
-{
-}
+
+public class NodeContentDatabaseObject extends NodeContentDatabaseObjectAbstract {}

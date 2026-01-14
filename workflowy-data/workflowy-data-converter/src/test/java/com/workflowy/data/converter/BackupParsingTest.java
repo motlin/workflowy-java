@@ -13,26 +13,24 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled("Uses real backup files not in VCS")
-class BackupParsingTest
-{
-    private static final String BACKUPS_PATH = "/Users/craig/projects/workflowy/backups/Data";
+class BackupParsingTest {
 
-    @Test
-    void parseBackupFile() throws Exception
-    {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+	private static final String BACKUPS_PATH = "/Users/craig/projects/workflowy/backups/Data";
 
-        File backupsDir = new File(BACKUPS_PATH);
-        File[] backupFiles = backupsDir.listFiles((dir, name) -> name.endsWith(".workflowy.backup"));
-        assertNotNull(backupFiles, "No backup files found");
-        assertTrue(backupFiles.length > 0, "No backup files found");
+	@Test
+	void parseBackupFile() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 
-        for (File backupFile : backupFiles)
-        {
-            System.out.println("Parsing: " + backupFile.getName());
-            List<InputItem> items = objectMapper.readValue(backupFile, new TypeReference<>() {});
-            System.out.println("  Parsed " + items.size() + " root items");
-        }
-    }
+		File backupsDir = new File(BACKUPS_PATH);
+		File[] backupFiles = backupsDir.listFiles((dir, name) -> name.endsWith(".workflowy.backup"));
+		assertNotNull(backupFiles, "No backup files found");
+		assertTrue(backupFiles.length > 0, "No backup files found");
+
+		for (File backupFile : backupFiles) {
+			System.out.println("Parsing: " + backupFile.getName());
+			List<InputItem> items = objectMapper.readValue(backupFile, new TypeReference<>() {});
+			System.out.println("  Parsed " + items.size() + " root items");
+		}
+	}
 }

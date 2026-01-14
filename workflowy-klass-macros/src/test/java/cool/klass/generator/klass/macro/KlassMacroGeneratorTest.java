@@ -18,51 +18,47 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(LogMarkerTestExtension.class)
-public class KlassMacroGeneratorTest
-{
-    public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
+public class KlassMacroGeneratorTest {
 
-    @RegisterExtension
-    final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
+	public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
 
-    @Test
-    void smokeTest()
-    {
-        ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
+	@RegisterExtension
+	final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
 
-        var domainModelCompilerLoader = new DomainModelCompilerLoader(
-                klassSourcePackages,
-                Thread.currentThread().getContextClassLoader(),
-                DomainModelCompilerLoader::logCompilerError,
-                ColorSchemeProvider.getByName("dark"));
+	@Test
+	void smokeTest() {
+		ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
 
-        DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
-        ImmutableList<SourceCode> sourceCodesFromMacros = domainModel
-                .getSourceCodes()
-                .select(each -> each.getMacroSourceCode().isPresent());
-        ImmutableListMultimap<String, SourceCode> sourceCodesByFullPath = sourceCodesFromMacros.groupBy(SourceCode::getFullPathSourceName);
-        sourceCodesByFullPath.forEachKeyMultiValues((fullPath, sourceCodes) ->
-        {
-            if (sourceCodes.size() > 1)
-            {
-                fail("Multiple source codes for " + fullPath);
-            }
-        });
+		var domainModelCompilerLoader = new DomainModelCompilerLoader(
+			klassSourcePackages,
+			Thread.currentThread().getContextClassLoader(),
+			DomainModelCompilerLoader::logCompilerError,
+			ColorSchemeProvider.getByName("dark")
+		);
 
-        for (SourceCode sourceCode : domainModel.getSourceCodes())
-        {
-            Optional<SourceCode> macroSourceCode = sourceCode.getMacroSourceCode();
-            if (macroSourceCode.isPresent())
-            {
-                String fullPathSourceName = sourceCode.getFullPathSourceName();
-                String sourceCodeText     = sourceCode.getSourceCodeText();
+		DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
+		ImmutableList<SourceCode> sourceCodesFromMacros = domainModel
+			.getSourceCodes()
+			.select((each) -> each.getMacroSourceCode().isPresent());
+		ImmutableListMultimap<String, SourceCode> sourceCodesByFullPath = sourceCodesFromMacros.groupBy(
+			SourceCode::getFullPathSourceName
+		);
+		sourceCodesByFullPath.forEachKeyMultiValues((fullPath, sourceCodes) -> {
+			if (sourceCodes.size() > 1) {
+				fail("Multiple source codes for " + fullPath);
+			}
+		});
 
-                String resourceClassPathLocation = fullPathSourceName + ".klass";
+		for (SourceCode sourceCode : domainModel.getSourceCodes()) {
+			Optional<SourceCode> macroSourceCode = sourceCode.getMacroSourceCode();
+			if (macroSourceCode.isPresent()) {
+				String fullPathSourceName = sourceCode.getFullPathSourceName();
+				String sourceCodeText = sourceCode.getSourceCodeText();
 
-                this.fileMatchExtension.assertFileContents(
-                        resourceClassPathLocation,
-                        sourceCodeText);
-            }
-        }
-    }
+				String resourceClassPathLocation = fullPathSourceName + ".klass";
+
+				this.fileMatchExtension.assertFileContents(resourceClassPathLocation, sourceCodeText);
+			}
+		}
+	}
 }

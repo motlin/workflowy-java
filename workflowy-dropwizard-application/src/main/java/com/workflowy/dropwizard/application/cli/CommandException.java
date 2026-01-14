@@ -1,17 +1,15 @@
 package com.workflowy.dropwizard.application.cli;
 
-public class CommandException extends Exception
-{
-    private final String code;
+public class CommandException extends Exception {
 
-    public CommandException(String code, String message)
-    {
-        super(message);
-        this.code = code;
-    }
+	private final String code;
 
-    public String getCode()
-    {
-        return this.code;
-    }
+	public CommandException(String code, String message) {
+		super(message);
+		this.code = code;
+	}
+
+	public String getCode() {
+		return this.code;
+	}
 }

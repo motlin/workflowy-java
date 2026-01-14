@@ -4,14 +4,13 @@ import java.util.List;
 
 import com.workflowy.embedding.model.EmbeddingModel;
 
-public interface EmbeddingEngine extends AutoCloseable
-{
-    float[] generateEmbedding(String text, boolean isQuery);
+public interface EmbeddingEngine extends AutoCloseable {
+	float[] generateEmbedding(String text, boolean isQuery);
 
-    List<float[]> generateEmbeddings(List<String> texts, boolean isQuery);
+	List<float[]> generateEmbeddings(List<String> texts, boolean isQuery);
 
-    EmbeddingModel getModel();
+	EmbeddingModel getModel();
 
-    @Override
-    void close();
+	@Override
+	void close();
 }

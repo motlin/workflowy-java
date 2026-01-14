@@ -27,100 +27,87 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider>
-        extends EnvironmentCommand<T>
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(SearchCommand.class);
+	extends EnvironmentCommand<T> {
 
-    private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
+	private static final Logger LOGGER = LoggerFactory.getLogger(SearchCommand.class);
 
-    public SearchCommand(Application<T> application)
-    {
-        super(application, "search", "Search nodes using semantic similarity");
-    }
+	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-    @Override
-    public void configure(Subparser subparser)
-    {
-        super.configure(subparser);
+	public SearchCommand(Application<T> application) {
+		super(application, "search", "Search nodes using semantic similarity");
+	}
 
-        subparser.addArgument("query")
-                .type(String.class)
-                .required(true)
-                .help("Search query text");
+	@Override
+	public void configure(Subparser subparser) {
+		super.configure(subparser);
 
-        subparser.addArgument("--model")
-                .type(String.class)
-                .setDefault("minilm")
-                .help("Embedding model to use: minilm, mpnet, bge, openai-small, openai-large");
+		subparser.addArgument("query").type(String.class).required(true).help("Search query text");
 
-        subparser.addArgument("--limit")
-                .type(Integer.class)
-                .setDefault(5)
-                .help("Maximum number of results to return");
+		subparser
+			.addArgument("--model")
+			.type(String.class)
+			.setDefault("minilm")
+			.help("Embedding model to use: minilm, mpnet, bge, openai-small, openai-large");
 
-        subparser.addArgument("--threshold")
-                .type(Double.class)
-                .help("Similarity threshold (0-1). Lower = more similar. Default depends on model.");
+		subparser.addArgument("--limit").type(Integer.class).setDefault(5).help("Maximum number of results to return");
 
-        subparser.addArgument("--db-path")
-                .type(String.class)
-                .help("Override path to the embeddings SQLite database");
-    }
+		subparser
+			.addArgument("--threshold")
+			.type(Double.class)
+			.help("Similarity threshold (0-1). Lower = more similar. Default depends on model.");
 
-    @Override
-    protected void run(
-            @Nonnull Environment environment,
-            Namespace namespace,
-            @Nonnull T configuration)
-            throws Exception
-    {
-        LOGGER.info("Running {}.", this.getClass().getSimpleName());
+		subparser.addArgument("--db-path").type(String.class).help("Override path to the embeddings SQLite database");
+	}
 
-        environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
-        ShutdownThread.register(this.containerLifeCycle);
-        this.containerLifeCycle.start();
+	@Override
+	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
+		throws Exception {
+		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
-        EmbeddingConfiguration embeddingConfig = configuration.getEmbeddingConfiguration();
-        ObjectMapper objectMapper = environment.getObjectMapper();
+		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
+		ShutdownThread.register(this.containerLifeCycle);
+		this.containerLifeCycle.start();
 
-        String query = namespace.getString("query");
-        String modelKey = namespace.getString("model");
-        int limit = namespace.getInt("limit");
-        Double threshold = namespace.getDouble("threshold");
-        String dbPath = namespace.getString("db_path");
+		EmbeddingConfiguration embeddingConfig = configuration.getEmbeddingConfiguration();
+		ObjectMapper objectMapper = environment.getObjectMapper();
 
-        if (dbPath == null)
-        {
-            dbPath = embeddingConfig.getDatabasePath();
-        }
+		String query = namespace.getString("query");
+		String modelKey = namespace.getString("model");
+		int limit = namespace.getInt("limit");
+		Double threshold = namespace.getDouble("threshold");
+		String dbPath = namespace.getString("db_path");
 
-        EmbeddingModel model = EmbeddingModel.fromKey(modelKey);
+		if (dbPath == null) {
+			dbPath = embeddingConfig.getDatabasePath();
+		}
 
-        LOGGER.info("Query: {}", query);
-        LOGGER.info("Model: {}", model.getKey());
-        LOGGER.info("Database path: {}", dbPath);
-        LOGGER.info("Limit: {}", limit);
-        LOGGER.info("Threshold: {}", threshold != null ? threshold : model.getDefaultThreshold());
+		EmbeddingModel model = EmbeddingModel.fromKey(modelKey);
 
-        try (SqliteVecConnection sqliteConnection = new SqliteVecConnection(dbPath);
-             EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig))
-        {
-            EmbeddingRepository repository = new EmbeddingRepository(sqliteConnection);
-            SearchEngine searchEngine = new SearchEngine(engine, repository);
+		LOGGER.info("Query: {}", query);
+		LOGGER.info("Model: {}", model.getKey());
+		LOGGER.info("Database path: {}", dbPath);
+		LOGGER.info("Limit: {}", limit);
+		LOGGER.info("Threshold: {}", threshold != null ? threshold : model.getDefaultThreshold());
 
-            List<SearchResult> results = searchEngine.search(query, limit, threshold);
+		try (
+			SqliteVecConnection sqliteConnection = new SqliteVecConnection(dbPath);
+			EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig)
+		) {
+			EmbeddingRepository repository = new EmbeddingRepository(sqliteConnection);
+			SearchEngine searchEngine = new SearchEngine(engine, repository);
 
-            this.writeResults(results, objectMapper);
-        }
+			List<SearchResult> results = searchEngine.search(query, limit, threshold);
 
-        this.containerLifeCycle.stop();
+			this.writeResults(results, objectMapper);
+		}
 
-        LOGGER.info("Completing {}.", this.getClass().getSimpleName());
-    }
+		this.containerLifeCycle.stop();
 
-    private void writeResults(List<SearchResult> results, ObjectMapper objectMapper) throws IOException
-    {
-        String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
-        System.out.println(json);
-    }
+		LOGGER.info("Completing {}.", this.getClass().getSimpleName());
+	}
+
+	private void writeResults(List<SearchResult> results, ObjectMapper objectMapper) throws IOException {
+		String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
+		System.out.println(json);
+	}
 }

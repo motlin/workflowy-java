@@ -2,61 +2,51 @@ package com.workflowy.dropwizard.application.cli;
 
 import java.time.Instant;
 
-public class CacheStatusDto
-{
-    private long totalNodes;
-    private long rootNodes;
-    private long completedNodes;
-    private String databaseType;
-    private Instant queryTime;
+public class CacheStatusDto {
 
-    public long getTotalNodes()
-    {
-        return this.totalNodes;
-    }
+	private long totalNodes;
+	private long rootNodes;
+	private long completedNodes;
+	private String databaseType;
+	private Instant queryTime;
 
-    public void setTotalNodes(long totalNodes)
-    {
-        this.totalNodes = totalNodes;
-    }
+	public long getTotalNodes() {
+		return this.totalNodes;
+	}
 
-    public long getRootNodes()
-    {
-        return this.rootNodes;
-    }
+	public void setTotalNodes(long totalNodes) {
+		this.totalNodes = totalNodes;
+	}
 
-    public void setRootNodes(long rootNodes)
-    {
-        this.rootNodes = rootNodes;
-    }
+	public long getRootNodes() {
+		return this.rootNodes;
+	}
 
-    public long getCompletedNodes()
-    {
-        return this.completedNodes;
-    }
+	public void setRootNodes(long rootNodes) {
+		this.rootNodes = rootNodes;
+	}
 
-    public void setCompletedNodes(long completedNodes)
-    {
-        this.completedNodes = completedNodes;
-    }
+	public long getCompletedNodes() {
+		return this.completedNodes;
+	}
 
-    public String getDatabaseType()
-    {
-        return this.databaseType;
-    }
+	public void setCompletedNodes(long completedNodes) {
+		this.completedNodes = completedNodes;
+	}
 
-    public void setDatabaseType(String databaseType)
-    {
-        this.databaseType = databaseType;
-    }
+	public String getDatabaseType() {
+		return this.databaseType;
+	}
 
-    public Instant getQueryTime()
-    {
-        return this.queryTime;
-    }
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
+	}
 
-    public void setQueryTime(Instant queryTime)
-    {
-        this.queryTime = queryTime;
-    }
+	public Instant getQueryTime() {
+		return this.queryTime;
+	}
+
+	public void setQueryTime(Instant queryTime) {
+		this.queryTime = queryTime;
+	}
 }

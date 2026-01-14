@@ -1,4 +1,3 @@
 package com.workflowy;
-public class TagDatabaseObject extends TagDatabaseObjectAbstract
-{
-}
+
+public class TagDatabaseObject extends TagDatabaseObjectAbstract {}

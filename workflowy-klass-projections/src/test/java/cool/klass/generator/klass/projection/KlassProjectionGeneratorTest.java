@@ -13,40 +13,37 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @ExtendWith(LogMarkerTestExtension.class)
-public class KlassProjectionGeneratorTest
-{
-    public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
+public class KlassProjectionGeneratorTest {
 
-    @RegisterExtension
-    final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
+	public static final String FULLY_QUALIFIED_PACKAGE = "com.workflowy";
 
-    @Test
-    public void smokeTest()
-    {
-        ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
+	@RegisterExtension
+	final FileMatchExtension fileMatchExtension = new FileMatchExtension(this.getClass());
 
-        var domainModelCompilerLoader = new DomainModelCompilerLoader(
-                klassSourcePackages,
-                Thread.currentThread().getContextClassLoader(),
-                DomainModelCompilerLoader::logCompilerError,
-                ColorSchemeProvider.getByName("dark"));
+	@Test
+	public void smokeTest() {
+		ImmutableList<String> klassSourcePackages = Lists.immutable.with(FULLY_QUALIFIED_PACKAGE);
 
-        DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
-        ImmutableList<String>     packageNames = domainModel
-                .getClassifiers()
-                .asLazy()
-                .collect(PackageableElement::getPackageName)
-                .distinct()
-                .toImmutableList();
-        for (String packageName : packageNames)
-        {
-            String sourceCode = KlassProjectionSourceCodeGenerator.getPackageSourceCode(domainModel, packageName);
+		var domainModelCompilerLoader = new DomainModelCompilerLoader(
+			klassSourcePackages,
+			Thread.currentThread().getContextClassLoader(),
+			DomainModelCompilerLoader::logCompilerError,
+			ColorSchemeProvider.getByName("dark")
+		);
 
-            String resourceClassPathLocation = packageName + ".klass";
+		DomainModelWithSourceCode domainModel = domainModelCompilerLoader.load();
+		ImmutableList<String> packageNames = domainModel
+			.getClassifiers()
+			.asLazy()
+			.collect(PackageableElement::getPackageName)
+			.distinct()
+			.toImmutableList();
+		for (String packageName : packageNames) {
+			String sourceCode = KlassProjectionSourceCodeGenerator.getPackageSourceCode(domainModel, packageName);
 
-            this.fileMatchExtension.assertFileContents(
-                    resourceClassPathLocation,
-                    sourceCode);
-        }
-    }
+			String resourceClassPathLocation = packageName + ".klass";
+
+			this.fileMatchExtension.assertFileContents(resourceClassPathLocation, sourceCode);
+		}
+	}
 }

@@ -33,19 +33,6 @@
 	// Default: 80
 	printWidth: 120,
 
-	// Change when properties in objects are quoted
-	// Default: "as-needed"
-	// Options: "as-needed" | "consistent" | "preserve"
-	quoteProps: "as-needed",
-
-	// Use single quotes in JSX
-	// Default: false
-	jsxSingleQuote: false,
-
-	// Put the > of a multi-line JSX element at the end of the last line
-	// Default: false
-	bracketSameLine: false,
-
 	// How to wrap prose in markdown
 	// Default: "preserve"
 	// Options: "always" | "never" | "preserve"
@@ -63,6 +50,7 @@
 
 	// Experimental: Put binary operators at the start of lines when wrapping
 	// This is an experimental feature that may be removed in future versions
-	// Options: "end" (default) | "start"
+	// Default: "end"
+	// Options: "start" | "end"
 	experimentalOperatorPosition: "start",
 }

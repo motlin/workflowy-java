@@ -43,7 +43,6 @@
         <mainClass>${app.rootPackageName}.dropwizard.application.WorkflowyApplication</mainClass>
         <liftwizard.version>2.1.40</liftwizard.version>
 
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 

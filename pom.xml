@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>io.liftwizard</groupId>
-        <artifactId>liftwizard-parent-build</artifactId>
+        <artifactId>liftwizard-profile-parent</artifactId>
         <version>2.1.40</version>
     </parent>
     <groupId>workflowy</groupId>
@@ -40,6 +42,14 @@
         <app.name>Workflowy</app.name>
         <mainClass>${app.rootPackageName}.dropwizard.application.WorkflowyApplication</mainClass>
         <liftwizard.version>2.1.40</liftwizard.version>
+
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
     </properties>
     <dependencyManagement>
         <dependencies>

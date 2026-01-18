@@ -728,6 +728,42 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>import-workflowy-api</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.6.3</version>
+                        <executions>
+                            <execution>
+                                <id>import-workflowy-api</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-Xmx8g</argument>
+                                        <argument>-classpath</argument>
+                                        <classpath />
+                                        <argument>${mainClass}</argument>
+                                        <argument>import-workflowy-api</argument>
+                                        <argument>config.json5</argument>
+                                        <argument>--api-export-file</argument>
+                                        <argument>${apiExportFile}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>

@@ -26,9 +26,13 @@ download-backups:
     echo "📥 Downloading Workflowy backups via ../workflowy CLI"
     cd ../workflowy && just download-backups
 
-# Import Workflowy backup data into the database
+workflowy_api_key := env('WORKFLOWY_API_KEY', '')
+
+# Import Workflowy backup data into the database, then fetch latest from API
 [group('data')]
 import-data DAYS="10000" MVN=default_mvn:
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
     {{MVN}} install \
         --projects workflowy-dropwizard-application \
         --also-make \
@@ -38,6 +42,17 @@ import-data DAYS="10000" MVN=default_mvn:
         --activate-profiles import-workflowy \
         -DbackupsPath={{workflowy_backups_path}} \
         -DdaysLimit={{DAYS}}
+    if [[ -n "{{workflowy_api_key}}" ]]; then
+        echo "📥 Fetching latest from Workflowy API..."
+        EXPORT_FILE=$(mktemp).json
+        curl -s -H "Authorization: Bearer {{workflowy_api_key}}" \
+            "https://workflowy.com/api/v1/nodes-export" > "$EXPORT_FILE"
+        {{MVN}} exec:exec@import-workflowy-api \
+            --projects workflowy-dropwizard-application \
+            --activate-profiles import-workflowy-api \
+            -DapiExportFile="$EXPORT_FILE"
+        rm "$EXPORT_FILE"
+    fi
 
 # `mise install`
 mise:

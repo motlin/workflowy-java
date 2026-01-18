@@ -36,6 +36,7 @@ public class WorkflowyApplication extends AbstractWorkflowyApplication {
 	protected void initializeCommands(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap) {
 		super.initializeCommands(bootstrap);
 		bootstrap.addCommand(new WorkflowyImportCommand(this));
+		bootstrap.addCommand(new WorkflowyImportApiCommand(this));
 		bootstrap.addCommand(new CacheStatusCommand(this));
 		bootstrap.addCommand(new ReadNodeCommand(this));
 		bootstrap.addCommand(new ListByIdCommand(this));

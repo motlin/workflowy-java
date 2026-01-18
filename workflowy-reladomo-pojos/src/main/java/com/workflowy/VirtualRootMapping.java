@@ -2,7 +2,7 @@ package com.workflowy;
 
 import java.sql.Timestamp;
 
-import com.gs.fw.common.mithra.util.DefaultInfinityTimestamp;
+import cool.klass.data.store.reladomo.UtcInfinityTimestamp;
 
 public class VirtualRootMapping extends VirtualRootMappingAbstract {
 
@@ -13,6 +13,6 @@ public class VirtualRootMapping extends VirtualRootMappingAbstract {
 	}
 
 	public VirtualRootMapping() {
-		this(DefaultInfinityTimestamp.getDefaultInfinity());
+		this(UtcInfinityTimestamp.getDefaultInfinity());
 	}
 }

@@ -2,7 +2,7 @@ package com.workflowy;
 
 import java.sql.Timestamp;
 
-import com.gs.fw.common.mithra.util.DefaultInfinityTimestamp;
+import cool.klass.data.store.reladomo.UtcInfinityTimestamp;
 
 public class NodeS3File extends NodeS3FileAbstract {
 
@@ -13,6 +13,6 @@ public class NodeS3File extends NodeS3FileAbstract {
 	}
 
 	public NodeS3File() {
-		this(DefaultInfinityTimestamp.getDefaultInfinity());
+		this(UtcInfinityTimestamp.getDefaultInfinity());
 	}
 }

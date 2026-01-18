@@ -2,7 +2,7 @@ package com.workflowy;
 
 import java.sql.Timestamp;
 
-import com.gs.fw.common.mithra.util.DefaultInfinityTimestamp;
+import cool.klass.data.store.reladomo.UtcInfinityTimestamp;
 
 public class NodeMetadata extends NodeMetadataAbstract {
 
@@ -13,6 +13,6 @@ public class NodeMetadata extends NodeMetadataAbstract {
 	}
 
 	public NodeMetadata() {
-		this(DefaultInfinityTimestamp.getDefaultInfinity());
+		this(UtcInfinityTimestamp.getDefaultInfinity());
 	}
 }

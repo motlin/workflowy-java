@@ -238,7 +238,10 @@ public final class WorkflowyDataConverter
                 }
             }
 
-            nodeMetadata.setNumberedStart(metadata.numberedStart());
+            if (metadata.numberedStart() != null)
+            {
+                nodeMetadata.setNumberedStart(metadata.numberedStart());
+            }
         }
         return nodeMetadata;
     }

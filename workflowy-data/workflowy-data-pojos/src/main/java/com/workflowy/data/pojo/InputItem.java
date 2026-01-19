@@ -2,11 +2,11 @@ package com.workflowy.data.pojo;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import org.eclipse.collections.impl.utility.Iterate;
 
 /**
@@ -30,18 +30,11 @@ public record InputItem(
 	/** Workflowy format - seconds since Jan 1, 2010. */
 	@JsonProperty("cp") @Nullable Long completedTimestamp,
 
-	@JsonProperty("metadata") @Nonnull InputMetadata metadata,
+	@Nullable InputMetadata metadata,
 
-	@JsonProperty("ch") @Nullable List<InputItem> children
+	@JsonSetter(nulls = Nulls.AS_EMPTY)
+	@JsonProperty("ch") List<InputItem> children
 ) {
-	public InputItem {
-		if (metadata == null) {
-			metadata = InputMetadata.empty();
-		}
-		if (children == null) {
-			children = List.of();
-		}
-	}
 
 	public boolean isCompleted() {
 		return this.completedTimestamp != null;

@@ -5,6 +5,9 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+
 /**
  * Mirror metadata indicating this item is a mirror of another item.
  */
@@ -13,21 +16,17 @@ public record InputMirrorMetadata(
 
 	@Nullable Boolean isMirrorRoot,
 
-	@Nullable Map<String, Boolean> mirrorRootIds,
+	@JsonSetter(nulls = Nulls.AS_EMPTY)
+	Map<String, Boolean> mirrorRootIds,
 
-	@Nullable Map<String, Boolean> backlinkMirrorRootIds
+	@JsonSetter(nulls = Nulls.AS_EMPTY)
+	Map<String, Boolean> backlinkMirrorRootIds
 ) {
 	public Set<String> getMirrorSourceIds() {
-		if (this.mirrorRootIds != null) {
-			return this.mirrorRootIds.keySet();
-		}
-		return Set.of();
+		return this.mirrorRootIds.keySet();
 	}
 
 	public Set<String> getBacklinkMirrorIds() {
-		if (this.backlinkMirrorRootIds != null) {
-			return this.backlinkMirrorRootIds.keySet();
-		}
-		return Set.of();
+		return this.backlinkMirrorRootIds.keySet();
 	}
 }

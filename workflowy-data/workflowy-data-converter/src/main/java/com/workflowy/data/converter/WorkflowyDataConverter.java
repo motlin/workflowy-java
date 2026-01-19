@@ -93,14 +93,12 @@ public final class WorkflowyDataConverter
     public static void convert(
             @Nonnull Path backupsPath,
             @Nonnull ObjectMapper objectMapper,
-            @Nonnull DataStore dataStore,
-            int daysLimit)
+            @Nonnull DataStore dataStore)
     {
         Instant highWatermark = WorkflowyDataConverter.getHighWatermark();
 
         ImmutableList<File> filesToProcess = WorkflowyDataConverter.getBackupFiles(backupsPath)
-                .selectWith(WorkflowyFileUtils::isAfterHighWatermark, highWatermark)
-                .take(daysLimit);
+                .selectWith(WorkflowyFileUtils::isAfterHighWatermark, highWatermark);
 
         if (filesToProcess.isEmpty())
         {

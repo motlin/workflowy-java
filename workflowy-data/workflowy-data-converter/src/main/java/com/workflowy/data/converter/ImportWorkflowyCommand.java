@@ -40,12 +40,6 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extend
 			.type(String.class)
 			.required(true)
 			.help("Path to the directory containing Workflowy backup files.");
-
-		subparser
-			.addArgument("--days-limit")
-			.type(Integer.class)
-			.setDefault(Integer.MAX_VALUE)
-			.help("Maximum number of backup files to process (default: all).");
 	}
 
 	@Override
@@ -61,12 +55,10 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extend
 
 		String backupsPathString = namespace.getString("backups_path");
 		Path backupsPath = Paths.get(backupsPathString);
-		Integer daysLimit = namespace.getInt("days_limit");
 
 		LOGGER.info("backupsPath = {}", backupsPath);
-		LOGGER.info("daysLimit = {}", daysLimit);
 
-		WorkflowyDataConverter.convert(backupsPath, environment.getObjectMapper(), dataStore, daysLimit);
+		WorkflowyDataConverter.convert(backupsPath, environment.getObjectMapper(), dataStore);
 
 		this.containerLifeCycle.stop();
 

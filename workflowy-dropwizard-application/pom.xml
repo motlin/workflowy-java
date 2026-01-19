@@ -718,8 +718,6 @@
                                         <argument>config.json5</argument>
                                         <argument>--backups-path</argument>
                                         <argument>${backupsPath}</argument>
-                                        <argument>--days-limit</argument>
-                                        <argument>${daysLimit}</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

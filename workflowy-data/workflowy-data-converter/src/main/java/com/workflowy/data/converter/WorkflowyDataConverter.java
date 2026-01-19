@@ -378,10 +378,7 @@ public final class WorkflowyDataConverter
                 nodeCalendar.setLevel(calendarMeta.level());
                 nodeCalendar.setDateId(calendarMeta.dateId());
                 nodeCalendar.setTimestamp(calendarMeta.timestamp());
-                if (calendarMeta.value() != null)
-                {
-                    nodeCalendar.setValue(String.valueOf(calendarMeta.value()));
-                }
+                nodeCalendar.setValue(calendarMeta.value());
                 nodeCalendar.setLevels(calendarMeta.levels());
                 if (calendarMeta.foundDates() != null)
                 {

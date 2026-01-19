@@ -237,7 +237,7 @@
 
             <column name="TIMESTAMP" type="bigint" />
 
-            <column name="VALUE" type="varchar(1024)" />
+            <column name="VALUE" type="int" />
 
             <column name="LEVELS" type="int" />
 

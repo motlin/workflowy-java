@@ -260,7 +260,7 @@ class NodeCalendar
     level     : String? maxLength(32);
     dateId    : String? maxLength(64);
     timestamp : Long?;
-    value     : String? maxLength(1024);
+    value     : Integer?;
 
     // Number of levels in the calendar hierarchy
     levels    : Integer?;

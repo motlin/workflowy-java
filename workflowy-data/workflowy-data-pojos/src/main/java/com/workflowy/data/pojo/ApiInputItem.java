@@ -23,25 +23,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @see InputItem for the backup format equivalent
  */
 public record ApiInputItem(
-	@JsonProperty("id") @Nonnull String id,
+	@Nonnull String id,
 
-	@JsonProperty("name") @Nonnull String name,
+	@Nonnull String name,
 
-	@JsonProperty("note") @Nullable String note,
+	@Nullable String note,
 
 	@JsonProperty("parent_id") @Nullable String parentId,
 
-	@JsonProperty("priority") int priority,
+	int priority,
 
-	@JsonProperty("completed") boolean completed,
+	boolean completed,
 
-	@JsonProperty("createdAt") @Nullable Long createdAt,
+	@Nullable Long createdAt,
 
-	@JsonProperty("modifiedAt") @Nullable Long modifiedAt,
+	@Nullable Long modifiedAt,
 
-	@JsonProperty("completedAt") @Nullable Long completedAt,
+	@Nullable Long completedAt,
 
-	@JsonProperty("data") @Nullable ApiInputData data
+	@Nullable ApiInputData data
 ) {
 	public ApiInputItem {
 		if (data == null) {

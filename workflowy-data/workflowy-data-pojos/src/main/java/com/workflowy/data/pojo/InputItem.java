@@ -14,7 +14,7 @@ import org.eclipse.collections.impl.utility.Iterate;
  */
 public record InputItem(
 	/** UUID string. */
-	@JsonProperty("id") String id,
+	String id,
 
 	/** Text content, may contain HTML and #hashtags. */
 	@JsonProperty("nm") String name,

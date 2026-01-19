@@ -6,32 +6,28 @@ import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Metadata attached to a Workflowy item.
- * Contains optional fields for mirrors, backlinks, calendar dates, S3 files, and AI data.
- */
 public record InputMetadata(
-	@JsonProperty("mirror") @Nullable InputMirrorMetadata mirror,
+	@Nullable InputMirrorMetadata mirror,
 
-	@JsonProperty("backlink") @Nullable InputBacklinkMetadata backlink,
+	@Nullable InputBacklinkMetadata backlink,
 
-	@JsonProperty("calendar") @Nullable InputCalendarMetadata calendar,
+	@Nullable InputCalendarMetadata calendar,
 
-	@JsonProperty("s3File") @Nullable InputS3FileMetadata s3File,
+	@Nullable InputS3FileMetadata s3File,
 
-	@JsonProperty("ai") @Nullable InputAiMetadata ai,
+	@Nullable InputAiMetadata ai,
 
-	@JsonProperty("originalId") @Nullable String originalId,
+	@Nullable String originalId,
 
-	@JsonProperty("isVirtualRoot") @Nullable Boolean isVirtualRoot,
+	@Nullable Boolean isVirtualRoot,
 
-	@JsonProperty("isReferencesRoot") @Nullable Boolean isReferencesRoot,
+	@Nullable Boolean isReferencesRoot,
 
-	@JsonProperty("layoutMode") @Nullable String layoutMode,
+	@Nullable String layoutMode,
 
-	@JsonProperty("virtualRootIds") @Nullable Map<String, Boolean> virtualRootIds,
+	@Nullable Map<String, Boolean> virtualRootIds,
 
-	@JsonProperty("changes") @Nullable Map<String, Object> changes,
+	@Nullable Map<String, Object> changes,
 
 	@JsonProperty("numbered_start") @Nullable Integer numberedStart
 ) {

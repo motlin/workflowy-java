@@ -5,35 +5,29 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.collections.impl.utility.Iterate;
 
 /**
  * Represents a single Workflowy item from the backup JSON.
- *
- * <p>JSON fields:
- * <ul>
- *   <li>id: UUID string</li>
- *   <li>nm: name (text content, may contain HTML and #hashtags)</li>
- *   <li>no: note (optional description)</li>
- *   <li>ct: created timestamp (Workflowy format - seconds since Jan 1, 2010)</li>
- *   <li>lm: last modified timestamp</li>
- *   <li>cp: completed timestamp (if completed)</li>
- *   <li>metadata: object containing mirror, backlink, calendar, s3File, ai data</li>
- *   <li>ch: children array (recursive)</li>
- * </ul>
  */
 public record InputItem(
+	/** UUID string. */
 	@JsonProperty("id") String id,
 
+	/** Text content, may contain HTML and #hashtags. */
 	@JsonProperty("nm") String name,
 
 	@JsonProperty("no") @Nullable String note,
 
+	/** Workflowy format - seconds since Jan 1, 2010. */
 	@JsonProperty("ct") @Nullable Long createdTimestamp,
 
+	/** Workflowy format - seconds since Jan 1, 2010. */
 	@JsonProperty("lm") @Nullable Long lastModifiedTimestamp,
 
+	/** Workflowy format - seconds since Jan 1, 2010. */
 	@JsonProperty("cp") @Nullable Long completedTimestamp,
 
 	@JsonProperty("metadata") @Nonnull InputMetadata metadata,

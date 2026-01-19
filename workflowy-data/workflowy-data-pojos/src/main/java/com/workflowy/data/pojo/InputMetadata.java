@@ -27,7 +27,7 @@ public record InputMetadata(
 
 	@Nullable Map<String, Boolean> virtualRootIds,
 
-	@Nullable Map<String, Object> changes,
+	@Nullable InputChangesMetadata changes,
 
 	@JsonProperty("numbered_start") @Nullable Integer numberedStart
 ) {

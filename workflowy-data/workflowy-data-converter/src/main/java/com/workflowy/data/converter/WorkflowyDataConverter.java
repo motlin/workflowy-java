@@ -226,7 +226,7 @@ public final class WorkflowyDataConverter
                 nodeMetadata.setOriginalId(metadata.originalId());
             }
 
-            if (metadata.changes() != null && !metadata.changes().isEmpty())
+            if (metadata.changes() != null)
             {
                 try
                 {

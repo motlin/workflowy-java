@@ -2,8 +2,6 @@ package com.workflowy.data.pojo;
 
 import javax.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Data field from Workflowy API export nodes.
  *
@@ -18,11 +16,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * which differs from the "metadata" field in the backup format.
  */
 public record ApiInputData(
-	@JsonProperty("layoutMode") @Nullable String layoutMode,
+	@Nullable String layoutMode,
 
-	@JsonProperty("ai") @Nullable InputAiMetadata ai,
+	@Nullable InputAiMetadata ai,
 
-	@JsonProperty("isReferencesRoot") @Nullable Boolean isReferencesRoot
+	@Nullable Boolean isReferencesRoot
 ) {
 	public static ApiInputData empty() {
 		return new ApiInputData(null, null, null);

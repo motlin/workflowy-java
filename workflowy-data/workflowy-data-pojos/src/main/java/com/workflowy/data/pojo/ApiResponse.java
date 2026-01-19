@@ -5,8 +5,6 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Response wrapper for Workflowy API endpoints that return nodes.
  *
@@ -18,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * </ul>
  */
 public record ApiResponse(
-	@JsonProperty("nodes") @Nullable List<ApiInputItem> nodes
+	@Nullable List<ApiInputItem> nodes
 ) {
 	public ApiResponse {
 		if (nodes == null) {

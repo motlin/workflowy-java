@@ -106,6 +106,8 @@
             <column name="ORIGINAL_ID" type="varchar(64)" />
 
             <column name="CHANGES" type="varchar(10000)" />
+
+            <column name="NUMBERED_START" type="int" />
         </createTable>
     </changeSet>
 
@@ -205,10 +207,10 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-8-NODE_DATE">
-        <createTable tableName="NODE_DATE">
+    <changeSet author="Klass" id="initial-table-8-NODE_CALENDAR">
+        <createTable tableName="NODE_CALENDAR">
             <column name="ID" type="varchar(36)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_DATE_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_CALENDAR_PK" />
             </column>
 
             <column name="NODE_ID" type="varchar(36)">
@@ -220,7 +222,7 @@
             </column>
 
             <column name="SYSTEM_TO" type="timestamp">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_DATE_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_CALENDAR_PK" />
             </column>
 
             <column name="DATE_VALUE" type="timestamp">
@@ -236,6 +238,10 @@
             <column name="TIMESTAMP" type="bigint" />
 
             <column name="VALUE" type="varchar(1024)" />
+
+            <column name="LEVELS" type="int" />
+
+            <column name="FOUND_DATES" type="varchar(10000)" />
         </createTable>
     </changeSet>
 
@@ -398,10 +404,10 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-8-NODE_DATE_IDX_NODE">
+    <changeSet author="Klass" id="initial-indices-8-NODE_CALENDAR_IDX_NODE">
         <createIndex
-                indexName="NODE_DATE_IDX_NODE"
-                tableName="NODE_DATE">
+                indexName="NODE_CALENDAR_IDX_NODE"
+                tableName="NODE_CALENDAR">
             <column name="NODE_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>

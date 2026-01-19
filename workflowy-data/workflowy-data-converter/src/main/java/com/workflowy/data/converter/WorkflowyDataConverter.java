@@ -26,9 +26,9 @@ import com.workflowy.MirrorList;
 import com.workflowy.NodeContent;
 import com.workflowy.NodeContentFinder;
 import com.workflowy.NodeContentList;
-import com.workflowy.NodeDate;
-import com.workflowy.NodeDateFinder;
-import com.workflowy.NodeDateList;
+import com.workflowy.NodeCalendar;
+import com.workflowy.NodeCalendarFinder;
+import com.workflowy.NodeCalendarList;
 import com.workflowy.NodeMetadata;
 import com.workflowy.NodeMetadataFinder;
 import com.workflowy.NodeMetadataList;
@@ -75,7 +75,7 @@ public final class WorkflowyDataConverter
     private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
     private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
     private final MirrorList mirrors = new MirrorList();
-    private final NodeDateList nodeDates = new NodeDateList();
+    private final NodeCalendarList nodeCalendars = new NodeCalendarList();
     private final NodeS3FileList nodeS3Files = new NodeS3FileList();
     private final VirtualRootMappingList virtualRootMappings = new VirtualRootMappingList();
 
@@ -152,7 +152,7 @@ public final class WorkflowyDataConverter
         LOGGER.info("Pass 3: Processing metadata (mirrors, dates, S3 files, virtual roots)");
         this.processMetadata(rootItems);
         LOGGER.info("Created {} mirrors, {} node dates, {} S3 files, {} virtual root mappings",
-                this.mirrors.size(), this.nodeDates.size(), this.nodeS3Files.size(), this.virtualRootMappings.size());
+                this.mirrors.size(), this.nodeCalendars.size(), this.nodeS3Files.size(), this.virtualRootMappings.size());
 
         this.mergeIntoDatabase(backupInstant);
     }
@@ -239,6 +239,8 @@ public final class WorkflowyDataConverter
                     LOGGER.warn("Failed to serialize changes for node {}: {}", inputItem.id(), e.getMessage());
                 }
             }
+
+            nodeMetadata.setNumberedStart(metadata.numberedStart());
         }
         return nodeMetadata;
     }
@@ -367,19 +369,31 @@ public final class WorkflowyDataConverter
             Timestamp dateValue = WorkflowyTimestampConverter.parseCalendarDate(calendarMeta.date());
             if (dateValue != null)
             {
-                NodeDate nodeDate = new NodeDate();
-                nodeDate.setId(UUID.randomUUID().toString());
-                nodeDate.setNodeId(nodeId);
-                nodeDate.setDateValue(dateValue);
-                nodeDate.setRoot(calendarMeta.isRoot());
-                nodeDate.setLevel(calendarMeta.level());
-                nodeDate.setDateId(calendarMeta.dateId());
-                nodeDate.setTimestamp(calendarMeta.timestamp());
+                NodeCalendar nodeCalendar = new NodeCalendar();
+                nodeCalendar.setId(UUID.randomUUID().toString());
+                nodeCalendar.setNodeId(nodeId);
+                nodeCalendar.setDateValue(dateValue);
+                nodeCalendar.setRoot(calendarMeta.isRoot());
+                nodeCalendar.setLevel(calendarMeta.level());
+                nodeCalendar.setDateId(calendarMeta.dateId());
+                nodeCalendar.setTimestamp(calendarMeta.timestamp());
                 if (calendarMeta.value() != null)
                 {
-                    nodeDate.setValue(String.valueOf(calendarMeta.value()));
+                    nodeCalendar.setValue(String.valueOf(calendarMeta.value()));
                 }
-                this.nodeDates.add(nodeDate);
+                nodeCalendar.setLevels(calendarMeta.levels());
+                if (calendarMeta.foundDates() != null)
+                {
+                    try
+                    {
+                        nodeCalendar.setFoundDates(this.objectMapper.writeValueAsString(calendarMeta.foundDates()));
+                    }
+                    catch (Exception e)
+                    {
+                        LOGGER.warn("Failed to serialize foundDates for node {}: {}", nodeId, e.getMessage());
+                    }
+                }
+                this.nodeCalendars.add(nodeCalendar);
             }
         }
     }
@@ -487,11 +501,11 @@ public final class WorkflowyDataConverter
                     new TopLevelMergeOptions<>(MirrorFinder.getFinderInstance());
             existingMirrors.merge(this.mirrors, mirrorMergeOptions);
 
-            LOGGER.info("Merging {} node dates", this.nodeDates.size());
-            NodeDateList existingDates = NodeDateFinder.findMany(NodeDateFinder.all());
-            TopLevelMergeOptions<NodeDate> dateMergeOptions =
-                    new TopLevelMergeOptions<>(NodeDateFinder.getFinderInstance());
-            existingDates.merge(this.nodeDates, dateMergeOptions);
+            LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
+            NodeCalendarList existingCalendars = NodeCalendarFinder.findMany(NodeCalendarFinder.all());
+            TopLevelMergeOptions<NodeCalendar> calendarMergeOptions =
+                    new TopLevelMergeOptions<>(NodeCalendarFinder.getFinderInstance());
+            existingCalendars.merge(this.nodeCalendars, calendarMergeOptions);
 
             LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
             NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());

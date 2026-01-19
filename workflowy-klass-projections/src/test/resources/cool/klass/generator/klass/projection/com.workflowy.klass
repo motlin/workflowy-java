@@ -34,7 +34,7 @@ projection NodeContentProjection on NodeContent
     asMirror: MirrorProjection,
     shares: SharedNodeProjection,
     tags: NodeTagMappingProjection,
-    dates: NodeDateProjection,
+    calendar: NodeCalendarProjection,
     s3File: NodeS3FileProjection,
     virtualRoots: VirtualRootMappingProjection,
 }
@@ -56,6 +56,7 @@ projection NodeMetadataProjection on NodeMetadata
     mirrorRoot: "NodeMetadata mirrorRoot",
     originalId: "NodeMetadata originalId",
     changes: "NodeMetadata changes",
+    numberedStart: "NodeMetadata numberedStart",
     createdBy: {
         userId: "User userId",
     },
@@ -101,17 +102,19 @@ projection NodeTagMappingProjection on NodeTagMapping
     },
 }
 
-projection NodeDateProjection on NodeDate
+projection NodeCalendarProjection on NodeCalendar
 {
-    id: "NodeDate id",
-    systemFrom: "NodeDate systemFrom",
-    systemTo: "NodeDate systemTo",
-    dateValue: "NodeDate dateValue",
-    root: "NodeDate root",
-    level: "NodeDate level",
-    dateId: "NodeDate dateId",
-    timestamp: "NodeDate timestamp",
-    value: "NodeDate value",
+    id: "NodeCalendar id",
+    systemFrom: "NodeCalendar systemFrom",
+    systemTo: "NodeCalendar systemTo",
+    dateValue: "NodeCalendar dateValue",
+    root: "NodeCalendar root",
+    level: "NodeCalendar level",
+    dateId: "NodeCalendar dateId",
+    timestamp: "NodeCalendar timestamp",
+    value: "NodeCalendar value",
+    levels: "NodeCalendar levels",
+    foundDates: "NodeCalendar foundDates",
 }
 
 projection NodeS3FileProjection on NodeS3File

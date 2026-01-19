@@ -31,10 +31,12 @@ public record InputMetadata(
 
 	@JsonProperty("virtualRootIds") @Nullable Map<String, Boolean> virtualRootIds,
 
-	@JsonProperty("changes") @Nullable Map<String, Object> changes
+	@JsonProperty("changes") @Nullable Map<String, Object> changes,
+
+	@JsonProperty("numbered_start") @Nullable Integer numberedStart
 ) {
 	public static InputMetadata empty() {
-		return new InputMetadata(null, null, null, null, null, null, null, null, null, null, null);
+		return new InputMetadata(null, null, null, null, null, null, null, null, null, null, null, null);
 	}
 
 	public boolean hasMirror() {

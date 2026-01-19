@@ -102,6 +102,9 @@ class NodeMetadata
 
     // Changes metadata stored as JSON (from metadata.changes)
     changes     : String? maxLength(10000);
+
+    // Starting number for numbered lists (from metadata.numbered_start)
+    numberedStart: Integer?;
 }
 
 // Note: NodeEmbedding is stored separately (e.g., SQLite) rather than in H2
@@ -243,29 +246,35 @@ association TagHasNodes
 }
 
 /*
- * Date represents date metadata attached to nodes.
+ * NodeCalendar represents calendar/date metadata attached to nodes.
  * Workflowy supports date filtering and date-based views.
- * Dates are stored as Instants; displayed as dates when at midnight.
+ * This is a 1-to-1 relationship since calendar metadata is sparse.
  */
-class NodeDate
+class NodeCalendar
     systemTemporal
 {
     id        : String key minLength(36) maxLength(36);
     nodeId    : String private final minLength(36) maxLength(36);
     dateValue : Instant;
-    root    : Boolean?;
+    root      : Boolean?;
     level     : String? maxLength(32);
     dateId    : String? maxLength(64);
     timestamp : Long?;
     value     : String? maxLength(1024);
+
+    // Number of levels in the calendar hierarchy
+    levels    : Integer?;
+
+    // Found dates stored as JSON (complex structure)
+    foundDates: String? maxLength(10000);
 }
 
-association NodeHasDates
+association NodeHasCalendar
 {
-    node  : NodeContent[1..1] final;
-    dates : NodeDate[0..*] owned;
+    node     : NodeContent[1..1] final;
+    calendar : NodeCalendar[0..1] owned;
 
-    relationship this.id == NodeDate.nodeId
+    relationship this.id == NodeCalendar.nodeId
 }
 
 /*
@@ -375,17 +384,19 @@ projection NodeTagMappingProjection on NodeTagMapping
     tag       : TagProjection,
 }
 
-projection NodeDateProjection on NodeDate
+projection NodeCalendarProjection on NodeCalendar
 {
-    id        : "NodeDate id",
-    dateValue : "NodeDate dateValue",
-    root    : "NodeDate root",
-    level     : "NodeDate level",
-    dateId    : "NodeDate dateId",
-    timestamp : "NodeDate timestamp",
-    value     : "NodeDate value",
-    systemFrom: "NodeDate systemFrom",
-    systemTo  : "NodeDate systemTo",
+    id        : "NodeCalendar id",
+    dateValue : "NodeCalendar dateValue",
+    root      : "NodeCalendar root",
+    level     : "NodeCalendar level",
+    dateId    : "NodeCalendar dateId",
+    timestamp : "NodeCalendar timestamp",
+    value     : "NodeCalendar value",
+    levels    : "NodeCalendar levels",
+    foundDates: "NodeCalendar foundDates",
+    systemFrom: "NodeCalendar systemFrom",
+    systemTo  : "NodeCalendar systemTo",
 }
 
 projection SharedNodeProjection on SharedNode
@@ -455,6 +466,7 @@ projection NodeMetadataProjection on NodeMetadata
     mirrorRoot    : "NodeMetadata mirrorRoot",
     originalId      : "NodeMetadata originalId",
     changes         : "NodeMetadata changes",
+    numberedStart   : "NodeMetadata numberedStart",
     systemFrom      : "NodeMetadata systemFrom",
     systemTo        : "NodeMetadata systemTo",
     createdOn       : "NodeMetadata createdOn",
@@ -485,7 +497,7 @@ projection NodeProjection on NodeContent
     metadata    : NodeMetadataProjection,
     children    : NodeSummaryProjection,
     tags        : NodeTagMappingProjection,
-    dates       : NodeDateProjection,
+    calendar    : NodeCalendarProjection,
     shares      : SharedNodeProjection,
     mirrors     : MirrorProjection,
     s3File      : NodeS3FileProjection,

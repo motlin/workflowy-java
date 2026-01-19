@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Calendar/date metadata attached to an item.
  */
 public record InputCalendarMetadata(
-	@Nullable Object date,
+	@Nullable Boolean date,
 
 	@JsonProperty("root") @Nullable Boolean isRoot,
 
@@ -16,11 +16,11 @@ public record InputCalendarMetadata(
 
 	@Nullable Integer levels,
 
-	@Nullable Object value,
+	@Nullable Boolean value,
 
 	@Nullable String dateId,
 
 	@Nullable Long timestamp,
 
-	@JsonProperty("found_dates") @Nullable Object foundDates
+	@JsonProperty("found_dates") @Nullable Boolean foundDates
 ) {}

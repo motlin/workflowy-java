@@ -16,7 +16,7 @@ public record InputCalendarMetadata(
 
 	@Nullable Integer levels,
 
-	@Nullable Boolean value,
+	@Nullable Integer value,
 
 	@Nullable String dateId,
 

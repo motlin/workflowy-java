@@ -245,7 +245,29 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-9-NODE_S3_FILE">
+    <changeSet author="Klass" id="initial-table-9-NODE_CALENDAR_LEVELS">
+        <createTable tableName="NODE_CALENDAR_LEVELS">
+            <column name="CALENDAR_ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_CALENDAR_LEVELS_PK" />
+            </column>
+
+            <column name="SYSTEM_FROM" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_TO" type="timestamp">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_CALENDAR_LEVELS_PK" />
+            </column>
+
+            <column name="DAY" type="boolean" />
+
+            <column name="MONTH" type="boolean" />
+
+            <column name="YEAR" type="boolean" />
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-table-10-NODE_S3_FILE">
         <createTable tableName="NODE_S3_FILE">
             <column name="ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_S3_FILE_PK" />
@@ -283,7 +305,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-10-VIRTUAL_ROOT_MAPPING">
+    <changeSet author="Klass" id="initial-table-11-VIRTUAL_ROOT_MAPPING">
         <createTable tableName="VIRTUAL_ROOT_MAPPING">
             <column name="NODE_ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="VIRTUAL_ROOT_MAPPING_PK" />
@@ -303,7 +325,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-11-DATA_IMPORT_TIMESTAMP">
+    <changeSet author="Klass" id="initial-table-12-DATA_IMPORT_TIMESTAMP">
         <createTable tableName="DATA_IMPORT_TIMESTAMP">
             <column name="NAME" type="varchar(64)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="DATA_IMPORT_TIMESTAMP_PK" />
@@ -413,7 +435,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-9-NODE_S3_FILE_IDX_NODE">
+    <changeSet author="Klass" id="initial-indices-10-NODE_S3_FILE_IDX_NODE">
         <createIndex
                 indexName="NODE_S3_FILE_IDX_NODE"
                 tableName="NODE_S3_FILE">
@@ -422,7 +444,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-10-VIRTUAL_ROOT_MAPPING_IDX_NODE">
+    <changeSet author="Klass" id="initial-indices-11-VIRTUAL_ROOT_MAPPING_IDX_NODE">
         <createIndex
                 indexName="VIRTUAL_ROOT_MAPPING_IDX_NODE"
                 tableName="VIRTUAL_ROOT_MAPPING">
@@ -431,7 +453,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-10-VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT">
+    <changeSet author="Klass" id="initial-indices-11-VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT">
         <createIndex
                 indexName="VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT"
                 tableName="VIRTUAL_ROOT_MAPPING">

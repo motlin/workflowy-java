@@ -239,8 +239,6 @@
 
             <column name="VALUE" type="int" />
 
-            <column name="LEVELS" type="int" />
-
             <column name="FOUND_DATES" type="varchar(10000)" />
         </createTable>
     </changeSet>

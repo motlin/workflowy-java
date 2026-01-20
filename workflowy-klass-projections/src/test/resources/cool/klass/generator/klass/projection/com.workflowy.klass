@@ -113,9 +113,8 @@ projection NodeCalendarProjection on NodeCalendar
     dateId: "NodeCalendar dateId",
     timestamp: "NodeCalendar timestamp",
     value: "NodeCalendar value",
-    levels: "NodeCalendar levels",
     foundDates: "NodeCalendar foundDates",
-    calendarLevels: NodeCalendarLevelsProjection,
+    levels: NodeCalendarLevelsProjection,
 }
 
 projection NodeCalendarLevelsProjection on NodeCalendarLevels

@@ -28,6 +28,7 @@ import com.workflowy.NodeContentFinder;
 import com.workflowy.NodeContentList;
 import com.workflowy.NodeCalendar;
 import com.workflowy.NodeCalendarFinder;
+import com.workflowy.NodeCalendarLevels;
 import com.workflowy.NodeCalendarList;
 import com.workflowy.NodeMetadata;
 import com.workflowy.NodeMetadataFinder;
@@ -379,7 +380,15 @@ public final class WorkflowyDataConverter
                 nodeCalendar.setDateId(calendarMeta.dateId());
                 nodeCalendar.setTimestamp(calendarMeta.timestamp());
                 nodeCalendar.setValue(calendarMeta.value());
-                nodeCalendar.setLevels(calendarMeta.levels());
+                if (calendarMeta.levels() != null)
+                {
+                    NodeCalendarLevels levels = new NodeCalendarLevels();
+                    levels.setCalendarId(nodeCalendar.getId());
+                    levels.setDay(calendarMeta.levels().day());
+                    levels.setMonth(calendarMeta.levels().month());
+                    levels.setYear(calendarMeta.levels().year());
+                    nodeCalendar.setLevels(levels);
+                }
                 if (calendarMeta.foundDates() != null)
                 {
                     try

@@ -262,11 +262,29 @@ class NodeCalendar
     timestamp : Long?;
     value     : Integer?;
 
-    // Number of levels in the calendar hierarchy
-    levels    : Integer?;
-
     // Found dates stored as JSON (complex structure)
     foundDates: String? maxLength(10000);
+}
+
+/*
+ * NodeCalendarLevels specifies which time granularities are enabled for a calendar.
+ * This is a 1-to-1 relationship with NodeCalendar.
+ */
+class NodeCalendarLevels
+    systemTemporal
+{
+    calendarId: String key private final minLength(36) maxLength(36);
+    day       : Boolean?;
+    month     : Boolean?;
+    year      : Boolean?;
+}
+
+association NodeCalendarHasLevels
+{
+    calendar: NodeCalendar[1..1] final;
+    levels  : NodeCalendarLevels[0..1] owned;
+
+    relationship this.id == NodeCalendarLevels.calendarId
 }
 
 association NodeHasCalendar
@@ -275,27 +293,6 @@ association NodeHasCalendar
     calendar : NodeCalendar[0..1] owned;
 
     relationship this.id == NodeCalendar.nodeId
-}
-
-/*
- * NodeCalendarLevels tracks which calendar hierarchy levels are enabled.
- * This is a 1-to-1 relationship with NodeCalendar.
- */
-class NodeCalendarLevels
-    systemTemporal
-{
-    calendarId: String key final minLength(36) maxLength(36);
-    day       : Boolean?;
-    month     : Boolean?;
-    year      : Boolean?;
-}
-
-association NodeCalendarHasLevels
-{
-    calendar      : NodeCalendar[1..1] final;
-    calendarLevels: NodeCalendarLevels[0..1] owned;
-
-    relationship this.id == NodeCalendarLevels.calendarId
 }
 
 /*
@@ -405,22 +402,6 @@ projection NodeTagMappingProjection on NodeTagMapping
     tag       : TagProjection,
 }
 
-projection NodeCalendarProjection on NodeCalendar
-{
-    id            : "NodeCalendar id",
-    dateValue     : "NodeCalendar dateValue",
-    root          : "NodeCalendar root",
-    level         : "NodeCalendar level",
-    dateId        : "NodeCalendar dateId",
-    timestamp     : "NodeCalendar timestamp",
-    value         : "NodeCalendar value",
-    levels        : "NodeCalendar levels",
-    foundDates    : "NodeCalendar foundDates",
-    systemFrom    : "NodeCalendar systemFrom",
-    systemTo      : "NodeCalendar systemTo",
-    calendarLevels: NodeCalendarLevelsProjection,
-}
-
 projection NodeCalendarLevelsProjection on NodeCalendarLevels
 {
     day       : "NodeCalendarLevels day",
@@ -428,6 +409,21 @@ projection NodeCalendarLevelsProjection on NodeCalendarLevels
     year      : "NodeCalendarLevels year",
     systemFrom: "NodeCalendarLevels systemFrom",
     systemTo  : "NodeCalendarLevels systemTo",
+}
+
+projection NodeCalendarProjection on NodeCalendar
+{
+    id        : "NodeCalendar id",
+    dateValue : "NodeCalendar dateValue",
+    root      : "NodeCalendar root",
+    level     : "NodeCalendar level",
+    dateId    : "NodeCalendar dateId",
+    timestamp : "NodeCalendar timestamp",
+    value     : "NodeCalendar value",
+    foundDates: "NodeCalendar foundDates",
+    systemFrom: "NodeCalendar systemFrom",
+    systemTo  : "NodeCalendar systemTo",
+    levels    : NodeCalendarLevelsProjection,
 }
 
 projection SharedNodeProjection on SharedNode

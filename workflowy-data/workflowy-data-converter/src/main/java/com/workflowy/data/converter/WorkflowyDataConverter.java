@@ -456,6 +456,8 @@ public final class WorkflowyDataConverter
     {
         this.ensureUserExists();
 
+        MithraManagerProvider.getMithraManager().setTransactionTimeout(3600);
+
         long time = backupInstant.toEpochMilli();
 
         this.dataStore.runInTransaction(transaction ->

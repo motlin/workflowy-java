@@ -278,6 +278,27 @@ association NodeHasCalendar
 }
 
 /*
+ * NodeCalendarLevels tracks which calendar hierarchy levels are enabled.
+ * This is a 1-to-1 relationship with NodeCalendar.
+ */
+class NodeCalendarLevels
+    systemTemporal
+{
+    calendarId: String key final minLength(36) maxLength(36);
+    day       : Boolean?;
+    month     : Boolean?;
+    year      : Boolean?;
+}
+
+association NodeCalendarHasLevels
+{
+    calendar      : NodeCalendar[1..1] final;
+    calendarLevels: NodeCalendarLevels[0..1] owned;
+
+    relationship this.id == NodeCalendarLevels.calendarId
+}
+
+/*
  * NodeS3File represents S3 file attachments on nodes.
  * From backup: metadata.s3File
  */
@@ -386,17 +407,27 @@ projection NodeTagMappingProjection on NodeTagMapping
 
 projection NodeCalendarProjection on NodeCalendar
 {
-    id        : "NodeCalendar id",
-    dateValue : "NodeCalendar dateValue",
-    root      : "NodeCalendar root",
-    level     : "NodeCalendar level",
-    dateId    : "NodeCalendar dateId",
-    timestamp : "NodeCalendar timestamp",
-    value     : "NodeCalendar value",
-    levels    : "NodeCalendar levels",
-    foundDates: "NodeCalendar foundDates",
-    systemFrom: "NodeCalendar systemFrom",
-    systemTo  : "NodeCalendar systemTo",
+    id            : "NodeCalendar id",
+    dateValue     : "NodeCalendar dateValue",
+    root          : "NodeCalendar root",
+    level         : "NodeCalendar level",
+    dateId        : "NodeCalendar dateId",
+    timestamp     : "NodeCalendar timestamp",
+    value         : "NodeCalendar value",
+    levels        : "NodeCalendar levels",
+    foundDates    : "NodeCalendar foundDates",
+    systemFrom    : "NodeCalendar systemFrom",
+    systemTo      : "NodeCalendar systemTo",
+    calendarLevels: NodeCalendarLevelsProjection,
+}
+
+projection NodeCalendarLevelsProjection on NodeCalendarLevels
+{
+    day       : "NodeCalendarLevels day",
+    month     : "NodeCalendarLevels month",
+    year      : "NodeCalendarLevels year",
+    systemFrom: "NodeCalendarLevels systemFrom",
+    systemTo  : "NodeCalendarLevels systemTo",
 }
 
 projection SharedNodeProjection on SharedNode

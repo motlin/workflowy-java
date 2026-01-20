@@ -115,6 +115,16 @@ projection NodeCalendarProjection on NodeCalendar
     value: "NodeCalendar value",
     levels: "NodeCalendar levels",
     foundDates: "NodeCalendar foundDates",
+    calendarLevels: NodeCalendarLevelsProjection,
+}
+
+projection NodeCalendarLevelsProjection on NodeCalendarLevels
+{
+    systemFrom: "NodeCalendarLevels systemFrom",
+    systemTo: "NodeCalendarLevels systemTo",
+    day: "NodeCalendarLevels day",
+    month: "NodeCalendarLevels month",
+    year: "NodeCalendarLevels year",
 }
 
 projection NodeS3FileProjection on NodeS3File

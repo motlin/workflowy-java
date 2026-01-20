@@ -10,6 +10,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gs.fw.common.mithra.MithraManagerProvider;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
 import com.workflowy.NodeContent;
 import com.workflowy.NodeContentFinder;
@@ -206,6 +207,8 @@ public final class WorkflowyApiDataConverter {
 
 	private void mergeIntoDatabase(Instant importTime) {
 		this.ensureUserExists();
+
+		MithraManagerProvider.getMithraManager().setTransactionTimeout(3600);
 
 		long time = importTime.toEpochMilli();
 

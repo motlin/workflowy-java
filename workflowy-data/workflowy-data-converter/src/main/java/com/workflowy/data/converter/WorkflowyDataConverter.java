@@ -345,6 +345,7 @@ public final class WorkflowyDataConverter {
 					NodeCalendarLevels levels = new NodeCalendarLevels();
 					levels.setCalendarId(nodeCalendar.getId());
 					levels.setDay(calendarMeta.levels().day());
+					levels.setWeek(calendarMeta.levels().week());
 					levels.setMonth(calendarMeta.levels().month());
 					levels.setYear(calendarMeta.levels().year());
 					nodeCalendar.setLevels(levels);

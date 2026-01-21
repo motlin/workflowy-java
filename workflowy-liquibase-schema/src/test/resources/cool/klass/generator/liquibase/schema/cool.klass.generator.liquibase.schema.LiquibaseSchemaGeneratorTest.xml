@@ -259,6 +259,8 @@
 
             <column name="DAY" type="boolean" />
 
+            <column name="WEEK" type="boolean" />
+
             <column name="MONTH" type="boolean" />
 
             <column name="YEAR" type="boolean" />

@@ -5,4 +5,9 @@ import javax.annotation.Nullable;
 /**
  * Specifies which calendar time levels are enabled for a date item.
  */
-public record InputCalendarLevelsMetadata(@Nullable Boolean day, @Nullable Boolean month, @Nullable Boolean year) {}
+public record InputCalendarLevelsMetadata(
+	@Nullable Boolean day,
+	@Nullable Boolean week,
+	@Nullable Boolean month,
+	@Nullable Boolean year
+) {}

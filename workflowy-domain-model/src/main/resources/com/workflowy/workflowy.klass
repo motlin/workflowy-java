@@ -275,6 +275,7 @@ class NodeCalendarLevels
 {
     calendarId: String key private final minLength(36) maxLength(36);
     day       : Boolean?;
+    week      : Boolean?;
     month     : Boolean?;
     year      : Boolean?;
 }
@@ -405,6 +406,7 @@ projection NodeTagMappingProjection on NodeTagMapping
 projection NodeCalendarLevelsProjection on NodeCalendarLevels
 {
     day       : "NodeCalendarLevels day",
+    week      : "NodeCalendarLevels week",
     month     : "NodeCalendarLevels month",
     year      : "NodeCalendarLevels year",
     systemFrom: "NodeCalendarLevels systemFrom",

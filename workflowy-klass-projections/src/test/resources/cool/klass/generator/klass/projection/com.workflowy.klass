@@ -122,6 +122,7 @@ projection NodeCalendarLevelsProjection on NodeCalendarLevels
     systemFrom: "NodeCalendarLevels systemFrom",
     systemTo: "NodeCalendarLevels systemTo",
     day: "NodeCalendarLevels day",
+    week: "NodeCalendarLevels week",
     month: "NodeCalendarLevels month",
     year: "NodeCalendarLevels year",
 }

@@ -4,12 +4,13 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-// TODO 2026-01-20: Use JsonProperty to map "ct", "mn", and "cp" to more descriptive field names.
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record InputChangesMetadata(
 	/** Created by - tracks who created this item. */
-	@Nullable Map<String, Object> ct,
+	@JsonProperty("ct") @Nullable Map<String, Object> createdBy,
 	/** Modified by - tracks who last modified this item. */
-	@Nullable Map<String, Object> mn,
+	@JsonProperty("mn") @Nullable Map<String, Object> modifiedBy,
 	/** Completed by - tracks who completed this item. */
-	@Nullable Map<String, Object> cp
+	@JsonProperty("cp") @Nullable Map<String, Object> completedBy
 ) {}

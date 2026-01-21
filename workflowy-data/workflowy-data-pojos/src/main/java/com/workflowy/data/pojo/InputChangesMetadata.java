@@ -4,10 +4,12 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-// TODO 2026-01-20: Use JsonProperty to map "ct" and "mn" to more descriptive field names.
+// TODO 2026-01-20: Use JsonProperty to map "ct", "mn", and "cp" to more descriptive field names.
 public record InputChangesMetadata(
 	/** Created by - tracks who created this item. */
 	@Nullable Map<String, Object> ct,
 	/** Modified by - tracks who last modified this item. */
-	@Nullable Map<String, Object> mn
+	@Nullable Map<String, Object> mn,
+	/** Completed by - tracks who completed this item. */
+	@Nullable Map<String, Object> cp
 ) {}

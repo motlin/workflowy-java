@@ -31,7 +31,6 @@ public record InputMetadata(
 
 	@JsonProperty("numbered_start") @Nullable Integer numberedStart
 ) {
-
 	public boolean hasMirror() {
 		return this.mirror != null;
 	}

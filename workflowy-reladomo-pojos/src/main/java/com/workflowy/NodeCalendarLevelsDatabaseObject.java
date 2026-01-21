@@ -1,4 +1,3 @@
 package com.workflowy;
-public class NodeCalendarLevelsDatabaseObject extends NodeCalendarLevelsDatabaseObjectAbstract
-{
-}
+
+public class NodeCalendarLevelsDatabaseObject extends NodeCalendarLevelsDatabaseObjectAbstract {}

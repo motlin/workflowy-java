@@ -4,9 +4,6 @@ import javax.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Calendar/date metadata attached to an item.
- */
 public record InputCalendarMetadata(
 	@Nullable Boolean date,
 

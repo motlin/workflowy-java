@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 
@@ -23,13 +19,13 @@ import com.workflowy.DataImportTimestampFinder;
 import com.workflowy.Mirror;
 import com.workflowy.MirrorFinder;
 import com.workflowy.MirrorList;
-import com.workflowy.NodeContent;
-import com.workflowy.NodeContentFinder;
-import com.workflowy.NodeContentList;
 import com.workflowy.NodeCalendar;
 import com.workflowy.NodeCalendarFinder;
 import com.workflowy.NodeCalendarLevels;
 import com.workflowy.NodeCalendarList;
+import com.workflowy.NodeContent;
+import com.workflowy.NodeContentFinder;
+import com.workflowy.NodeContentList;
 import com.workflowy.NodeMetadata;
 import com.workflowy.NodeMetadataFinder;
 import com.workflowy.NodeMetadataList;
@@ -58,524 +54,477 @@ import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.list.fixed.ArrayAdapter;
 import org.eclipse.collections.impl.map.mutable.MapAdapter;
+import org.eclipse.collections.impl.utility.MapIterate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class WorkflowyDataConverter
-{
-    private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowyDataConverter.class);
-
-
-    private final ObjectMapper objectMapper;
-    private final DataStore dataStore;
-    private final File backupFile;
-    private final String userId;
-
-    private final MutableMap<String, NodeContent> nodeContents = MapAdapter.adapt(new LinkedHashMap<>());
-    private final MutableMap<String, NodeMetadata> nodeMetadatas = MapAdapter.adapt(new LinkedHashMap<>());
-    private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
-    private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
-    private final MirrorList mirrors = new MirrorList();
-    private final NodeCalendarList nodeCalendars = new NodeCalendarList();
-    private final NodeS3FileList nodeS3Files = new NodeS3FileList();
-    private final VirtualRootMappingList virtualRootMappings = new VirtualRootMappingList();
-
-    private WorkflowyDataConverter(
-            @Nonnull ObjectMapper objectMapper,
-            @Nonnull DataStore dataStore,
-            @Nonnull File backupFile)
-    {
-        this.objectMapper = Objects.requireNonNull(objectMapper);
-        this.dataStore = Objects.requireNonNull(dataStore);
-        this.backupFile = Objects.requireNonNull(backupFile);
-        this.userId = WorkflowyFileUtils.extractUserIdFromFile(backupFile);
-    }
-
-    public static void convert(
-            @Nonnull Path backupsPath,
-            @Nonnull ObjectMapper objectMapper,
-            @Nonnull DataStore dataStore)
-    {
-        Instant highWatermark = WorkflowyDataConverter.getHighWatermark();
-
-        ImmutableList<File> filesToProcess = WorkflowyDataConverter.getBackupFiles(backupsPath)
-                .selectWith(WorkflowyFileUtils::isAfterHighWatermark, highWatermark);
-
-        if (filesToProcess.isEmpty())
-        {
-            LOGGER.info("No files to process after highWatermark {}", highWatermark);
-            return;
-        }
-
-        LOGGER.info("Processing {} files after highWatermark {}", filesToProcess.size(), highWatermark);
-        LOGGER.info("filesToProcess = {}", filesToProcess);
-
-        filesToProcess
-                .asLazy()
-                .collect(file -> new WorkflowyDataConverter(objectMapper, dataStore, file))
-                .forEach(WorkflowyDataConverter::processBackupFile);
-    }
-
-    private void processBackupFile()
-    {
-        try
-        {
-            processBackupFileOrThrow();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to process backup file: " + this.backupFile, e);
-        }
-    }
-
-    private void processBackupFileOrThrow() throws IOException
-    {
-        LOGGER.info("Processing backup file: {}", this.backupFile);
-
-        List<InputItem> rootItems = this.objectMapper.readValue(
-                this.backupFile,
-                new TypeReference<>()
-                {
-                });
-
-        Instant backupInstant = WorkflowyFileUtils.getFileTimestamp(this.backupFile);
-
-        LOGGER.info("Pass 1: Creating nodes from {} root items", rootItems.size());
-        this.processNodesPass1(rootItems, null, 0);
-        LOGGER.info("Created {} node contents and {} node metadatas", this.nodeContents.size(), this.nodeMetadatas.size());
-
-        LOGGER.info("Pass 2: Extracting tags");
-        this.extractTagsFromNodes();
-        LOGGER.info("Extracted {} tags and {} node-tag mappings", this.tags.size(), this.nodeTagMappings.size());
-
-        LOGGER.info("Pass 3: Processing metadata (mirrors, dates, S3 files, virtual roots)");
-        this.processMetadata(rootItems);
-        LOGGER.info("Created {} mirrors, {} node dates, {} S3 files, {} virtual root mappings",
-                this.mirrors.size(), this.nodeCalendars.size(), this.nodeS3Files.size(), this.virtualRootMappings.size());
-
-        this.mergeIntoDatabase(backupInstant);
-    }
-
-    private void processNodesPass1(List<InputItem> inputItems, String parentId, int startPriority)
-    {
-        int priority = startPriority;
-        for (InputItem inputItem : inputItems)
-        {
-            NodeContent nodeContent = this.createNodeContent(inputItem, parentId);
-            NodeMetadata nodeMetadata = this.createNodeMetadata(inputItem, priority);
-            this.nodeContents.put(inputItem.id(), nodeContent);
-            this.nodeMetadatas.put(inputItem.id(), nodeMetadata);
-            priority++;
-
-            if (inputItem.hasChildren())
-            {
-                this.processNodesPass1(inputItem.children(), inputItem.id(), 0);
-            }
-        }
-    }
-
-    private NodeContent createNodeContent(InputItem inputItem, String parentId)
-    {
-        NodeContent nodeContent = new NodeContent();
-        nodeContent.setId(inputItem.id());
-        nodeContent.setParentId(parentId);
-        nodeContent.setName(inputItem.name() != null ? inputItem.name() : "");
-        nodeContent.setNote(inputItem.note());
-        return nodeContent;
-    }
-
-    private NodeMetadata createNodeMetadata(InputItem inputItem, int priority)
-    {
-        NodeMetadata nodeMetadata = new NodeMetadata();
-        nodeMetadata.setNodeId(inputItem.id());
-        nodeMetadata.setPriority(priority);
-        nodeMetadata.setCompleted(inputItem.isCompleted());
-        nodeMetadata.setCompletedAt(WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.completedTimestamp()));
-        nodeMetadata.setCollapsed(false);
-        nodeMetadata.setLastModified(WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.lastModifiedTimestamp()));
-        nodeMetadata.setCreatedById(this.userId);
-        nodeMetadata.setCreatedOn(WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.createdTimestamp()));
-        nodeMetadata.setLastUpdatedById(this.userId);
-
-        InputMetadata metadata = inputItem.metadata();
-        if (metadata != null)
-        {
-            nodeMetadata.setLayoutMode(metadata.layoutMode());
-            nodeMetadata.setVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
-            nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
-
-            if (metadata.ai() != null)
-            {
-                nodeMetadata.setInChat(metadata.ai().inChat());
-            }
-
-            if (metadata.mirror() != null)
-            {
-                if (metadata.mirror().isMirrorRoot() != null)
-                {
-                    nodeMetadata.setMirrorRoot(metadata.mirror().isMirrorRoot());
-                }
-                if (metadata.mirror().originalId() != null)
-                {
-                    nodeMetadata.setOriginalId(metadata.mirror().originalId());
-                }
-            }
-
-            // metadata.originalId takes precedence if both are present
-            if (metadata.originalId() != null)
-            {
-                nodeMetadata.setOriginalId(metadata.originalId());
-            }
-
-            if (metadata.changes() != null)
-            {
-                try
-                {
-                    nodeMetadata.setChanges(this.objectMapper.writeValueAsString(metadata.changes()));
-                }
-                catch (Exception e)
-                {
-                    LOGGER.warn("Failed to serialize changes for node {}: {}", inputItem.id(), e.getMessage());
-                }
-            }
-
-            if (metadata.numberedStart() != null)
-            {
-                nodeMetadata.setNumberedStart(metadata.numberedStart());
-            }
-        }
-        return nodeMetadata;
-    }
-
-    private void extractTagsFromNodes()
-    {
-        for (NodeContent nodeContent : this.nodeContents.values())
-        {
-            this.extractTagsFromName(nodeContent);
-        }
-    }
-
-    private void extractTagsFromName(NodeContent nodeContent)
-    {
-        String name = nodeContent.getName();
-        if (name == null || name.isEmpty())
-        {
-            return;
-        }
-
-        List<String> extractedTags = HashtagExtractor.extractHashtags(name);
-
-        for (String tagName : extractedTags)
-        {
-            this.tags.computeIfAbsent(tagName, t ->
-            {
-                Tag newTag = new Tag();
-                newTag.setName(t);
-                newTag.setColor(null);
-                return newTag;
-            });
-
-            NodeTagMapping mapping = new NodeTagMapping();
-            mapping.setNodeId(nodeContent.getId());
-            mapping.setTagName(tagName);
-            this.nodeTagMappings.add(mapping);
-        }
-    }
-
-    private void processMetadata(List<InputItem> inputItems)
-    {
-        for (InputItem inputItem : inputItems)
-        {
-            this.processInputItemMetadata(inputItem);
-            if (inputItem.hasChildren())
-            {
-                this.processMetadata(inputItem.children());
-            }
-        }
-    }
-
-    private void processInputItemMetadata(InputItem inputItem)
-    {
-        InputMetadata metadata = inputItem.metadata();
-        if (metadata == null)
-        {
-            return;
-        }
-
-        if (metadata.hasMirror())
-        {
-            this.processMirrorMetadata(inputItem.id(), metadata.mirror());
-        }
-
-        if (metadata.hasBacklink())
-        {
-            this.processBacklinkMetadata(metadata.backlink());
-        }
-
-        if (metadata.hasCalendar())
-        {
-            this.processCalendarMetadata(inputItem.id(), metadata.calendar());
-        }
-
-        if (metadata.s3File() != null)
-        {
-            this.processS3FileMetadata(inputItem.id(), metadata.s3File());
-        }
-
-        if (metadata.virtualRootIds() != null && !metadata.virtualRootIds().isEmpty())
-        {
-            this.processVirtualRootIds(inputItem.id(), metadata.virtualRootIds());
-        }
-    }
-
-    private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta)
-    {
-        for (String sourceId : mirrorMeta.getMirrorSourceIds())
-        {
-            Mirror mirror = new Mirror();
-            mirror.setId(UUID.randomUUID().toString());
-            mirror.setMirrorRootId(sourceId);
-            mirror.setMirrorNodeId(nodeId);
-            mirror.setBacklink(false);
-            this.mirrors.add(mirror);
-        }
-
-        for (String sourceId : mirrorMeta.getBacklinkMirrorIds())
-        {
-            Mirror mirror = new Mirror();
-            mirror.setId(UUID.randomUUID().toString());
-            mirror.setMirrorRootId(sourceId);
-            mirror.setMirrorNodeId(nodeId);
-            mirror.setBacklink(true);
-            this.mirrors.add(mirror);
-        }
-    }
-
-    private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta)
-    {
-        if (backlinkMeta.sourceId() != null && backlinkMeta.targetId() != null)
-        {
-            Mirror mirror = new Mirror();
-            mirror.setId(UUID.randomUUID().toString());
-            mirror.setMirrorRootId(backlinkMeta.sourceId());
-            mirror.setMirrorNodeId(backlinkMeta.targetId());
-            mirror.setBacklink(true);
-            this.mirrors.add(mirror);
-        }
-    }
-
-    private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta)
-    {
-        if (calendarMeta.date() != null)
-        {
-            Timestamp dateValue = WorkflowyTimestampConverter.parseCalendarDate(calendarMeta.date());
-            if (dateValue != null)
-            {
-                NodeCalendar nodeCalendar = new NodeCalendar();
-                nodeCalendar.setId(UUID.randomUUID().toString());
-                nodeCalendar.setNodeId(nodeId);
-                nodeCalendar.setDateValue(dateValue);
-                nodeCalendar.setRoot(calendarMeta.isRoot());
-                nodeCalendar.setLevel(calendarMeta.level());
-                nodeCalendar.setDateId(calendarMeta.dateId());
-                nodeCalendar.setTimestamp(calendarMeta.timestamp());
-                nodeCalendar.setValue(calendarMeta.value());
-                if (calendarMeta.levels() != null)
-                {
-                    NodeCalendarLevels levels = new NodeCalendarLevels();
-                    levels.setCalendarId(nodeCalendar.getId());
-                    levels.setDay(calendarMeta.levels().day());
-                    levels.setMonth(calendarMeta.levels().month());
-                    levels.setYear(calendarMeta.levels().year());
-                    nodeCalendar.setLevels(levels);
-                }
-                if (calendarMeta.foundDates() != null)
-                {
-                    try
-                    {
-                        nodeCalendar.setFoundDates(this.objectMapper.writeValueAsString(calendarMeta.foundDates()));
-                    }
-                    catch (Exception e)
-                    {
-                        LOGGER.warn("Failed to serialize foundDates for node {}: {}", nodeId, e.getMessage());
-                    }
-                }
-                this.nodeCalendars.add(nodeCalendar);
-            }
-        }
-    }
-
-    private void processS3FileMetadata(String nodeId, InputS3FileMetadata s3FileMeta)
-    {
-        NodeS3File nodeS3File = new NodeS3File();
-        nodeS3File.setId(UUID.randomUUID().toString());
-        nodeS3File.setNodeId(nodeId);
-        nodeS3File.setFile(s3FileMeta.isFile() != null && s3FileMeta.isFile());
-        nodeS3File.setFileName(s3FileMeta.fileName());
-        nodeS3File.setFileType(s3FileMeta.fileType());
-        nodeS3File.setObjectFolder(s3FileMeta.objectFolder());
-        if (s3FileMeta.isAnimatedGIF() != null)
-        {
-            nodeS3File.setAnimatedGIF(s3FileMeta.isAnimatedGIF());
-        }
-        if (s3FileMeta.imageOriginalWidth() != null)
-        {
-            nodeS3File.setImageOriginalWidth(s3FileMeta.imageOriginalWidth());
-        }
-        if (s3FileMeta.imageOriginalHeight() != null)
-        {
-            nodeS3File.setImageOriginalHeight(s3FileMeta.imageOriginalHeight());
-        }
-        if (s3FileMeta.imageOriginalPixels() != null)
-        {
-            nodeS3File.setImageOriginalPixels(s3FileMeta.imageOriginalPixels());
-        }
-        this.nodeS3Files.add(nodeS3File);
-    }
-
-    private void processVirtualRootIds(String nodeId, java.util.Map<String, Boolean> virtualRootIds)
-    {
-        for (String virtualRootId : virtualRootIds.keySet())
-        {
-            VirtualRootMapping mapping = new VirtualRootMapping();
-            mapping.setNodeId(nodeId);
-            mapping.setVirtualRootId(virtualRootId);
-            this.virtualRootMappings.add(mapping);
-        }
-    }
-
-    private void ensureUserExists()
-    {
-        User existingUser = UserFinder.findOne(UserFinder.userId().eq(this.userId));
-        if (existingUser == null)
-        {
-            LOGGER.info("Creating user: {}", this.userId);
-            MithraManagerProvider.getMithraManager().executeTransactionalCommand(tx ->
-            {
-                User user = new User();
-                user.setUserId(this.userId);
-                user.setEmail(this.userId);
-                user.insert();
-                return null;
-            });
-        }
-    }
-
-    private void mergeIntoDatabase(Instant backupInstant)
-    {
-        this.ensureUserExists();
-
-        MithraManagerProvider.getMithraManager().setTransactionTimeout(3600);
-
-        long time = backupInstant.toEpochMilli();
-
-        this.dataStore.runInTransaction(transaction ->
-        {
-            transaction.setSystemTime(time);
-
-            LOGGER.info("Merging {} tags", this.tags.size());
-            TagList existingTags = TagFinder.findMany(TagFinder.all());
-            TagList updatedTags = new TagList();
-            updatedTags.addAll(this.tags.values());
-            TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
-            existingTags.merge(updatedTags, tagMergeOptions);
-
-            LOGGER.info("Merging {} node contents", this.nodeContents.size());
-            NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
-            NodeContentList updatedContents = new NodeContentList();
-            updatedContents.addAll(this.nodeContents.values());
-            TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(NodeContentFinder.getFinderInstance());
-            existingContents.merge(updatedContents, contentMergeOptions);
-
-            LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
-            NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
-            NodeMetadataList updatedMetadatas = new NodeMetadataList();
-            updatedMetadatas.addAll(this.nodeMetadatas.values());
-            TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(NodeMetadataFinder.getFinderInstance());
-            metadataMergeOptions.doNotCompare(
-                    NodeMetadataFinder.createdById(),
-                    NodeMetadataFinder.createdOn(),
-                    NodeMetadataFinder.lastUpdatedById());
-            existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
-
-            LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
-            NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
-            TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions =
-                    new TopLevelMergeOptions<>(NodeTagMappingFinder.getFinderInstance());
-            existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
-
-            LOGGER.info("Merging {} mirrors", this.mirrors.size());
-            MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
-            TopLevelMergeOptions<Mirror> mirrorMergeOptions =
-                    new TopLevelMergeOptions<>(MirrorFinder.getFinderInstance());
-            existingMirrors.merge(this.mirrors, mirrorMergeOptions);
-
-            LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
-            NodeCalendarList existingCalendars = NodeCalendarFinder.findMany(NodeCalendarFinder.all());
-            TopLevelMergeOptions<NodeCalendar> calendarMergeOptions =
-                    new TopLevelMergeOptions<>(NodeCalendarFinder.getFinderInstance());
-            existingCalendars.merge(this.nodeCalendars, calendarMergeOptions);
-
-            LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
-            NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());
-            TopLevelMergeOptions<NodeS3File> s3FileMergeOptions =
-                    new TopLevelMergeOptions<>(NodeS3FileFinder.getFinderInstance());
-            existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
-
-            LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
-            VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(VirtualRootMappingFinder.all());
-            TopLevelMergeOptions<VirtualRootMapping> virtualRootMergeOptions =
-                    new TopLevelMergeOptions<>(VirtualRootMappingFinder.getFinderInstance());
-            existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
-
-            WorkflowyDataConverter.storeHighWatermark(backupInstant);
-
-            return null;
-        });
-
-        LOGGER.info("Completed merge for backup file: {}", this.backupFile.getName());
-    }
-
-    private static Instant getHighWatermark()
-    {
-        Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
-        DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
-
-        Instant highWatermark = Optional.ofNullable(workflowyTimestamp)
-                .map(DataImportTimestamp::getTimestamp)
-                .map(Timestamp::toInstant)
-                .orElse(Instant.MIN);
-
-        LOGGER.info("High watermark: {}", highWatermark);
-        return highWatermark;
-    }
-
-    private static void storeHighWatermark(@Nonnull Instant instant)
-    {
-        Timestamp highWatermark = Timestamp.from(instant);
-        Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
-        DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
-
-        if (workflowyTimestamp == null)
-        {
-            DataImportTimestamp newTimestamp = new DataImportTimestamp();
-            newTimestamp.setName("workflowy");
-            newTimestamp.setTimestamp(highWatermark);
-            newTimestamp.insert();
-        }
-        else
-        {
-            workflowyTimestamp.setTimestamp(highWatermark);
-        }
-
-        LOGGER.info("Stored high watermark: {}", instant);
-    }
-
-    private static ImmutableList<File> getBackupFiles(Path backupsPath)
-    {
-        File[] files = backupsPath.toFile().listFiles(
-                pathname -> pathname.getName().endsWith(".workflowy.backup"));
-        Objects.requireNonNull(files, backupsPath::toString);
-        return ArrayAdapter.adapt(files).toSortedListBy(File::getName).toImmutable();
-    }
+public final class WorkflowyDataConverter {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowyDataConverter.class);
+
+	private final ObjectMapper objectMapper;
+	private final DataStore dataStore;
+	private final File backupFile;
+	private final String userId;
+
+	private final MutableMap<String, NodeContent> nodeContents = MapAdapter.adapt(new LinkedHashMap<>());
+	private final MutableMap<String, NodeMetadata> nodeMetadatas = MapAdapter.adapt(new LinkedHashMap<>());
+	private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
+	private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
+	private final MirrorList mirrors = new MirrorList();
+	private final NodeCalendarList nodeCalendars = new NodeCalendarList();
+	private final NodeS3FileList nodeS3Files = new NodeS3FileList();
+	private final VirtualRootMappingList virtualRootMappings = new VirtualRootMappingList();
+
+	private WorkflowyDataConverter(
+		@Nonnull ObjectMapper objectMapper,
+		@Nonnull DataStore dataStore,
+		@Nonnull File backupFile
+	) {
+		this.objectMapper = Objects.requireNonNull(objectMapper);
+		this.dataStore = Objects.requireNonNull(dataStore);
+		this.backupFile = Objects.requireNonNull(backupFile);
+		this.userId = WorkflowyFileUtils.extractUserIdFromFile(backupFile);
+	}
+
+	public static void convert(
+		@Nonnull Path backupsPath,
+		@Nonnull ObjectMapper objectMapper,
+		@Nonnull DataStore dataStore
+	) {
+		Instant highWatermark = WorkflowyDataConverter.getHighWatermark();
+
+		ImmutableList<File> filesToProcess = WorkflowyDataConverter.getBackupFiles(backupsPath).selectWith(
+			WorkflowyFileUtils::isAfterHighWatermark,
+			highWatermark
+		);
+
+		if (filesToProcess.isEmpty()) {
+			LOGGER.info("No files to process after highWatermark {}", highWatermark);
+			return;
+		}
+
+		LOGGER.info("Processing {} files after highWatermark {}", filesToProcess.size(), highWatermark);
+		LOGGER.info("filesToProcess = {}", filesToProcess);
+
+		filesToProcess
+			.asLazy()
+			.collect((file) -> new WorkflowyDataConverter(objectMapper, dataStore, file))
+			.forEach(WorkflowyDataConverter::processBackupFile);
+	}
+
+	private void processBackupFile() {
+		try {
+			this.processBackupFileOrThrow();
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to process backup file: " + this.backupFile, e);
+		}
+	}
+
+	private void processBackupFileOrThrow() throws IOException {
+		LOGGER.info("Processing backup file: {}", this.backupFile);
+
+		List<InputItem> rootItems = this.objectMapper.readValue(this.backupFile, new TypeReference<>() {});
+
+		Instant backupInstant = WorkflowyFileUtils.getFileTimestamp(this.backupFile);
+
+		LOGGER.info("Pass 1: Creating nodes from {} root items", rootItems.size());
+		this.processNodesPass1(rootItems, null, 0);
+		LOGGER.info(
+			"Created {} node contents and {} node metadatas",
+			this.nodeContents.size(),
+			this.nodeMetadatas.size()
+		);
+
+		LOGGER.info("Pass 2: Extracting tags");
+		this.extractTagsFromNodes();
+		LOGGER.info("Extracted {} tags and {} node-tag mappings", this.tags.size(), this.nodeTagMappings.size());
+
+		LOGGER.info("Pass 3: Processing metadata (mirrors, dates, S3 files, virtual roots)");
+		this.processMetadata(rootItems);
+		LOGGER.info(
+			"Created {} mirrors, {} node dates, {} S3 files, {} virtual root mappings",
+			this.mirrors.size(),
+			this.nodeCalendars.size(),
+			this.nodeS3Files.size(),
+			this.virtualRootMappings.size()
+		);
+
+		this.mergeIntoDatabase(backupInstant);
+	}
+
+	private void processNodesPass1(List<InputItem> inputItems, String parentId, int startPriority) {
+		int priority = startPriority;
+		for (InputItem inputItem : inputItems) {
+			NodeContent nodeContent = this.createNodeContent(inputItem, parentId);
+			NodeMetadata nodeMetadata = this.createNodeMetadata(inputItem, priority);
+			this.nodeContents.put(inputItem.id(), nodeContent);
+			this.nodeMetadatas.put(inputItem.id(), nodeMetadata);
+			priority++;
+
+			if (inputItem.hasChildren()) {
+				this.processNodesPass1(inputItem.children(), inputItem.id(), 0);
+			}
+		}
+	}
+
+	private NodeContent createNodeContent(InputItem inputItem, String parentId) {
+		NodeContent nodeContent = new NodeContent();
+		nodeContent.setId(inputItem.id());
+		nodeContent.setParentId(parentId);
+		nodeContent.setName(inputItem.name() != null ? inputItem.name() : "");
+		nodeContent.setNote(inputItem.note());
+		return nodeContent;
+	}
+
+	private NodeMetadata createNodeMetadata(InputItem inputItem, int priority) {
+		NodeMetadata nodeMetadata = new NodeMetadata();
+		nodeMetadata.setNodeId(inputItem.id());
+		nodeMetadata.setPriority(priority);
+		nodeMetadata.setCompleted(inputItem.isCompleted());
+		nodeMetadata.setCompletedAt(
+			WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.completedTimestamp())
+		);
+		nodeMetadata.setCollapsed(false);
+		nodeMetadata.setLastModified(
+			WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.lastModifiedTimestamp())
+		);
+		nodeMetadata.setCreatedById(this.userId);
+		nodeMetadata.setCreatedOn(WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.createdTimestamp()));
+		nodeMetadata.setLastUpdatedById(this.userId);
+
+		InputMetadata metadata = inputItem.metadata();
+		if (metadata != null) {
+			nodeMetadata.setLayoutMode(metadata.layoutMode());
+			nodeMetadata.setVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
+			nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
+
+			if (metadata.ai() != null) {
+				nodeMetadata.setInChat(metadata.ai().inChat());
+			}
+
+			if (metadata.mirror() != null) {
+				if (metadata.mirror().isMirrorRoot() != null) {
+					nodeMetadata.setMirrorRoot(metadata.mirror().isMirrorRoot());
+				}
+				if (metadata.mirror().originalId() != null) {
+					nodeMetadata.setOriginalId(metadata.mirror().originalId());
+				}
+			}
+
+			// metadata.originalId takes precedence if both are present
+			if (metadata.originalId() != null) {
+				nodeMetadata.setOriginalId(metadata.originalId());
+			}
+
+			if (metadata.changes() != null) {
+				try {
+					nodeMetadata.setChanges(this.objectMapper.writeValueAsString(metadata.changes()));
+				} catch (Exception e) {
+					LOGGER.warn("Failed to serialize changes for node {}: {}", inputItem.id(), e.getMessage());
+				}
+			}
+
+			if (metadata.numberedStart() != null) {
+				nodeMetadata.setNumberedStart(metadata.numberedStart());
+			}
+		}
+		return nodeMetadata;
+	}
+
+	private void extractTagsFromNodes() {
+		for (NodeContent nodeContent : this.nodeContents.values()) {
+			this.extractTagsFromName(nodeContent);
+		}
+	}
+
+	private void extractTagsFromName(NodeContent nodeContent) {
+		String name = nodeContent.getName();
+		if (name == null || name.isEmpty()) {
+			return;
+		}
+
+		List<String> extractedTags = HashtagExtractor.extractHashtags(name);
+
+		for (String tagName : extractedTags) {
+			this.tags.computeIfAbsent(tagName, (t) -> {
+					Tag newTag = new Tag();
+					newTag.setName(t);
+					newTag.setColor(null);
+					return newTag;
+				});
+
+			NodeTagMapping mapping = new NodeTagMapping();
+			mapping.setNodeId(nodeContent.getId());
+			mapping.setTagName(tagName);
+			this.nodeTagMappings.add(mapping);
+		}
+	}
+
+	private void processMetadata(List<InputItem> inputItems) {
+		for (InputItem inputItem : inputItems) {
+			this.processInputItemMetadata(inputItem);
+			if (inputItem.hasChildren()) {
+				this.processMetadata(inputItem.children());
+			}
+		}
+	}
+
+	private void processInputItemMetadata(InputItem inputItem) {
+		InputMetadata metadata = inputItem.metadata();
+		if (metadata == null) {
+			return;
+		}
+
+		if (metadata.hasMirror()) {
+			this.processMirrorMetadata(inputItem.id(), metadata.mirror());
+		}
+
+		if (metadata.hasBacklink()) {
+			this.processBacklinkMetadata(metadata.backlink());
+		}
+
+		if (metadata.hasCalendar()) {
+			this.processCalendarMetadata(inputItem.id(), metadata.calendar());
+		}
+
+		if (metadata.s3File() != null) {
+			this.processS3FileMetadata(inputItem.id(), metadata.s3File());
+		}
+
+		if (MapIterate.notEmpty(metadata.virtualRootIds())) {
+			this.processVirtualRootIds(inputItem.id(), metadata.virtualRootIds());
+		}
+	}
+
+	private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta) {
+		for (String sourceId : mirrorMeta.getMirrorSourceIds()) {
+			Mirror mirror = new Mirror();
+			mirror.setId(UUID.randomUUID().toString());
+			mirror.setMirrorRootId(sourceId);
+			mirror.setMirrorNodeId(nodeId);
+			mirror.setBacklink(false);
+			this.mirrors.add(mirror);
+		}
+
+		for (String sourceId : mirrorMeta.getBacklinkMirrorIds()) {
+			Mirror mirror = new Mirror();
+			mirror.setId(UUID.randomUUID().toString());
+			mirror.setMirrorRootId(sourceId);
+			mirror.setMirrorNodeId(nodeId);
+			mirror.setBacklink(true);
+			this.mirrors.add(mirror);
+		}
+	}
+
+	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta) {
+		if (backlinkMeta.sourceId() != null && backlinkMeta.targetId() != null) {
+			Mirror mirror = new Mirror();
+			mirror.setId(UUID.randomUUID().toString());
+			mirror.setMirrorRootId(backlinkMeta.sourceId());
+			mirror.setMirrorNodeId(backlinkMeta.targetId());
+			mirror.setBacklink(true);
+			this.mirrors.add(mirror);
+		}
+	}
+
+	private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta) {
+		if (calendarMeta.date() != null) {
+			Timestamp dateValue = WorkflowyTimestampConverter.parseCalendarDate(calendarMeta.date());
+			if (dateValue != null) {
+				NodeCalendar nodeCalendar = new NodeCalendar();
+				nodeCalendar.setId(UUID.randomUUID().toString());
+				nodeCalendar.setNodeId(nodeId);
+				nodeCalendar.setDateValue(dateValue);
+				nodeCalendar.setRoot(calendarMeta.isRoot());
+				nodeCalendar.setLevel(calendarMeta.level());
+				nodeCalendar.setDateId(calendarMeta.dateId());
+				nodeCalendar.setTimestamp(calendarMeta.timestamp());
+				nodeCalendar.setValue(calendarMeta.value());
+				if (calendarMeta.levels() != null) {
+					NodeCalendarLevels levels = new NodeCalendarLevels();
+					levels.setCalendarId(nodeCalendar.getId());
+					levels.setDay(calendarMeta.levels().day());
+					levels.setMonth(calendarMeta.levels().month());
+					levels.setYear(calendarMeta.levels().year());
+					nodeCalendar.setLevels(levels);
+				}
+				if (calendarMeta.foundDates() != null) {
+					try {
+						nodeCalendar.setFoundDates(this.objectMapper.writeValueAsString(calendarMeta.foundDates()));
+					} catch (Exception e) {
+						LOGGER.warn("Failed to serialize foundDates for node {}: {}", nodeId, e.getMessage());
+					}
+				}
+				this.nodeCalendars.add(nodeCalendar);
+			}
+		}
+	}
+
+	private void processS3FileMetadata(String nodeId, InputS3FileMetadata s3FileMeta) {
+		NodeS3File nodeS3File = new NodeS3File();
+		nodeS3File.setId(UUID.randomUUID().toString());
+		nodeS3File.setNodeId(nodeId);
+		nodeS3File.setFile(s3FileMeta.isFile() != null && s3FileMeta.isFile());
+		nodeS3File.setFileName(s3FileMeta.fileName());
+		nodeS3File.setFileType(s3FileMeta.fileType());
+		nodeS3File.setObjectFolder(s3FileMeta.objectFolder());
+		if (s3FileMeta.isAnimatedGIF() != null) {
+			nodeS3File.setAnimatedGIF(s3FileMeta.isAnimatedGIF());
+		}
+		if (s3FileMeta.imageOriginalWidth() != null) {
+			nodeS3File.setImageOriginalWidth(s3FileMeta.imageOriginalWidth());
+		}
+		if (s3FileMeta.imageOriginalHeight() != null) {
+			nodeS3File.setImageOriginalHeight(s3FileMeta.imageOriginalHeight());
+		}
+		if (s3FileMeta.imageOriginalPixels() != null) {
+			nodeS3File.setImageOriginalPixels(s3FileMeta.imageOriginalPixels());
+		}
+		this.nodeS3Files.add(nodeS3File);
+	}
+
+	private void processVirtualRootIds(String nodeId, Map<String, Boolean> virtualRootIds) {
+		for (String virtualRootId : virtualRootIds.keySet()) {
+			VirtualRootMapping mapping = new VirtualRootMapping();
+			mapping.setNodeId(nodeId);
+			mapping.setVirtualRootId(virtualRootId);
+			this.virtualRootMappings.add(mapping);
+		}
+	}
+
+	private void ensureUserExists() {
+		User existingUser = UserFinder.findOne(UserFinder.userId().eq(this.userId));
+		if (existingUser == null) {
+			LOGGER.info("Creating user: {}", this.userId);
+			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) -> {
+					User user = new User();
+					user.setUserId(this.userId);
+					user.setEmail(this.userId);
+					user.insert();
+					return null;
+				});
+		}
+	}
+
+	private void mergeIntoDatabase(Instant backupInstant) {
+		this.ensureUserExists();
+
+		MithraManagerProvider.getMithraManager().setTransactionTimeout(3600);
+
+		long time = backupInstant.toEpochMilli();
+
+		this.dataStore.runInTransaction((transaction) -> {
+				transaction.setSystemTime(time);
+
+				LOGGER.info("Merging {} tags", this.tags.size());
+				TagList existingTags = TagFinder.findMany(TagFinder.all());
+				TagList updatedTags = new TagList();
+				updatedTags.addAll(this.tags.values());
+				TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
+				existingTags.merge(updatedTags, tagMergeOptions);
+
+				LOGGER.info("Merging {} node contents", this.nodeContents.size());
+				NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
+				NodeContentList updatedContents = new NodeContentList();
+				updatedContents.addAll(this.nodeContents.values());
+				TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(
+					NodeContentFinder.getFinderInstance()
+				);
+				existingContents.merge(updatedContents, contentMergeOptions);
+
+				LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
+				NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
+				NodeMetadataList updatedMetadatas = new NodeMetadataList();
+				updatedMetadatas.addAll(this.nodeMetadatas.values());
+				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
+					NodeMetadataFinder.getFinderInstance()
+				);
+				metadataMergeOptions.doNotCompare(
+					NodeMetadataFinder.createdById(),
+					NodeMetadataFinder.createdOn(),
+					NodeMetadataFinder.lastUpdatedById()
+				);
+				existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
+
+				LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
+				NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
+				TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions = new TopLevelMergeOptions<>(
+					NodeTagMappingFinder.getFinderInstance()
+				);
+				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
+
+				LOGGER.info("Merging {} mirrors", this.mirrors.size());
+				MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
+				TopLevelMergeOptions<Mirror> mirrorMergeOptions = new TopLevelMergeOptions<>(
+					MirrorFinder.getFinderInstance()
+				);
+				existingMirrors.merge(this.mirrors, mirrorMergeOptions);
+
+				LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
+				NodeCalendarList existingCalendars = NodeCalendarFinder.findMany(NodeCalendarFinder.all());
+				TopLevelMergeOptions<NodeCalendar> calendarMergeOptions = new TopLevelMergeOptions<>(
+					NodeCalendarFinder.getFinderInstance()
+				);
+				existingCalendars.merge(this.nodeCalendars, calendarMergeOptions);
+
+				LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
+				NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());
+				TopLevelMergeOptions<NodeS3File> s3FileMergeOptions = new TopLevelMergeOptions<>(
+					NodeS3FileFinder.getFinderInstance()
+				);
+				existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
+
+				LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
+				VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(
+					VirtualRootMappingFinder.all()
+				);
+				TopLevelMergeOptions<VirtualRootMapping> virtualRootMergeOptions = new TopLevelMergeOptions<>(
+					VirtualRootMappingFinder.getFinderInstance()
+				);
+				existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
+
+				WorkflowyDataConverter.storeHighWatermark(backupInstant);
+
+				return null;
+			});
+
+		LOGGER.info("Completed merge for backup file: {}", this.backupFile.getName());
+	}
+
+	private static Instant getHighWatermark() {
+		Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
+		DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
+
+		Instant highWatermark = Optional.ofNullable(workflowyTimestamp)
+			.map(DataImportTimestamp::getTimestamp)
+			.map(Timestamp::toInstant)
+			.orElse(Instant.MIN);
+
+		LOGGER.info("High watermark: {}", highWatermark);
+		return highWatermark;
+	}
+
+	private static void storeHighWatermark(@Nonnull Instant instant) {
+		Timestamp highWatermark = Timestamp.from(instant);
+		Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
+		DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
+
+		if (workflowyTimestamp == null) {
+			DataImportTimestamp newTimestamp = new DataImportTimestamp();
+			newTimestamp.setName("workflowy");
+			newTimestamp.setTimestamp(highWatermark);
+			newTimestamp.insert();
+		} else {
+			workflowyTimestamp.setTimestamp(highWatermark);
+		}
+
+		LOGGER.info("Stored high watermark: {}", instant);
+	}
+
+	private static ImmutableList<File> getBackupFiles(Path backupsPath) {
+		File[] files = backupsPath.toFile().listFiles((pathname) -> pathname.getName().endsWith(".workflowy.backup"));
+		Objects.requireNonNull(files, backupsPath::toString);
+		return ArrayAdapter.adapt(files).toSortedListBy(File::getName).toImmutable();
+	}
 }

@@ -15,9 +15,7 @@ import javax.annotation.Nullable;
  *   <li>GET /api/v1/nodes?parent_id=X - Returns children of a node</li>
  * </ul>
  */
-public record ApiResponse(
-	@Nullable List<ApiInputItem> nodes
-) {
+public record ApiResponse(@Nullable List<ApiInputItem> nodes) {
 	public ApiResponse {
 		if (nodes == null) {
 			nodes = List.of();

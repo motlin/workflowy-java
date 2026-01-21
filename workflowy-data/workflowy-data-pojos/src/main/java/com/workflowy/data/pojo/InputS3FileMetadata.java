@@ -2,9 +2,6 @@ package com.workflowy.data.pojo;
 
 import javax.annotation.Nullable;
 
-/**
- * S3 file attachment metadata.
- */
 public record InputS3FileMetadata(
 	Boolean isFile,
 

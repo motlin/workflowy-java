@@ -158,9 +158,9 @@ public final class WorkflowyApiDataConverter {
 		nodeMetadata.setCreatedOn(WorkflowyTimestampConverter.convertUnixTimestamp(node.createdAt()));
 		nodeMetadata.setLastUpdatedById(this.userId);
 
-		nodeMetadata.setLayoutMode(node.layoutMode());
-		nodeMetadata.setReferencesRoot(node.isReferencesRoot());
-		nodeMetadata.setInChat(node.isInChat());
+		nodeMetadata.setLayoutMode(node.data().layoutMode());
+		nodeMetadata.setReferencesRoot(node.data().isReferencesRoot());
+		nodeMetadata.setInChat(node.data().ai().inChat());
 
 		return nodeMetadata;
 	}

@@ -32,10 +32,8 @@ public record InputItem(
 
 	@Nullable InputMetadata metadata,
 
-	@JsonSetter(nulls = Nulls.AS_EMPTY)
-	@JsonProperty("ch") List<InputItem> children
+	@JsonSetter(nulls = Nulls.AS_EMPTY) @JsonProperty("ch") List<InputItem> children
 ) {
-
 	public boolean isCompleted() {
 		return this.completedTimestamp != null;
 	}

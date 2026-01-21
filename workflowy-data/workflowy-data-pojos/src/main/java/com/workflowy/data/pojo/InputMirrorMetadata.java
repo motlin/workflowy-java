@@ -8,19 +8,14 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 
-/**
- * Mirror metadata indicating this item is a mirror of another item.
- */
 public record InputMirrorMetadata(
 	@Nullable String originalId,
 
 	@Nullable Boolean isMirrorRoot,
 
-	@JsonSetter(nulls = Nulls.AS_EMPTY)
-	Map<String, Boolean> mirrorRootIds,
+	@JsonSetter(nulls = Nulls.AS_EMPTY) Map<String, Boolean> mirrorRootIds,
 
-	@JsonSetter(nulls = Nulls.AS_EMPTY)
-	Map<String, Boolean> backlinkMirrorRootIds
+	@JsonSetter(nulls = Nulls.AS_EMPTY) Map<String, Boolean> backlinkMirrorRootIds
 ) {
 	public Set<String> getMirrorSourceIds() {
 		return this.mirrorRootIds.keySet();

@@ -28,6 +28,7 @@ import com.workflowy.User;
 import com.workflowy.UserFinder;
 import com.workflowy.data.pojo.ApiInputItem;
 import com.workflowy.data.pojo.ApiResponse;
+import com.workflowy.data.pojo.InputAiMetadata;
 import cool.klass.data.store.DataStore;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.map.mutable.MapAdapter;
@@ -159,8 +160,9 @@ public final class WorkflowyApiDataConverter {
 		nodeMetadata.setLastUpdatedById(this.userId);
 
 		nodeMetadata.setLayoutMode(normalizeLayoutMode(node.data().layoutMode()));
-		nodeMetadata.setReferencesRoot(node.data().isReferencesRoot());
-		nodeMetadata.setInChat(node.data().ai().inChat());
+		nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(node.data().isReferencesRoot()));
+		InputAiMetadata ai = node.data().ai();
+		nodeMetadata.setInChat(ai != null && Boolean.TRUE.equals(ai.inChat()));
 
 		return nodeMetadata;
 	}
@@ -198,10 +200,13 @@ public final class WorkflowyApiDataConverter {
 		User existingUser = UserFinder.findOne(UserFinder.userId().eq(this.userId));
 		if (existingUser == null) {
 			LOGGER.info("Creating user: {}", this.userId);
-			User user = new User();
-			user.setUserId(this.userId);
-			user.setEmail(this.userId);
-			user.insert();
+			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) -> {
+					User user = new User();
+					user.setUserId(this.userId);
+					user.setEmail(this.userId);
+					user.insert();
+					return null;
+				});
 		}
 	}
 

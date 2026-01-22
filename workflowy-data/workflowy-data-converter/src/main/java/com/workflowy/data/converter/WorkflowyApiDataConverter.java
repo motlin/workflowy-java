@@ -158,7 +158,7 @@ public final class WorkflowyApiDataConverter {
 		nodeMetadata.setCreatedOn(WorkflowyTimestampConverter.convertUnixTimestamp(node.createdAt()));
 		nodeMetadata.setLastUpdatedById(this.userId);
 
-		nodeMetadata.setLayoutMode(node.data().layoutMode());
+		nodeMetadata.setLayoutMode(normalizeLayoutMode(node.data().layoutMode()));
 		nodeMetadata.setReferencesRoot(node.data().isReferencesRoot());
 		nodeMetadata.setInChat(node.data().ai().inChat());
 
@@ -256,5 +256,17 @@ public final class WorkflowyApiDataConverter {
 			});
 
 		LOGGER.info("Completed API export import");
+	}
+
+	/**
+	 * Normalizes layoutMode to prevent edit wars between backup and API imports.
+	 * Backup files store the default layout as "bullets", while API exports use null.
+	 * We normalize "bullets" to null so both sources produce consistent values.
+	 */
+	private static String normalizeLayoutMode(String layoutMode) {
+		if ("bullets".equals(layoutMode)) {
+			return null;
+		}
+		return layoutMode;
 	}
 }

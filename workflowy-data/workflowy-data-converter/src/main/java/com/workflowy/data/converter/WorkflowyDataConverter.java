@@ -195,7 +195,7 @@ public final class WorkflowyDataConverter {
 
 		InputMetadata metadata = inputItem.metadata();
 		if (metadata != null) {
-			nodeMetadata.setLayoutMode(metadata.layoutMode());
+			nodeMetadata.setLayoutMode(normalizeLayoutMode(metadata.layoutMode()));
 			nodeMetadata.setVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
 			nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
 
@@ -524,8 +524,27 @@ public final class WorkflowyDataConverter {
 	}
 
 	private static ImmutableList<File> getBackupFiles(Path backupsPath) {
-		File[] files = backupsPath.toFile().listFiles((pathname) -> pathname.getName().endsWith(".workflowy.backup"));
+		File directory = backupsPath.toFile();
+		if (!directory.exists()) {
+			throw new IllegalArgumentException("Backup directory does not exist: " + backupsPath);
+		}
+		if (!directory.isDirectory()) {
+			throw new IllegalArgumentException("Backup path is not a directory: " + backupsPath);
+		}
+		File[] files = directory.listFiles((pathname) -> pathname.getName().endsWith(".workflowy.backup"));
 		Objects.requireNonNull(files, backupsPath::toString);
 		return ArrayAdapter.adapt(files).toSortedListBy(File::getName).toImmutable();
+	}
+
+	/**
+	 * Normalizes layoutMode to prevent edit wars between backup and API imports.
+	 * Backup files store the default layout as "bullets", while API exports use null.
+	 * We normalize "bullets" to null so both sources produce consistent values.
+	 */
+	private static String normalizeLayoutMode(String layoutMode) {
+		if ("bullets".equals(layoutMode)) {
+			return null;
+		}
+		return layoutMode;
 	}
 }

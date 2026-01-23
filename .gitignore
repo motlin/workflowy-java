@@ -7,6 +7,10 @@
 spy.log
 logs/
 
+# H2 database files
+*.db.mv.db
+*.db.trace.db
+
 # Created by https://www.toptal.com/developers/gitignore/api/java,maven,intellij+iml,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,maven,intellij+iml,visualstudiocode
 

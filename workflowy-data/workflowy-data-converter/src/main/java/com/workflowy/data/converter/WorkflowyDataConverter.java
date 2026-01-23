@@ -43,6 +43,7 @@ import com.workflowy.UserFinder;
 import com.workflowy.VirtualRootMapping;
 import com.workflowy.VirtualRootMappingFinder;
 import com.workflowy.VirtualRootMappingList;
+import com.workflowy.data.pojo.InputAiMetadata;
 import com.workflowy.data.pojo.InputBacklinkMetadata;
 import com.workflowy.data.pojo.InputCalendarMetadata;
 import com.workflowy.data.pojo.InputItem;
@@ -154,13 +155,14 @@ public final class WorkflowyDataConverter {
 	}
 
 	private void processNodesPass1(List<InputItem> inputItems, String parentId, int startPriority) {
+		// Use multiples of 100 for priority to match API format (0, 100, 200, ...)
 		int priority = startPriority;
 		for (InputItem inputItem : inputItems) {
 			NodeContent nodeContent = this.createNodeContent(inputItem, parentId);
 			NodeMetadata nodeMetadata = this.createNodeMetadata(inputItem, priority);
 			this.nodeContents.put(inputItem.id(), nodeContent);
 			this.nodeMetadatas.put(inputItem.id(), nodeMetadata);
-			priority++;
+			priority += 100;
 
 			if (inputItem.hasChildren()) {
 				this.processNodesPass1(inputItem.children(), inputItem.id(), 0);
@@ -199,9 +201,9 @@ public final class WorkflowyDataConverter {
 			nodeMetadata.setVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
 			nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
 
-			if (metadata.ai() != null) {
-				nodeMetadata.setInChat(metadata.ai().inChat());
-			}
+			// Set inChat consistently with API converter (false when not present)
+			InputAiMetadata ai = metadata.ai();
+			nodeMetadata.setInChat(ai != null && Boolean.TRUE.equals(ai.inChat()));
 
 			if (metadata.mirror() != null) {
 				if (metadata.mirror().isMirrorRoot() != null) {
@@ -441,11 +443,15 @@ public final class WorkflowyDataConverter {
 				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
 					NodeMetadataFinder.getFinderInstance()
 				);
+				// Exclude audit fields
 				metadataMergeOptions.doNotCompare(
 					NodeMetadataFinder.createdById(),
 					NodeMetadataFinder.createdOn(),
 					NodeMetadataFinder.lastUpdatedById()
 				);
+				// Exclude priority - backup derives it from tree position, not real priority.
+				// API import has the real priorities and should update them.
+				metadataMergeOptions.doNotCompare(NodeMetadataFinder.priority());
 				existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
 
 				LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());

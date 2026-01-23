@@ -143,8 +143,12 @@ public final class WorkflowyApiDataConverter {
 		nodeContent.setId(node.id());
 		nodeContent.setParentId(node.parentId());
 		nodeContent.setName(node.name() != null ? node.name() : "");
-		nodeContent.setNote(node.note());
+		nodeContent.setNote(emptyToNull(node.note()));
 		return nodeContent;
+	}
+
+	private static String emptyToNull(String value) {
+		return value == null || value.isEmpty() ? null : value;
 	}
 
 	private NodeMetadata createNodeMetadata(ApiInputItem node) {
@@ -243,10 +247,21 @@ public final class WorkflowyApiDataConverter {
 				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
 					NodeMetadataFinder.getFinderInstance()
 				);
+				// Exclude audit fields
 				metadataMergeOptions.doNotCompare(
 					NodeMetadataFinder.createdById(),
 					NodeMetadataFinder.createdOn(),
 					NodeMetadataFinder.lastUpdatedById()
+				);
+				// Exclude fields not provided or incomplete in the API export format
+				metadataMergeOptions.doNotCompare(
+					NodeMetadataFinder.virtualRoot(),
+					NodeMetadataFinder.mirrorRoot(),
+					NodeMetadataFinder.originalId(),
+					NodeMetadataFinder.changes(),
+					NodeMetadataFinder.numberedStart(),
+					NodeMetadataFinder.collapsed(),
+					NodeMetadataFinder.lastModified() // API often returns null, preserve backup values
 				);
 				existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
 

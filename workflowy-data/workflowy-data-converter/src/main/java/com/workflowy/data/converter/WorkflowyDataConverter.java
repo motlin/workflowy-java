@@ -452,6 +452,18 @@ public final class WorkflowyDataConverter {
 				// Exclude priority - backup derives it from tree position, not real priority.
 				// API import has the real priorities and should update them.
 				metadataMergeOptions.doNotCompare(NodeMetadataFinder.priority());
+				// Exclude fields not compared in TypeScript backup import.
+				// Only compare: completed, completedAt, layoutMode, originalId
+				metadataMergeOptions.doNotCompare(
+					NodeMetadataFinder.collapsed(),
+					NodeMetadataFinder.virtualRoot(),
+					NodeMetadataFinder.referencesRoot(),
+					NodeMetadataFinder.inChat(),
+					NodeMetadataFinder.mirrorRoot(),
+					NodeMetadataFinder.changes(),
+					NodeMetadataFinder.numberedStart(),
+					NodeMetadataFinder.lastModified() // Exclude timestamp-only changes
+				);
 				existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
 
 				LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());

@@ -24,7 +24,7 @@ download-backups:
     #!/usr/bin/env bash
     set -Eeuo pipefail
     echo "📥 Downloading Workflowy backups via ../workflowy CLI"
-    cd ../workflowy && op run -- just download-backups
+    cd ../workflowy && just download-backups
 
 workflowy_api_key := env('WORKFLOWY_API_KEY', '')
 

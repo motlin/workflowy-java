@@ -37,6 +37,7 @@ public class WorkflowyApplication extends AbstractWorkflowyApplication {
 		super.initializeCommands(bootstrap);
 		bootstrap.addCommand(new WorkflowyImportCommand(this));
 		bootstrap.addCommand(new WorkflowyImportApiCommand(this));
+		bootstrap.addCommand(new WorkflowyRollbackCommand(this));
 		bootstrap.addCommand(new CacheStatusCommand(this));
 		bootstrap.addCommand(new ReadNodeCommand(this));
 		bootstrap.addCommand(new ListByIdCommand(this));

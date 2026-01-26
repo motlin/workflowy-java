@@ -51,6 +51,8 @@ import com.workflowy.data.pojo.InputMetadata;
 import com.workflowy.data.pojo.InputMirrorMetadata;
 import com.workflowy.data.pojo.InputS3FileMetadata;
 import cool.klass.data.store.DataStore;
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.list.fixed.ArrayAdapter;
@@ -438,6 +440,35 @@ public final class WorkflowyDataConverter {
 
 				LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
 				NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
+
+				// Apply order detection to minimize priority-related updates.
+				// This preserves existing priorities when sibling order hasn't changed.
+				Map<String, Integer> priorityUpdates = this.calculatePrioritiesWithOrderDetection(existingMetadatas);
+				LOGGER.info(
+					"Order detection: {} nodes need priority updates out of {}",
+					priorityUpdates.size(),
+					this.nodeMetadatas.size()
+				);
+
+				// Build map of existing priorities for preservation
+				MutableMap<String, Integer> existingPriorities = Maps.mutable.empty();
+				for (NodeMetadata meta : existingMetadatas) {
+					existingPriorities.put(meta.getNodeId(), meta.getPriority());
+				}
+
+				// Apply priorities: use calculated updates, or preserve existing
+				for (NodeMetadata meta : this.nodeMetadatas.values()) {
+					String nodeId = meta.getNodeId();
+					if (priorityUpdates.containsKey(nodeId)) {
+						// Order changed or new node - use calculated priority
+						meta.setPriority(priorityUpdates.get(nodeId));
+					} else if (existingPriorities.containsKey(nodeId)) {
+						// Order unchanged - preserve existing priority
+						meta.setPriority(existingPriorities.get(nodeId));
+					}
+					// New nodes not in priorityUpdates keep their initial priority (shouldn't happen)
+				}
+
 				NodeMetadataList updatedMetadatas = new NodeMetadataList();
 				updatedMetadatas.addAll(this.nodeMetadatas.values());
 				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
@@ -509,6 +540,86 @@ public final class WorkflowyDataConverter {
 			});
 
 		LOGGER.info("Completed merge for backup file: {}", this.backupFile.getName());
+	}
+
+	/**
+	 * Holds information about a sibling node for order detection.
+	 * backupIndex is the position in the backup file (0, 1, 2, ...).
+	 */
+	private record SiblingInfo(String nodeId, int backupIndex, Integer existingPriority) {
+		boolean isNew() {
+			return this.existingPriority == null;
+		}
+	}
+
+	/**
+	 * Calculates priorities using order detection to minimize unnecessary updates.
+	 * Only returns new priorities for nodes that actually need priority changes.
+	 *
+	 * <p>The algorithm detects whether the ORDER of siblings has changed, not just
+	 * their priority values. If siblings A, B, C exist in the DB and the backup
+	 * shows them in the same order, their existing priorities are preserved.
+	 */
+	private Map<String, Integer> calculatePrioritiesWithOrderDetection(NodeMetadataList existingMetadatas) {
+		// Build map of existing priorities
+		MutableMap<String, Integer> existingPriorities = Maps.mutable.empty();
+		for (NodeMetadata meta : existingMetadatas) {
+			existingPriorities.put(meta.getNodeId(), meta.getPriority());
+		}
+
+		// Group nodes by parent using nodeContents (which has parentId)
+		Map<String, List<SiblingInfo>> siblingsByParent = new LinkedHashMap<>();
+		int backupIndex = 0;
+		for (var entry : this.nodeContents.entrySet()) {
+			String nodeId = entry.getKey();
+			NodeContent content = entry.getValue();
+			String parentId = content.getParentId();
+			// Use empty string for root nodes
+			String groupKey = parentId != null ? parentId : "";
+
+			siblingsByParent
+				.computeIfAbsent(groupKey, (k) -> Lists.mutable.empty())
+				.add(new SiblingInfo(nodeId, siblingsByParent.get(groupKey).size(), existingPriorities.get(nodeId)));
+		}
+
+		// For each sibling group, detect if order changed
+		Map<String, Integer> priorityUpdates = new LinkedHashMap<>();
+		for (Map.Entry<String, List<SiblingInfo>> group : siblingsByParent.entrySet()) {
+			List<SiblingInfo> siblings = group.getValue();
+
+			// Check if any siblings are new
+			boolean hasNewNodes = siblings.stream().anyMatch(SiblingInfo::isNew);
+
+			// Get existing siblings sorted by their existing priority
+			List<SiblingInfo> existingSiblings = siblings
+				.stream()
+				.filter((s) -> !s.isNew())
+				.sorted(Comparator.comparingInt(SiblingInfo::existingPriority))
+				.toList();
+
+			// Compare order: extract node IDs in backup order vs DB order
+			List<String> backupOrder = siblings
+				.stream()
+				.filter((s) -> !s.isNew())
+				.map(SiblingInfo::nodeId)
+				.toList();
+			List<String> dbOrder = existingSiblings.stream().map(SiblingInfo::nodeId).toList();
+
+			boolean orderChanged = !backupOrder.equals(dbOrder);
+
+			if (orderChanged || hasNewNodes) {
+				// Recalculate all priorities for this group
+				int priority = 0;
+				for (SiblingInfo sibling : siblings) {
+					priorityUpdates.put(sibling.nodeId(), priority);
+					priority += 100;
+				}
+			}
+			// If order unchanged and no new nodes, don't add to priorityUpdates
+			// (existing priorities will be preserved by the caller)
+		}
+
+		return priorityUpdates;
 	}
 
 	private static Instant getHighWatermark() {

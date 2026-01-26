@@ -698,6 +698,9 @@
 
         <profile>
             <id>import-workflowy</id>
+            <properties>
+                <resetWatermark>false</resetWatermark>
+            </properties>
 
             <build>
                 <plugins>
@@ -723,6 +726,8 @@
                                         <argument>config.json5</argument>
                                         <argument>--backups-path</argument>
                                         <argument>${backupsPath}</argument>
+                                        <argument>--reset-watermark</argument>
+                                        <argument>${resetWatermark}</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

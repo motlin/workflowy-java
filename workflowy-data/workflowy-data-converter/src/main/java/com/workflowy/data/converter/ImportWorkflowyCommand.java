@@ -40,6 +40,12 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extend
 			.type(String.class)
 			.required(true)
 			.help("Path to the directory containing Workflowy backup files.");
+
+		subparser
+			.addArgument("--reset-watermark")
+			.type(Boolean.class)
+			.setDefault(false)
+			.help("Reset the import watermark before importing. Use this to fix corrupted temporal state.");
 	}
 
 	@Override
@@ -55,8 +61,14 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extend
 
 		String backupsPathString = namespace.getString("backups_path");
 		Path backupsPath = Paths.get(backupsPathString);
+		Boolean resetWatermark = namespace.getBoolean("reset_watermark");
 
 		LOGGER.info("backupsPath = {}", backupsPath);
+
+		if (Boolean.TRUE.equals(resetWatermark)) {
+			LOGGER.info("Resetting import watermark...");
+			WorkflowyDataConverter.resetWatermark(dataStore);
+		}
 
 		WorkflowyDataConverter.convert(backupsPath, environment.getObjectMapper(), dataStore);
 

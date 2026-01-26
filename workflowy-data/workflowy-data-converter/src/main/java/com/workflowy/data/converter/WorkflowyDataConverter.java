@@ -14,42 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gs.fw.common.mithra.MithraManagerProvider;
 import com.gs.fw.common.mithra.finder.Operation;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
-import com.workflowy.DataImportTimestamp;
-import com.workflowy.DataImportTimestampFinder;
-import com.workflowy.Mirror;
-import com.workflowy.MirrorFinder;
-import com.workflowy.MirrorList;
-import com.workflowy.NodeCalendar;
-import com.workflowy.NodeCalendarFinder;
-import com.workflowy.NodeCalendarLevels;
-import com.workflowy.NodeCalendarList;
-import com.workflowy.NodeContent;
-import com.workflowy.NodeContentFinder;
-import com.workflowy.NodeContentList;
-import com.workflowy.NodeMetadata;
-import com.workflowy.NodeMetadataFinder;
-import com.workflowy.NodeMetadataList;
-import com.workflowy.NodeS3File;
-import com.workflowy.NodeS3FileFinder;
-import com.workflowy.NodeS3FileList;
-import com.workflowy.NodeTagMapping;
-import com.workflowy.NodeTagMappingFinder;
-import com.workflowy.NodeTagMappingList;
-import com.workflowy.Tag;
-import com.workflowy.TagFinder;
-import com.workflowy.TagList;
-import com.workflowy.User;
-import com.workflowy.UserFinder;
-import com.workflowy.VirtualRootMapping;
-import com.workflowy.VirtualRootMappingFinder;
-import com.workflowy.VirtualRootMappingList;
-import com.workflowy.data.pojo.InputAiMetadata;
-import com.workflowy.data.pojo.InputBacklinkMetadata;
-import com.workflowy.data.pojo.InputCalendarMetadata;
-import com.workflowy.data.pojo.InputItem;
-import com.workflowy.data.pojo.InputMetadata;
-import com.workflowy.data.pojo.InputMirrorMetadata;
-import com.workflowy.data.pojo.InputS3FileMetadata;
+import com.workflowy.*;
+import com.workflowy.data.pojo.*;
 import cool.klass.data.store.DataStore;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
@@ -650,6 +616,25 @@ public final class WorkflowyDataConverter {
 		}
 
 		LOGGER.info("Stored high watermark: {}", instant);
+	}
+
+	/**
+	 * Resets the import watermark to allow re-processing all backup files.
+	 * Use this to recover from temporal corruption or to force a full re-import.
+	 */
+	public static void resetWatermark(@Nonnull DataStore dataStore) {
+		dataStore.runInTransaction((transaction) -> {
+			Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
+			DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
+
+			if (workflowyTimestamp != null) {
+				LOGGER.info("Deleting watermark with timestamp: {}", workflowyTimestamp.getTimestamp());
+				workflowyTimestamp.delete();
+			} else {
+				LOGGER.info("No watermark found to reset");
+			}
+			return null;
+		});
 	}
 
 	private static ImmutableList<File> getBackupFiles(Path backupsPath) {

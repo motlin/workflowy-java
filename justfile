@@ -54,6 +54,21 @@ import-data DAYS="10000" MVN=default_mvn:
         rm "$EXPORT_FILE"
     fi
 
+# Roll back to before the Nth-to-last backup import
+[group('data')]
+rollback-backups COUNT MVN=default_mvn:
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+    echo "⏪ Rolling back {{COUNT}} backup(s)..."
+    {{MVN}} install \
+        --projects workflowy-dropwizard-application \
+        --also-make \
+        -DskipTests
+    {{MVN}} exec:java \
+        --projects workflowy-dropwizard-application \
+        -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+        -Dexec.args="rollback-backups config.json5 --backups-path {{workflowy_backups_path}} --count {{COUNT}}"
+
 # `mise install`
 mise:
     mise install --quiet

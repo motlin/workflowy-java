@@ -265,6 +265,11 @@
 
         <dependency>
             <groupId>io.liftwizard</groupId>
+            <artifactId>liftwizard-reladomo-rollback</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.liftwizard</groupId>
             <artifactId>liftwizard-logging-p6spy</artifactId>
             <scope>runtime</scope>
         </dependency>

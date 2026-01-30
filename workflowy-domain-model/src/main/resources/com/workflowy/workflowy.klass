@@ -70,8 +70,8 @@ class NodeMetadata
     // Priority/position within siblings (0 = first)
     priority    : Integer min(0);
 
-    // Whether this node has been marked as completed
-    completed   : Boolean;
+    // Whether this node has been marked as completed (derived as true if completedAt is non-null)
+    completed   : Boolean derived;
 
     // Timestamp when the node was completed (null if not completed)
     completedAt : Instant?;
@@ -649,7 +649,7 @@ service NodeMetadataResource on NodeMetadata
         GET
         {
             multiplicity: many;
-            criteria    : this.completed == true;
+            criteria    : this.completedAt != null;
             projection  : NodeMetadataProjection;
             orderBy     : this.completedAt descending;
         }

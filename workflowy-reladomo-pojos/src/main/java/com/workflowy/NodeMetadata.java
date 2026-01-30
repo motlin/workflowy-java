@@ -15,4 +15,8 @@ public class NodeMetadata extends NodeMetadataAbstract {
 	public NodeMetadata() {
 		this(UtcInfinityTimestamp.getDefaultInfinity());
 	}
+
+	public boolean isCompleted() {
+		return this.getCompletedAt() != null;
+	}
 }

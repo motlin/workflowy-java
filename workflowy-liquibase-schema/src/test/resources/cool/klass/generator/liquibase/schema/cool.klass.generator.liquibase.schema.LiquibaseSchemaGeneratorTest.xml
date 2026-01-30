@@ -81,10 +81,6 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="COMPLETED" type="boolean">
-                <constraints nullable="false" />
-            </column>
-
             <column name="COMPLETED_AT" type="timestamp" />
 
             <column name="COLLAPSED" type="boolean">

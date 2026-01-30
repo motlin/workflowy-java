@@ -151,7 +151,6 @@ public final class WorkflowyDataConverter {
 		NodeMetadata nodeMetadata = new NodeMetadata();
 		nodeMetadata.setNodeId(inputItem.id());
 		nodeMetadata.setPriority(priority);
-		nodeMetadata.setCompleted(inputItem.isCompleted());
 		nodeMetadata.setCompletedAt(
 			WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.completedTimestamp())
 		);

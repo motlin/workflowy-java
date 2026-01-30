@@ -40,8 +40,7 @@ public class CacheStatusCommand extends AbstractReadOnlyCommand {
 		NodeContentList rootNodes = NodeContentFinder.findMany(rootNodesOp);
 		status.setRootNodes(rootNodes.size());
 
-		// Count completed nodes
-		Operation completedOp = NodeMetadataFinder.completed().eq(true);
+		Operation completedOp = NodeMetadataFinder.completedAt().isNotNull();
 		NodeMetadataList completedMetadata = NodeMetadataFinder.findMany(completedOp);
 		status.setCompletedNodes(completedMetadata.size());
 

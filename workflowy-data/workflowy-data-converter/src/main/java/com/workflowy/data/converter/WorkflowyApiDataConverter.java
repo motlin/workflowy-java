@@ -155,7 +155,6 @@ public final class WorkflowyApiDataConverter {
 		NodeMetadata nodeMetadata = new NodeMetadata();
 		nodeMetadata.setNodeId(node.id());
 		nodeMetadata.setPriority(node.priority());
-		nodeMetadata.setCompleted(node.completed());
 		nodeMetadata.setCompletedAt(WorkflowyTimestampConverter.convertUnixTimestamp(node.completedAt()));
 		nodeMetadata.setCollapsed(false);
 		nodeMetadata.setLastModified(WorkflowyTimestampConverter.convertUnixTimestamp(node.modifiedAt()));

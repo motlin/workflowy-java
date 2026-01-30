@@ -76,20 +76,38 @@ service TagResource on Tag
         }
 }
 
-service DataImportTimestampResource on DataImportTimestamp
+service BackupImportTimestampResource on BackupImportTimestamp
 {
-    /dataImportTimestamp/{name: String[1..1]}
+    /backupImportTimestamp/{name: String[1..1]}
         GET
         {
             multiplicity: one;
             criteria    : this.name == name;
-            projection  : DataImportTimestampProjection;
+            projection  : BackupImportTimestampProjection;
         }
-    /dataImportTimestamp
+    /backupImportTimestamp
         GET
         {
             multiplicity: many;
             criteria    : all;
-            projection  : DataImportTimestampProjection;
+            projection  : BackupImportTimestampProjection;
+        }
+}
+
+service ApiImportTimestampResource on ApiImportTimestamp
+{
+    /apiImportTimestamp/{name: String[1..1]}
+        GET
+        {
+            multiplicity: one;
+            criteria    : this.name == name;
+            projection  : ApiImportTimestampProjection;
+        }
+    /apiImportTimestamp
+        GET
+        {
+            multiplicity: many;
+            criteria    : all;
+            projection  : ApiImportTimestampProjection;
         }
 }

@@ -136,6 +136,32 @@ cli +ARGS:
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
         -Dexec.args="{{ARGS}} config.json5" --quiet
 
+# Roll back to keep data up to a specific backup date (deletes all data after)
+[group('data')]
+rollback-to-backup BACKUP_DATE MVN=default_mvn:
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+    echo "🔍 Finding SYSTEM_TO for backup dated {{BACKUP_DATE}}..."
+
+    # Query DATA_IMPORT_TIMESTAMP to find the SYSTEM_TO for this backup date
+    SYSTEM_TO=$(java -cp ~/.m2/repository/com/h2database/h2/2.3.232/h2-2.3.232.jar \
+        org.h2.tools.Shell \
+        -url "jdbc:h2:file:./workflowy-dropwizard-application/target/h2db/workflowy-h2;MODE=LEGACY" \
+        -user sa -password "" \
+        -sql "SELECT SYSTEM_TO FROM DATA_IMPORT_TIMESTAMP WHERE CAST(timestamp AS DATE) = '{{BACKUP_DATE}}'" \
+        | tail -1 | tr -d ' ')
+
+    if [[ -z "$SYSTEM_TO" || "$SYSTEM_TO" == "(0rows,"* ]]; then
+        echo "❌ No backup found for date {{BACKUP_DATE}}"
+        exit 1
+    fi
+
+    echo "⏪ Rolling back to SYSTEM_FROM >= $SYSTEM_TO (keeping data up to {{BACKUP_DATE}})..."
+    {{MVN}} exec:java \
+        --projects workflowy-dropwizard-application \
+        -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+        -Dexec.args="rollback-temporal config.json5 --date ${SYSTEM_TO}"
+
 # Override this with a command called `woof` which notifies you in whatever ways you prefer.
 # My `woof` command uses `echo`, `say`, and sends a Pushover notification.
 echo_command := env('ECHO_COMMAND', "echo")

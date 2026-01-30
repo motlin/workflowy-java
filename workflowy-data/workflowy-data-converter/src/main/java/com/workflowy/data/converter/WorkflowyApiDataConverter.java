@@ -2,16 +2,23 @@ package com.workflowy.data.converter;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gs.fw.common.mithra.MithraManagerProvider;
+import com.gs.fw.common.mithra.finder.Operation;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
+import com.workflowy.ApiImportTimestamp;
+import com.workflowy.ApiImportTimestampFinder;
+import com.workflowy.BackupImportTimestamp;
+import com.workflowy.BackupImportTimestampFinder;
 import com.workflowy.NodeContent;
 import com.workflowy.NodeContentFinder;
 import com.workflowy.NodeContentList;
@@ -214,6 +221,9 @@ public final class WorkflowyApiDataConverter {
 	}
 
 	private void mergeIntoDatabase(Instant importTime) {
+		// Validate that this import won't violate temporal ordering
+		validateImportTime(importTime);
+
 		this.ensureUserExists();
 
 		MithraManagerProvider.getMithraManager().setTransactionTimeout(3600);
@@ -271,10 +281,63 @@ public final class WorkflowyApiDataConverter {
 				);
 				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
+				storeApiHighWatermark(importTime);
+
 				return null;
 			});
 
 		LOGGER.info("Completed API export import");
+	}
+
+	private static Instant getBackupHighWatermark() {
+		Operation criteria = BackupImportTimestampFinder.name().eq("workflowy");
+		BackupImportTimestamp timestamp = BackupImportTimestampFinder.findOne(criteria);
+		return Optional.ofNullable(timestamp)
+			.map(BackupImportTimestamp::getTimestamp)
+			.map(Timestamp::toInstant)
+			.orElse(Instant.MIN);
+	}
+
+	private static Instant getApiHighWatermark() {
+		Operation criteria = ApiImportTimestampFinder.name().eq("workflowy");
+		ApiImportTimestamp timestamp = ApiImportTimestampFinder.findOne(criteria);
+		return Optional.ofNullable(timestamp)
+			.map(ApiImportTimestamp::getTimestamp)
+			.map(Timestamp::toInstant)
+			.orElse(Instant.MIN);
+	}
+
+	private static void validateImportTime(Instant proposedTime) {
+		Instant maxBackupTime = getBackupHighWatermark();
+		Instant maxApiTime = getApiHighWatermark();
+		Instant maxTime = maxBackupTime.isAfter(maxApiTime) ? maxBackupTime : maxApiTime;
+
+		if (proposedTime.isBefore(maxTime)) {
+			throw new IllegalStateException(
+				"Cannot import API data with time "
+				+ proposedTime
+				+ " which is before existing data at "
+				+ maxTime
+				+ ". Use 'rollback-temporal' command first to roll back to before this date."
+			);
+		}
+	}
+
+	private static void storeApiHighWatermark(@Nonnull Instant instant) {
+		Timestamp watermark = Timestamp.from(instant);
+		Operation criteria = ApiImportTimestampFinder.name().eq("workflowy");
+		ApiImportTimestamp timestamp = ApiImportTimestampFinder.findOne(criteria);
+
+		if (timestamp == null) {
+			ApiImportTimestamp newTimestamp = new ApiImportTimestamp();
+			newTimestamp.setName("workflowy");
+			newTimestamp.setTimestamp(watermark);
+			newTimestamp.insert();
+		} else {
+			timestamp.setTimestamp(watermark);
+		}
+
+		LOGGER.info("Stored API high watermark: {}", instant);
 	}
 
 	/**

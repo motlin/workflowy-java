@@ -151,10 +151,18 @@ projection VirtualRootMappingProjection on VirtualRootMapping
     },
 }
 
-projection DataImportTimestampProjection on DataImportTimestamp
+projection BackupImportTimestampProjection on BackupImportTimestamp
 {
-    name: "DataImportTimestamp name",
-    systemFrom: "DataImportTimestamp systemFrom",
-    systemTo: "DataImportTimestamp systemTo",
-    timestamp: "DataImportTimestamp timestamp",
+    name: "BackupImportTimestamp name",
+    systemFrom: "BackupImportTimestamp systemFrom",
+    systemTo: "BackupImportTimestamp systemTo",
+    timestamp: "BackupImportTimestamp timestamp",
+}
+
+projection ApiImportTimestampProjection on ApiImportTimestamp
+{
+    name: "ApiImportTimestamp name",
+    systemFrom: "ApiImportTimestamp systemFrom",
+    systemTo: "ApiImportTimestamp systemTo",
+    timestamp: "ApiImportTimestamp timestamp",
 }

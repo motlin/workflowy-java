@@ -14,7 +14,37 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gs.fw.common.mithra.MithraManagerProvider;
 import com.gs.fw.common.mithra.finder.Operation;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
-import com.workflowy.*;
+import com.workflowy.ApiImportTimestamp;
+import com.workflowy.ApiImportTimestampFinder;
+import com.workflowy.BackupImportTimestamp;
+import com.workflowy.BackupImportTimestampFinder;
+import com.workflowy.Mirror;
+import com.workflowy.MirrorFinder;
+import com.workflowy.MirrorList;
+import com.workflowy.NodeCalendar;
+import com.workflowy.NodeCalendarFinder;
+import com.workflowy.NodeCalendarLevels;
+import com.workflowy.NodeCalendarList;
+import com.workflowy.NodeContent;
+import com.workflowy.NodeContentFinder;
+import com.workflowy.NodeContentList;
+import com.workflowy.NodeMetadata;
+import com.workflowy.NodeMetadataFinder;
+import com.workflowy.NodeMetadataList;
+import com.workflowy.NodeS3File;
+import com.workflowy.NodeS3FileFinder;
+import com.workflowy.NodeS3FileList;
+import com.workflowy.NodeTagMapping;
+import com.workflowy.NodeTagMappingFinder;
+import com.workflowy.NodeTagMappingList;
+import com.workflowy.Tag;
+import com.workflowy.TagFinder;
+import com.workflowy.TagList;
+import com.workflowy.User;
+import com.workflowy.UserFinder;
+import com.workflowy.VirtualRootMapping;
+import com.workflowy.VirtualRootMappingFinder;
+import com.workflowy.VirtualRootMappingList;
 import com.workflowy.data.pojo.*;
 import cool.klass.data.store.DataStore;
 import org.eclipse.collections.api.factory.Lists;
@@ -61,7 +91,7 @@ public final class WorkflowyDataConverter {
 		@Nonnull ObjectMapper objectMapper,
 		@Nonnull DataStore dataStore
 	) {
-		Instant highWatermark = WorkflowyDataConverter.getHighWatermark();
+		Instant highWatermark = WorkflowyDataConverter.getBackupHighWatermark();
 
 		ImmutableList<File> filesToProcess = WorkflowyDataConverter.getBackupFiles(backupsPath).selectWith(
 			WorkflowyFileUtils::isAfterHighWatermark,
@@ -377,12 +407,18 @@ public final class WorkflowyDataConverter {
 		}
 	}
 
-	private void mergeIntoDatabase(Instant backupInstant) {
+	private void mergeIntoDatabase(Instant backupFileDate) {
+		// Use actual wall-clock time for SYSTEM_TIME, not the backfilled backup date
+		Instant importTime = Instant.now();
+
+		// Validate that this import won't violate temporal ordering
+		validateImportTime(importTime, backupFileDate);
+
 		this.ensureUserExists();
 
 		MithraManagerProvider.getMithraManager().setTransactionTimeout(3600);
 
-		long time = backupInstant.toEpochMilli();
+		long time = importTime.toEpochMilli();
 
 		this.dataStore.runInTransaction((transaction) -> {
 				transaction.setSystemTime(time);
@@ -499,7 +535,7 @@ public final class WorkflowyDataConverter {
 				);
 				existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
 
-				WorkflowyDataConverter.storeHighWatermark(backupInstant);
+				WorkflowyDataConverter.storeBackupHighWatermark(backupFileDate);
 
 				return null;
 			});
@@ -587,26 +623,53 @@ public final class WorkflowyDataConverter {
 		return priorityUpdates;
 	}
 
-	private static Instant getHighWatermark() {
-		Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
-		DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
+	private static Instant getBackupHighWatermark() {
+		Operation workflowyCriteria = BackupImportTimestampFinder.name().eq("workflowy");
+		BackupImportTimestamp workflowyTimestamp = BackupImportTimestampFinder.findOne(workflowyCriteria);
 
 		Instant highWatermark = Optional.ofNullable(workflowyTimestamp)
-			.map(DataImportTimestamp::getTimestamp)
+			.map(BackupImportTimestamp::getTimestamp)
 			.map(Timestamp::toInstant)
 			.orElse(Instant.MIN);
 
-		LOGGER.info("High watermark: {}", highWatermark);
+		LOGGER.info("Backup high watermark: {}", highWatermark);
 		return highWatermark;
 	}
 
-	private static void storeHighWatermark(@Nonnull Instant instant) {
+	private static Instant getApiHighWatermark() {
+		Operation criteria = ApiImportTimestampFinder.name().eq("workflowy");
+		ApiImportTimestamp timestamp = ApiImportTimestampFinder.findOne(criteria);
+		return Optional.ofNullable(timestamp)
+			.map(ApiImportTimestamp::getTimestamp)
+			.map(Timestamp::toInstant)
+			.orElse(Instant.MIN);
+	}
+
+	private static void validateImportTime(Instant proposedTime, Instant backupFileDate) {
+		Instant maxBackupTime = getBackupHighWatermark();
+		Instant maxApiTime = getApiHighWatermark();
+		Instant maxTime = maxBackupTime.isAfter(maxApiTime) ? maxBackupTime : maxApiTime;
+
+		if (proposedTime.isBefore(maxTime)) {
+			throw new IllegalStateException(
+				"Cannot import backup with date "
+				+ backupFileDate
+				+ " which would create SYSTEM_FROM "
+				+ proposedTime
+				+ " before existing data at "
+				+ maxTime
+				+ ". Use 'rollback-temporal' command first to roll back to before this date."
+			);
+		}
+	}
+
+	private static void storeBackupHighWatermark(@Nonnull Instant instant) {
 		Timestamp highWatermark = Timestamp.from(instant);
-		Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
-		DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
+		Operation workflowyCriteria = BackupImportTimestampFinder.name().eq("workflowy");
+		BackupImportTimestamp workflowyTimestamp = BackupImportTimestampFinder.findOne(workflowyCriteria);
 
 		if (workflowyTimestamp == null) {
-			DataImportTimestamp newTimestamp = new DataImportTimestamp();
+			BackupImportTimestamp newTimestamp = new BackupImportTimestamp();
 			newTimestamp.setName("workflowy");
 			newTimestamp.setTimestamp(highWatermark);
 			newTimestamp.insert();
@@ -614,7 +677,7 @@ public final class WorkflowyDataConverter {
 			workflowyTimestamp.setTimestamp(highWatermark);
 		}
 
-		LOGGER.info("Stored high watermark: {}", instant);
+		LOGGER.info("Stored backup high watermark: {}", instant);
 	}
 
 	/**
@@ -623,14 +686,14 @@ public final class WorkflowyDataConverter {
 	 */
 	public static void resetWatermark(@Nonnull DataStore dataStore) {
 		dataStore.runInTransaction((transaction) -> {
-			Operation workflowyCriteria = DataImportTimestampFinder.name().eq("workflowy");
-			DataImportTimestamp workflowyTimestamp = DataImportTimestampFinder.findOne(workflowyCriteria);
+			Operation workflowyCriteria = BackupImportTimestampFinder.name().eq("workflowy");
+			BackupImportTimestamp workflowyTimestamp = BackupImportTimestampFinder.findOne(workflowyCriteria);
 
 			if (workflowyTimestamp != null) {
-				LOGGER.info("Deleting watermark with timestamp: {}", workflowyTimestamp.getTimestamp());
+				LOGGER.info("Deleting backup watermark with timestamp: {}", workflowyTimestamp.getTimestamp());
 				workflowyTimestamp.delete();
 			} else {
-				LOGGER.info("No watermark found to reset");
+				LOGGER.info("No backup watermark found to reset");
 			}
 			return null;
 		});

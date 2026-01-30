@@ -364,10 +364,22 @@ association VirtualRootHasNodes
 }
 
 /*
- * DataImportTimestamp tracks the high watermark for incremental data imports.
+ * BackupImportTimestamp tracks the high watermark for backup file imports.
+ * The timestamp is the date from the backup filename (backfilled).
  * Used by the ingestion pipeline to only process new backup files.
  */
-class DataImportTimestamp
+class BackupImportTimestamp
+    systemTemporal
+{
+    name     : String key maxLength(64);
+    timestamp: Instant;
+}
+
+/*
+ * ApiImportTimestamp tracks when API imports were performed.
+ * The timestamp is the actual wall-clock time (Instant.now()).
+ */
+class ApiImportTimestamp
     systemTemporal
 {
     name     : String key maxLength(64);
@@ -531,6 +543,22 @@ projection NodeProjection on NodeContent
     mirrors     : MirrorProjection,
     s3File      : NodeS3FileProjection,
     virtualRoots: VirtualRootMappingProjection,
+}
+
+projection BackupImportTimestampProjection on BackupImportTimestamp
+{
+    name      : "BackupImportTimestamp name",
+    systemFrom: "BackupImportTimestamp systemFrom",
+    systemTo  : "BackupImportTimestamp systemTo",
+    timestamp : "BackupImportTimestamp timestamp",
+}
+
+projection ApiImportTimestampProjection on ApiImportTimestamp
+{
+    name      : "ApiImportTimestamp name",
+    systemFrom: "ApiImportTimestamp systemFrom",
+    systemTo  : "ApiImportTimestamp systemTo",
+    timestamp : "ApiImportTimestamp timestamp",
 }
 
 // ============================================================================

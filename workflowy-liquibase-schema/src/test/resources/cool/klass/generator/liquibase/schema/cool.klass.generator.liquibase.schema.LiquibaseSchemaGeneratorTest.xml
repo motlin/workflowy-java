@@ -321,10 +321,10 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-12-DATA_IMPORT_TIMESTAMP">
-        <createTable tableName="DATA_IMPORT_TIMESTAMP">
+    <changeSet author="Klass" id="initial-table-12-BACKUP_IMPORT_TIMESTAMP">
+        <createTable tableName="BACKUP_IMPORT_TIMESTAMP">
             <column name="NAME" type="varchar(64)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="DATA_IMPORT_TIMESTAMP_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="BACKUP_IMPORT_TIMESTAMP_PK" />
             </column>
 
             <column name="SYSTEM_FROM" type="timestamp">
@@ -332,7 +332,27 @@
             </column>
 
             <column name="SYSTEM_TO" type="timestamp">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="DATA_IMPORT_TIMESTAMP_PK" />
+                <constraints nullable="false" primaryKey="true" primaryKeyName="BACKUP_IMPORT_TIMESTAMP_PK" />
+            </column>
+
+            <column name="TIMESTAMP" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-table-13-API_IMPORT_TIMESTAMP">
+        <createTable tableName="API_IMPORT_TIMESTAMP">
+            <column name="NAME" type="varchar(64)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="API_IMPORT_TIMESTAMP_PK" />
+            </column>
+
+            <column name="SYSTEM_FROM" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_TO" type="timestamp">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="API_IMPORT_TIMESTAMP_PK" />
             </column>
 
             <column name="TIMESTAMP" type="timestamp">

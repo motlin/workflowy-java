@@ -72,7 +72,7 @@ rollback-backups COUNT MVN=default_mvn:
     {{MVN}} exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="rollback-backups config.json5 --backups-path {{workflowy_backups_path}} --count {{COUNT}}"
+        -Dexec.args="rollback-backups workflowy-dropwizard-application/config.json5 --backups-path {{workflowy_backups_path}} --count {{COUNT}}"
 
 # `mise install`
 mise:
@@ -97,19 +97,21 @@ demo MVN=default_mvn:
     echo "🔨 Building application..."
     {{MVN}} compile -pl workflowy-dropwizard-application -am -DskipTests --quiet
 
-    cd workflowy-dropwizard-application
+    CONFIG=workflowy-dropwizard-application/config.json5
 
     echo ""
     echo "📊 cache-status: Show cache statistics"
     {{MVN}} exec:java \
+        --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="cache-status config.json5 --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
+        -Dexec.args="cache-status $CONFIG --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
 
     echo ""
     echo "📂 list-by-id: List root nodes"
     ROOT_OUTPUT=$({{MVN}} exec:java \
+        --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="list-by-id config.json5 --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p')
+        -Dexec.args="list-by-id $CONFIG --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p')
     echo "$ROOT_OUTPUT"
     PLAIN_OUTPUT=$(echo "$ROOT_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g')
     FIRST_ID=$(echo "$PLAIN_OUTPUT" | jq -r '.[0].id // empty' 2>/dev/null)
@@ -119,15 +121,17 @@ demo MVN=default_mvn:
         echo ""
         echo "📖 read-node: Read node '$FIRST_ID' with depth=1"
         {{MVN}} exec:java \
+            --projects workflowy-dropwizard-application \
             -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-            -Dexec.args="read-node config.json5 --id \"$FIRST_ID\" --depth 1 --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
+            -Dexec.args="read-node $CONFIG --id \"$FIRST_ID\" --depth 1 --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
 
         if [[ -n "$FIRST_NAME" ]]; then
             echo ""
             echo "🗂️ list-by-path: Navigate to '$FIRST_NAME'"
             {{MVN}} exec:java \
+                --projects workflowy-dropwizard-application \
                 -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-                -Dexec.args="list-by-path config.json5 --path \"$FIRST_NAME\" --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p'
+                -Dexec.args="list-by-path $CONFIG --path \"$FIRST_NAME\" --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p'
         fi
     else
         echo ""
@@ -137,9 +141,10 @@ demo MVN=default_mvn:
 # Run a CLI command (e.g., `just cli cache-status`)
 [group('cli')]
 cli +ARGS:
-    cd workflowy-dropwizard-application && mvn exec:java \
+    mvn exec:java \
+        --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="{{ARGS}} config.json5" --quiet
+        -Dexec.args="{{ARGS}} workflowy-dropwizard-application/config.json5" --quiet
 
 # Roll back to keep data up to a specific backup date (deletes all data after)
 [group('data')]
@@ -165,7 +170,7 @@ rollback-to-backup BACKUP_DATE MVN=default_mvn:
     {{MVN}} exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="rollback-temporal config.json5 --date ${SYSTEM_TO}"
+        -Dexec.args="rollback-temporal workflowy-dropwizard-application/config.json5 --date ${SYSTEM_TO}"
 
 # Override this with a command called `woof` which notifies you in whatever ways you prefer.
 # My `woof` command uses `echo`, `say`, and sends a Pushover notification.

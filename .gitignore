@@ -7,10 +7,11 @@
 spy.log
 logs/
 
-# Embedding models
+# Embedding data (location from config.json5)
+/embeddings.sqlite
 /models/
 
-# Database files
+# H2 database files
 *.db.mv.db
 *.db.trace.db
 *.sqlite

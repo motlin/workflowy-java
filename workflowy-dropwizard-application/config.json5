@@ -24,8 +24,8 @@
 				},
 				{
 					type: "file-access-logstash",
-					currentLogFilename: "./logs/logstash-access.jsonl",
-					archivedLogFilenamePattern: "./logs/logstash-access-%d.jsonl",
+					currentLogFilename: "./workflowy-dropwizard-application/logs/logstash-access.jsonl",
+					archivedLogFilenamePattern: "./workflowy-dropwizard-application/logs/logstash-access-%d.jsonl",
 					includeCallerData: true,
 					filterFactories: [
 						{
@@ -80,8 +80,8 @@
 			},
 			{
 				type: "file-logstash",
-				currentLogFilename: "./logs/logstash.jsonl",
-				archivedLogFilenamePattern: "./logs/logstash-%d.jsonl",
+				currentLogFilename: "./workflowy-dropwizard-application/logs/logstash.jsonl",
+				archivedLogFilenamePattern: "./workflowy-dropwizard-application/logs/logstash-%d.jsonl",
 				encoder: {
 					includeContext: true,
 					includeMdc: true,
@@ -154,7 +154,7 @@
 			readOnlyByDefault: false,
 			user: "sa",
 			password: "",
-			url: "jdbc:p6spy:h2:file:./target/h2db/workflowy-h2",
+			url: "jdbc:p6spy:h2:file:./workflowy-dropwizard-application/target/h2db/workflowy-h2",
 			properties: {
 				charSet: "UTF-8",
 			},

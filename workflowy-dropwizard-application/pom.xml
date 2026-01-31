@@ -717,13 +717,14 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <executable>java</executable>
+                                    <workingDirectory>..</workingDirectory>
                                     <arguments>
                                         <argument>-Xmx8g</argument>
                                         <argument>-classpath</argument>
                                         <classpath />
                                         <argument>${mainClass}</argument>
                                         <argument>import-workflowy</argument>
-                                        <argument>config.json5</argument>
+                                        <argument>workflowy-dropwizard-application/config.json5</argument>
                                         <argument>--backups-path</argument>
                                         <argument>${backupsPath}</argument>
                                         <argument>--reset-watermark</argument>
@@ -755,13 +756,14 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <executable>java</executable>
+                                    <workingDirectory>..</workingDirectory>
                                     <arguments>
                                         <argument>-Xmx8g</argument>
                                         <argument>-classpath</argument>
                                         <classpath />
                                         <argument>${mainClass}</argument>
                                         <argument>import-workflowy-api</argument>
-                                        <argument>config.json5</argument>
+                                        <argument>workflowy-dropwizard-application/config.json5</argument>
                                         <argument>--api-export-file</argument>
                                         <argument>${apiExportFile}</argument>
                                     </arguments>

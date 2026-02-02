@@ -29,9 +29,14 @@ projection NodeContentProjection on NodeContent
         id: "NodeContent id",
     },
     mirrors: {
-        id: "Mirror id",
+        },
+    mirrorRecord: MirrorProjection,
+    mirrorCopies: {
+        id: "NodeContent id",
     },
-    asMirror: MirrorProjection,
+    originalNode: {
+        id: "NodeContent id",
+    },
     shares: SharedNodeProjection,
     tags: NodeTagMappingProjection,
     calendar: NodeCalendarProjection,
@@ -50,11 +55,7 @@ projection NodeMetadataProjection on NodeMetadata
     collapsed: "NodeMetadata collapsed",
     lastModified: "NodeMetadata lastModified",
     layoutMode: "NodeMetadata layoutMode",
-    virtualRoot: "NodeMetadata virtualRoot",
-    referencesRoot: "NodeMetadata referencesRoot",
     inChat: "NodeMetadata inChat",
-    mirrorRoot: "NodeMetadata mirrorRoot",
-    originalId: "NodeMetadata originalId",
     changes: "NodeMetadata changes",
     numberedStart: "NodeMetadata numberedStart",
     createdBy: {
@@ -67,10 +68,8 @@ projection NodeMetadataProjection on NodeMetadata
 
 projection MirrorProjection on Mirror
 {
-    id: "Mirror id",
     systemFrom: "Mirror systemFrom",
     systemTo: "Mirror systemTo",
-    backlink: "Mirror backlink",
 }
 
 projection SharedNodeProjection on SharedNode

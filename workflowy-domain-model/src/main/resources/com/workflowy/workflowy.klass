@@ -85,20 +85,9 @@ class NodeMetadata
     // Display layout mode (bullets, todo, h1, h2, h3, code-block, quote-block)
     layoutMode  : String? maxLength(32);
 
-    // Whether this node is a virtual root (from metadata.isVirtualRoot)
-    virtualRoot: Boolean?;
-
-    // Whether this node is a references root (from metadata.isReferencesRoot)
-    referencesRoot: Boolean?;
-
     // Whether this node is included in AI chat (from metadata.ai.inChat)
+    // TODO: Consider moving to AiMetadata sparse table when AI associations are defined
     inChat      : Boolean?;
-
-    // Whether this node is a mirror root (from metadata.mirror.isMirrorRoot)
-    mirrorRoot: Boolean?;
-
-    // Original ID for mirrored content (from metadata.originalId or metadata.mirror.originalId)
-    originalId  : String? maxLength(64);
 
     // Changes metadata stored as JSON (from metadata.changes)
     changes     : String? maxLength(10000);
@@ -135,42 +124,43 @@ association NodeHasChildren
  * Workflowy allows creating "live copies" of nodes called mirrors.
  * When you edit a mirrored node, changes appear everywhere it's mirrored.
  *
- * Terminology matches backup file:
- * - mirrorRootId: ID from metadata.mirror.mirrorRootIds (the original node)
- * - mirrorNodeId: The node that HAS the mirror metadata (the copy)
- * - isBacklink: true if from backlinkMirrorRootIds instead of mirrorRootIds
+ * Uses composite natural key (originalId, mirrorId) instead of surrogate key.
+ * Backlinks are handled separately in the Backlink class (future).
  */
 class Mirror
     systemTemporal
 {
-    id           : String key minLength(36) maxLength(36);
+    // The ID of the original node being mirrored
+    originalId : String key final minLength(36) maxLength(36);
 
-    // The ID of the original node (from mirrorRootIds keys)
-    mirrorRootId : String private final minLength(36) maxLength(36);
-
-    // The ID of the node that is the mirror (has the mirror metadata)
-    mirrorNodeId : String private final minLength(36) maxLength(36);
-
-    // True if this came from backlinkMirrorRootIds instead of mirrorRootIds
-    backlink   : Boolean;
+    // The ID of the node that is a mirror/copy
+    mirrorId   : String key final minLength(36) maxLength(36);
 }
 
 // Association from the original node to its mirrors
-association MirrorRootHasMirrors
+association OriginalNodeHasMirrors
 {
-    mirrorRoot : NodeContent[1..1] final;
-    mirrors    : Mirror[0..*];
+    original : NodeContent[1..1] final;
+    mirrors  : Mirror[0..*];
 
-    relationship this.id == Mirror.mirrorRootId
+    relationship this.id == Mirror.originalId
 }
 
-// Association from the mirror node back to its Mirror record
-association MirrorNodeHasMirror
+// Association from the mirror node to its Mirror record
+association MirrorNodeHasMirrorRecord
 {
-    mirrorNode : NodeContent[1..1] final;
-    asMirror   : Mirror[0..1];
+    mirrorNode   : NodeContent[1..1] final;
+    mirrorRecord : Mirror[0..1];
 
-    relationship this.id == Mirror.mirrorNodeId
+    relationship this.id == Mirror.mirrorId
+}
+
+association NodeHasMirrorCopies
+{
+    originalNode : NodeContent[1..1] final;
+    mirrorCopies : NodeContent[0..*];
+
+    relationship this.id == Mirror.originalId && Mirror.mirrorId == NodeContent.id
 }
 
 /*
@@ -452,8 +442,8 @@ projection SharedNodeProjection on SharedNode
 
 projection MirrorProjection on Mirror
 {
-    id        : "Mirror id",
-    backlink: "Mirror backlink",
+    originalId: "Mirror originalId",
+    mirrorId  : "Mirror mirrorId",
     systemFrom: "Mirror systemFrom",
     systemTo  : "Mirror systemTo",
 }
@@ -501,11 +491,7 @@ projection NodeMetadataProjection on NodeMetadata
     collapsed       : "NodeMetadata collapsed",
     lastModified    : "NodeMetadata lastModified",
     layoutMode      : "NodeMetadata layoutMode",
-    virtualRoot   : "NodeMetadata virtualRoot",
-    referencesRoot: "NodeMetadata referencesRoot",
     inChat          : "NodeMetadata inChat",
-    mirrorRoot    : "NodeMetadata mirrorRoot",
-    originalId      : "NodeMetadata originalId",
     changes         : "NodeMetadata changes",
     numberedStart   : "NodeMetadata numberedStart",
     systemFrom      : "NodeMetadata systemFrom",

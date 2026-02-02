@@ -71,12 +71,7 @@ public final class NodeContentDTOMapper {
 		dto.setCollapsed(metadata.isCollapsed());
 		dto.setLastModified(metadata.getLastModified() != null ? metadata.getLastModified().toInstant() : null);
 		dto.setLayoutMode(metadata.getLayoutMode());
-		// Handle nullable boolean fields - check isXxxNull() before calling isXxx()
-		dto.setVirtualRoot(metadata.isVirtualRootNull() ? null : metadata.isVirtualRoot());
-		dto.setReferencesRoot(metadata.isReferencesRootNull() ? null : metadata.isReferencesRoot());
 		dto.setInChat(metadata.isInChatNull() ? null : metadata.isInChat());
-		dto.setMirrorRoot(metadata.isMirrorRootNull() ? null : metadata.isMirrorRoot());
-		dto.setOriginalId(metadata.getOriginalId());
 		dto.setChanges(metadata.getChanges());
 		dto.setCreatedOn(metadata.getCreatedOn() != null ? metadata.getCreatedOn().toInstant() : null);
 		dto.setSystemFrom(metadata.getSystemFrom().toInstant());

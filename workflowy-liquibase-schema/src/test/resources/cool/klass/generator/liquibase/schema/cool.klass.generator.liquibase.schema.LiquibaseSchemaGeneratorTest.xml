@@ -91,15 +91,7 @@
 
             <column name="LAYOUT_MODE" type="varchar(32)" />
 
-            <column name="VIRTUAL_ROOT" type="boolean" />
-
-            <column name="REFERENCES_ROOT" type="boolean" />
-
             <column name="IN_CHAT" type="boolean" />
-
-            <column name="MIRROR_ROOT" type="boolean" />
-
-            <column name="ORIGINAL_ID" type="varchar(64)" />
 
             <column name="CHANGES" type="varchar(10000)" />
 
@@ -109,16 +101,12 @@
 
     <changeSet author="Klass" id="initial-table-4-MIRROR">
         <createTable tableName="MIRROR">
-            <column name="ID" type="varchar(36)">
+            <column name="ORIGINAL_ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="MIRROR_PK" />
             </column>
 
-            <column name="MIRROR_ROOT_ID" type="varchar(36)">
-                <constraints nullable="false" />
-            </column>
-
-            <column name="MIRROR_NODE_ID" type="varchar(36)">
-                <constraints nullable="false" />
+            <column name="MIRROR_ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="MIRROR_PK" />
             </column>
 
             <column name="SYSTEM_FROM" type="timestamp">
@@ -127,10 +115,6 @@
 
             <column name="SYSTEM_TO" type="timestamp">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="MIRROR_PK" />
-            </column>
-
-            <column name="BACKLINK" type="boolean">
-                <constraints nullable="false" />
             </column>
         </createTable>
     </changeSet>
@@ -388,11 +372,11 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-4-MIRROR_IDX_MIRROR_ROOT">
+    <changeSet author="Klass" id="initial-indices-4-MIRROR_IDX_ORIGINAL">
         <createIndex
-                indexName="MIRROR_IDX_MIRROR_ROOT"
+                indexName="MIRROR_IDX_ORIGINAL"
                 tableName="MIRROR">
-            <column name="MIRROR_ROOT_ID" />
+            <column name="ORIGINAL_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>
@@ -401,7 +385,7 @@
         <createIndex
                 indexName="MIRROR_IDX_MIRROR_NODE"
                 tableName="MIRROR">
-            <column name="MIRROR_NODE_ID" />
+            <column name="MIRROR_ID" />
             <column name="SYSTEM_TO" />
         </createIndex>
     </changeSet>

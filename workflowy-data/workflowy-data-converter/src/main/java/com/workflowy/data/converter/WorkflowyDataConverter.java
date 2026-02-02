@@ -195,26 +195,10 @@ public final class WorkflowyDataConverter {
 		InputMetadata metadata = inputItem.metadata();
 		if (metadata != null) {
 			nodeMetadata.setLayoutMode(normalizeLayoutMode(metadata.layoutMode()));
-			nodeMetadata.setVirtualRoot(Boolean.TRUE.equals(metadata.isVirtualRoot()));
-			nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(metadata.isReferencesRoot()));
 
 			// Set inChat consistently with API converter (false when not present)
 			InputAiMetadata ai = metadata.ai();
 			nodeMetadata.setInChat(ai != null && Boolean.TRUE.equals(ai.inChat()));
-
-			if (metadata.mirror() != null) {
-				if (metadata.mirror().isMirrorRoot() != null) {
-					nodeMetadata.setMirrorRoot(metadata.mirror().isMirrorRoot());
-				}
-				if (metadata.mirror().originalId() != null) {
-					nodeMetadata.setOriginalId(metadata.mirror().originalId());
-				}
-			}
-
-			// metadata.originalId takes precedence if both are present
-			if (metadata.originalId() != null) {
-				nodeMetadata.setOriginalId(metadata.originalId());
-			}
 
 			if (metadata.changes() != null) {
 				try {
@@ -299,33 +283,13 @@ public final class WorkflowyDataConverter {
 	private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta) {
 		for (String sourceId : mirrorMeta.getMirrorSourceIds()) {
 			Mirror mirror = new Mirror();
-			mirror.setId(UUID.randomUUID().toString());
-			mirror.setMirrorRootId(sourceId);
-			mirror.setMirrorNodeId(nodeId);
-			mirror.setBacklink(false);
-			this.mirrors.add(mirror);
-		}
-
-		for (String sourceId : mirrorMeta.getBacklinkMirrorIds()) {
-			Mirror mirror = new Mirror();
-			mirror.setId(UUID.randomUUID().toString());
-			mirror.setMirrorRootId(sourceId);
-			mirror.setMirrorNodeId(nodeId);
-			mirror.setBacklink(true);
+			mirror.setOriginalId(sourceId);
+			mirror.setMirrorId(nodeId);
 			this.mirrors.add(mirror);
 		}
 	}
 
-	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta) {
-		if (backlinkMeta.sourceId() != null && backlinkMeta.targetId() != null) {
-			Mirror mirror = new Mirror();
-			mirror.setId(UUID.randomUUID().toString());
-			mirror.setMirrorRootId(backlinkMeta.sourceId());
-			mirror.setMirrorNodeId(backlinkMeta.targetId());
-			mirror.setBacklink(true);
-			this.mirrors.add(mirror);
-		}
-	}
+	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta) {}
 
 	private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta) {
 		if (calendarMeta.date() != null) {
@@ -485,13 +449,10 @@ public final class WorkflowyDataConverter {
 				// API import has the real priorities and should update them.
 				metadataMergeOptions.doNotCompare(NodeMetadataFinder.priority());
 				// Exclude fields not compared in TypeScript backup import.
-				// Only compare: completed, completedAt, layoutMode, originalId
+				// Only compare: completed, completedAt, layoutMode
 				metadataMergeOptions.doNotCompare(
 					NodeMetadataFinder.collapsed(),
-					NodeMetadataFinder.virtualRoot(),
-					NodeMetadataFinder.referencesRoot(),
 					NodeMetadataFinder.inChat(),
-					NodeMetadataFinder.mirrorRoot(),
 					NodeMetadataFinder.changes(),
 					NodeMetadataFinder.numberedStart(),
 					NodeMetadataFinder.lastModified() // Exclude timestamp-only changes

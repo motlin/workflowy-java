@@ -42,11 +42,11 @@ service NodeContentResource on NodeContent
 
 service MirrorResource on Mirror
 {
-    /mirror/{id: String[1..1]}
+    /mirror/{originalId: String[1..1]}/{mirrorId: String[1..1]}
         GET
         {
             multiplicity: one;
-            criteria    : this.id == id;
+            criteria    : this.originalId == originalId && this.mirrorId == mirrorId;
             projection  : MirrorProjection;
         }
     /mirror

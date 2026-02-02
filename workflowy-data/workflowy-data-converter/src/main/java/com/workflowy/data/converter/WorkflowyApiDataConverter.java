@@ -170,7 +170,6 @@ public final class WorkflowyApiDataConverter {
 		nodeMetadata.setLastUpdatedById(this.userId);
 
 		nodeMetadata.setLayoutMode(normalizeLayoutMode(node.data().layoutMode()));
-		nodeMetadata.setReferencesRoot(Boolean.TRUE.equals(node.data().isReferencesRoot()));
 		InputAiMetadata ai = node.data().ai();
 		nodeMetadata.setInChat(ai != null && Boolean.TRUE.equals(ai.inChat()));
 
@@ -264,9 +263,6 @@ public final class WorkflowyApiDataConverter {
 				);
 				// Exclude fields not provided or incomplete in the API export format
 				metadataMergeOptions.doNotCompare(
-					NodeMetadataFinder.virtualRoot(),
-					NodeMetadataFinder.mirrorRoot(),
-					NodeMetadataFinder.originalId(),
 					NodeMetadataFinder.changes(),
 					NodeMetadataFinder.numberedStart(),
 					NodeMetadataFinder.collapsed(),

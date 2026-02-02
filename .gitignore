@@ -7,9 +7,13 @@
 spy.log
 logs/
 
-# H2 database files
+# Embedding models
+/models/
+
+# Database files
 *.db.mv.db
 *.db.trace.db
+*.sqlite
 
 # Created by https://www.toptal.com/developers/gitignore/api/java,maven,intellij+iml,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,maven,intellij+iml,visualstudiocode

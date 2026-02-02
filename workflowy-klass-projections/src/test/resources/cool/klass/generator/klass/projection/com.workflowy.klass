@@ -37,6 +37,16 @@ projection NodeContentProjection on NodeContent
     originalNode: {
         id: "NodeContent id",
     },
+    backlinks: {
+        },
+    incomingLinks: {
+        },
+    linkTargets: {
+        id: "NodeContent id",
+    },
+    linkSource: {
+        id: "NodeContent id",
+    },
     shares: SharedNodeProjection,
     tags: NodeTagMappingProjection,
     calendar: NodeCalendarProjection,
@@ -71,6 +81,12 @@ projection MirrorProjection on Mirror
 {
     systemFrom: "Mirror systemFrom",
     systemTo: "Mirror systemTo",
+}
+
+projection BacklinkProjection on Backlink
+{
+    systemFrom: "Backlink systemFrom",
+    systemTo: "Backlink systemTo",
 }
 
 projection SharedNodeProjection on SharedNode

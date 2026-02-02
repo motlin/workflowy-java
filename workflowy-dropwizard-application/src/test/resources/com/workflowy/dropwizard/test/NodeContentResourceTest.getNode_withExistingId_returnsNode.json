@@ -1,0 +1,125 @@
+{
+	"id": "00000000-0000-0000-0000-000000000001",
+	"name": "Root Node",
+	"note": "This is the root",
+	"systemFrom": "1999-12-31T23:59:59.999Z",
+	"systemTo": null,
+	"parent": null,
+	"metadata": {
+		"shortId": "short1",
+		"priority": 0,
+		"completed": false,
+		"completedAt": null,
+		"collapsed": false,
+		"lastModified": "1999-12-31T23:59:59.999Z",
+		"layoutMode": null,
+		"inChat": null,
+		"changes": null,
+		"numberedStart": null,
+		"systemFrom": "1999-12-31T23:59:59.999Z",
+		"systemTo": null,
+		"createdOn": "1999-12-31T23:59:59.999Z",
+		"createdBy": {
+			"userId": "test-user-1",
+			"email": "test@example.com",
+			"firstName": "Test",
+			"lastName": "User",
+			"systemFrom": "1999-12-31T23:59:59.999Z",
+			"systemTo": null
+		},
+		"lastUpdatedBy": {
+			"userId": "test-user-1",
+			"email": "test@example.com",
+			"firstName": "Test",
+			"lastName": "User",
+			"systemFrom": "1999-12-31T23:59:59.999Z",
+			"systemTo": null
+		}
+	},
+	"children": [
+		{
+			"id": "00000000-0000-0000-0000-000000000002",
+			"name": "Child 1",
+			"note": "First child note",
+			"systemFrom": "1999-12-31T23:59:59.999Z",
+			"systemTo": null,
+			"metadata": {
+				"shortId": "short2",
+				"priority": 0,
+				"completed": false,
+				"completedAt": null,
+				"collapsed": false,
+				"lastModified": "1999-12-31T23:59:59.999Z",
+				"layoutMode": null,
+				"inChat": null,
+				"changes": null,
+				"numberedStart": null,
+				"systemFrom": "1999-12-31T23:59:59.999Z",
+				"systemTo": null,
+				"createdOn": "1999-12-31T23:59:59.999Z",
+				"createdBy": {
+					"userId": "test-user-1",
+					"email": "test@example.com",
+					"firstName": "Test",
+					"lastName": "User",
+					"systemFrom": "1999-12-31T23:59:59.999Z",
+					"systemTo": null
+				},
+				"lastUpdatedBy": {
+					"userId": "test-user-1",
+					"email": "test@example.com",
+					"firstName": "Test",
+					"lastName": "User",
+					"systemFrom": "1999-12-31T23:59:59.999Z",
+					"systemTo": null
+				}
+			}
+		},
+		{
+			"id": "00000000-0000-0000-0000-000000000003",
+			"name": "Child 2",
+			"note": null,
+			"systemFrom": "1999-12-31T23:59:59.999Z",
+			"systemTo": null,
+			"metadata": {
+				"shortId": "short3",
+				"priority": 1,
+				"completed": true,
+				"completedAt": "2000-01-15T10:30:00Z",
+				"collapsed": false,
+				"lastModified": "2000-01-15T10:30:00Z",
+				"layoutMode": null,
+				"inChat": null,
+				"changes": null,
+				"numberedStart": null,
+				"systemFrom": "1999-12-31T23:59:59.999Z",
+				"systemTo": null,
+				"createdOn": "1999-12-31T23:59:59.999Z",
+				"createdBy": {
+					"userId": "test-user-1",
+					"email": "test@example.com",
+					"firstName": "Test",
+					"lastName": "User",
+					"systemFrom": "1999-12-31T23:59:59.999Z",
+					"systemTo": null
+				},
+				"lastUpdatedBy": {
+					"userId": "test-user-1",
+					"email": "test@example.com",
+					"firstName": "Test",
+					"lastName": "User",
+					"systemFrom": "1999-12-31T23:59:59.999Z",
+					"systemTo": null
+				}
+			}
+		}
+	],
+	"tags": [],
+	"calendar": null,
+	"shares": [],
+	"mirrors": [],
+	"backlinks": [],
+	"incomingLinks": [],
+	"s3File": null,
+	"virtualRoots": []
+}

@@ -21,7 +21,39 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 			.request()
 			.get();
 
-		this.assertResponseStatus(response, Status.OK);
+		this.assertResponse("getNode_withExistingId_returnsNode", Status.OK, response);
+	}
+
+	@Test
+	@ReladomoTestFile("test-data/basic-hierarchy.txt")
+	void getNode_withBacklinks_returnsBacklinks() {
+		Client client = this.getClient("getNode_withBacklinks_returnsBacklinks");
+
+		// Node 2 has a backlink pointing TO Node 3
+		Response response = client
+			.target("http://localhost:{port}/api/node/{id}")
+			.resolveTemplate("port", this.appExtension.getLocalPort())
+			.resolveTemplate("id", "00000000-0000-0000-0000-000000000002")
+			.request()
+			.get();
+
+		this.assertResponse("getNode_withBacklinks_returnsBacklinks", Status.OK, response);
+	}
+
+	@Test
+	@ReladomoTestFile("test-data/basic-hierarchy.txt")
+	void getNode_withIncomingLinks_returnsIncomingLinks() {
+		Client client = this.getClient("getNode_withIncomingLinks_returnsIncomingLinks");
+
+		// Node 3 has an incoming link FROM Node 2
+		Response response = client
+			.target("http://localhost:{port}/api/node/{id}")
+			.resolveTemplate("port", this.appExtension.getLocalPort())
+			.resolveTemplate("id", "00000000-0000-0000-0000-000000000003")
+			.request()
+			.get();
+
+		this.assertResponse("getNode_withIncomingLinks_returnsIncomingLinks", Status.OK, response);
 	}
 
 	@Test
@@ -51,7 +83,7 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 			.request()
 			.get();
 
-		this.assertResponseStatus(response, Status.OK);
+		this.assertResponse("getChildren_withExistingParent_returnsChildren", Status.OK, response);
 	}
 
 	@Test
@@ -65,7 +97,7 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 			.request()
 			.get();
 
-		this.assertResponseStatus(response, Status.OK);
+		this.assertResponse("getRootNodes_returnsRootNodes", Status.OK, response);
 	}
 
 	@Test
@@ -80,6 +112,6 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 			.request()
 			.get();
 
-		this.assertResponseStatus(response, Status.OK);
+		this.assertResponse("searchNodes_withMatchingQuery_returnsResults", Status.OK, response);
 	}
 }

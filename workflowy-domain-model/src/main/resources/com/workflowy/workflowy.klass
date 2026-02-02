@@ -129,7 +129,7 @@ association NodeHasChildren
  * When you edit a mirrored node, changes appear everywhere it's mirrored.
  *
  * Uses composite natural key (originalId, mirrorId) instead of surrogate key.
- * Backlinks are handled separately in the Backlink class (future).
+ * Note: Backlinks (explicit [[link]] references) are handled separately in the Backlink class.
  */
 class Mirror
     systemTemporal
@@ -165,6 +165,54 @@ association NodeHasMirrorCopies
     mirrorCopies : NodeContent[0..*];
 
     relationship this.id == Mirror.originalId && Mirror.mirrorId == NodeContent.id
+}
+
+/*
+ * Backlink represents an explicit [[link]] reference between nodes.
+ * Unlike mirrors (which are live copies of content), backlinks are references
+ * where one node explicitly links to another using [[link]] syntax.
+ *
+ * The sourceId is the node containing the [[link]] (where the link was written).
+ * The targetId is the node being linked to (the link destination).
+ *
+ * Uses composite natural key (sourceId, targetId) similar to Mirror.
+ */
+class Backlink
+    systemTemporal
+{
+    // The ID of the node containing the [[link]] (source of the link)
+    sourceId : String key final minLength(36) maxLength(36);
+
+    // The ID of the node being linked to (target/destination of the link)
+    targetId : String key final minLength(36) maxLength(36);
+}
+
+// Association from the source node (containing the [[link]]) to its backlinks
+association SourceNodeHasBacklinks
+{
+    source    : NodeContent[1..1] final;
+    backlinks : Backlink[0..*];
+
+    relationship this.id == Backlink.sourceId
+}
+
+// Association from the target node (being linked to) to backlinks pointing to it
+association TargetNodeHasIncomingLinks
+{
+    target        : NodeContent[1..1] final;
+    incomingLinks : Backlink[0..*];
+
+    relationship this.id == Backlink.targetId
+}
+
+// Direct many-to-many through Backlink table
+// Provides a direct path from source node to all nodes it links to
+association NodeLinksToNodes
+{
+    linkSource  : NodeContent[1..1] final;
+    linkTargets : NodeContent[0..*];
+
+    relationship this.id == Backlink.sourceId && Backlink.targetId == NodeContent.id
 }
 
 /*
@@ -452,6 +500,14 @@ projection MirrorProjection on Mirror
     systemTo  : "Mirror systemTo",
 }
 
+projection BacklinkProjection on Backlink
+{
+    sourceId  : "Backlink sourceId",
+    targetId  : "Backlink targetId",
+    systemFrom: "Backlink systemFrom",
+    systemTo  : "Backlink systemTo",
+}
+
 projection NodeS3FileProjection on NodeS3File
 {
     id                  : "NodeS3File id",
@@ -520,20 +576,22 @@ projection NodeSummaryProjection on NodeContent
 // Full projection including children and all metadata
 projection NodeProjection on NodeContent
 {
-    id          : "NodeContent id",
-    name        : "NodeContent name",
-    note        : "NodeContent note",
-    systemFrom  : "NodeContent systemFrom",
-    systemTo    : "NodeContent systemTo",
-    parent      : NodeContentProjection,
-    metadata    : NodeMetadataProjection,
-    children    : NodeSummaryProjection,
-    tags        : NodeTagMappingProjection,
-    calendar    : NodeCalendarProjection,
-    shares      : SharedNodeProjection,
-    mirrors     : MirrorProjection,
-    s3File      : NodeS3FileProjection,
-    virtualRoots: VirtualRootMappingProjection,
+    id           : "NodeContent id",
+    name         : "NodeContent name",
+    note         : "NodeContent note",
+    systemFrom   : "NodeContent systemFrom",
+    systemTo     : "NodeContent systemTo",
+    parent       : NodeContentProjection,
+    metadata     : NodeMetadataProjection,
+    children     : NodeSummaryProjection,
+    tags         : NodeTagMappingProjection,
+    calendar     : NodeCalendarProjection,
+    shares       : SharedNodeProjection,
+    mirrors      : MirrorProjection,
+    backlinks    : BacklinkProjection,
+    incomingLinks: BacklinkProjection,
+    s3File       : NodeS3FileProjection,
+    virtualRoots : VirtualRootMappingProjection,
 }
 
 projection BackupImportTimestampProjection on BackupImportTimestamp

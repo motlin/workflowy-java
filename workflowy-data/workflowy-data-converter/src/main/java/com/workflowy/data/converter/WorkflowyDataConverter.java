@@ -180,6 +180,7 @@ public final class WorkflowyDataConverter {
 	private NodeMetadata createNodeMetadata(InputItem inputItem, int priority) {
 		NodeMetadata nodeMetadata = new NodeMetadata();
 		nodeMetadata.setNodeId(inputItem.id());
+		nodeMetadata.setShortId(WorkflowyFileUtils.computeShortId(inputItem.id()));
 		nodeMetadata.setPriority(priority);
 		nodeMetadata.setCompletedAt(
 			WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.completedTimestamp())

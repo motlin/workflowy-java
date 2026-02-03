@@ -53,6 +53,11 @@ import-data DAYS="10000" MVN=default_mvn:
             -DapiExportFile="$EXPORT_FILE"
         rm "$EXPORT_FILE"
     fi
+    echo "🧠 Generating embeddings for new nodes..."
+    {{MVN}} exec:java \
+        --projects workflowy-dropwizard-application \
+        -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
+        -Dexec.args="embed-generate config.json5"
 
 # Roll back to before the Nth-to-last backup import
 [group('data')]

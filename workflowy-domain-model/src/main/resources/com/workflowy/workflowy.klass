@@ -67,6 +67,10 @@ class NodeMetadata
     // References the NodeContent this metadata belongs to
     nodeId      : String key private final minLength(36) maxLength(36);
 
+    // Short ID for URL lookups (last 12 hex chars of UUID, e.g., workflowy.com/#/abc123def456)
+    // Computed from nodeId by removing hyphens and taking last 12 characters
+    shortId     : String final minLength(12) maxLength(12);
+
     // Priority/position within siblings (0 = first)
     priority    : Integer min(0);
 
@@ -485,6 +489,7 @@ projection VirtualRootMappingProjection on VirtualRootMapping
 // Projection for NodeMetadata (non-embedding fields)
 projection NodeMetadataProjection on NodeMetadata
 {
+    shortId         : "NodeMetadata shortId",
     priority        : "NodeMetadata priority",
     completed       : "NodeMetadata completed",
     completedAt     : "NodeMetadata completedAt",

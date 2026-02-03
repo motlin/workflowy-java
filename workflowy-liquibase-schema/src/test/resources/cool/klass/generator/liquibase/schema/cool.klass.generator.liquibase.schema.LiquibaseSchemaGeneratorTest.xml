@@ -77,6 +77,10 @@
                 <constraints nullable="false" />
             </column>
 
+            <column name="SHORT_ID" type="varchar(12)">
+                <constraints nullable="false" />
+            </column>
+
             <column name="PRIORITY" type="int">
                 <constraints nullable="false" />
             </column>

@@ -49,6 +49,7 @@ projection NodeMetadataProjection on NodeMetadata
     systemFrom: "NodeMetadata systemFrom",
     systemTo: "NodeMetadata systemTo",
     createdOn: "NodeMetadata createdOn",
+    shortId: "NodeMetadata shortId",
     priority: "NodeMetadata priority",
     completed: "NodeMetadata completed",
     completedAt: "NodeMetadata completedAt",

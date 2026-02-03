@@ -49,4 +49,19 @@ public final class WorkflowyFileUtils {
 		Instant fileTimestamp = getFileTimestamp(filename);
 		return fileTimestamp.isAfter(highWatermark);
 	}
+
+	/**
+	 * Computes the short ID from a node's full UUID.
+	 * The short ID is the last 12 hex characters of the UUID (after removing hyphens),
+	 * used for short URLs like workflowy.com/#/abc123def456.
+	 *
+	 * <p>Example: UUID "12345678-1234-1234-1234-123456789abc" becomes "123456789abc"
+	 *
+	 * @param nodeId The full 36-character UUID string (with hyphens)
+	 * @return The 12-character short ID (hex characters only)
+	 */
+	public static String computeShortId(String nodeId) {
+		String hexOnly = nodeId.replace("-", "");
+		return hexOnly.substring(hexOnly.length() - 12);
+	}
 }

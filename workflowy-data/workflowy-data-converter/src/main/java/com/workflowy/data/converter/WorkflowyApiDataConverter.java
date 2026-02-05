@@ -164,7 +164,6 @@ public final class WorkflowyApiDataConverter {
 		nodeMetadata.setShortId(WorkflowyFileUtils.computeShortId(node.id()));
 		nodeMetadata.setPriority(node.priority());
 		nodeMetadata.setCompletedAt(WorkflowyTimestampConverter.convertUnixTimestamp(node.completedAt()));
-		nodeMetadata.setCollapsed(false);
 		nodeMetadata.setLastModified(WorkflowyTimestampConverter.convertUnixTimestamp(node.modifiedAt()));
 		nodeMetadata.setCreatedById(this.userId);
 		nodeMetadata.setCreatedOn(WorkflowyTimestampConverter.convertUnixTimestamp(node.createdAt()));
@@ -270,7 +269,6 @@ public final class WorkflowyApiDataConverter {
 				metadataMergeOptions.doNotCompare(
 					NodeMetadataFinder.changes(),
 					NodeMetadataFinder.numberedStart(),
-					NodeMetadataFinder.collapsed(),
 					NodeMetadataFinder.lastModified() // API often returns null, preserve backup values
 				);
 				existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);

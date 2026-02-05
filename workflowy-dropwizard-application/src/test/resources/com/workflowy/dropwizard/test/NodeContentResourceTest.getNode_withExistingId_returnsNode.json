@@ -10,7 +10,6 @@
 		"priority": 0,
 		"completed": false,
 		"completedAt": null,
-		"collapsed": false,
 		"lastModified": "1999-12-31T23:59:59.999Z",
 		"layoutMode": null,
 		"inChat": null,
@@ -36,6 +35,11 @@
 			"systemTo": null
 		}
 	},
+	"collapsedState": {
+		"collapsed": false,
+		"systemFrom": "1999-12-31T23:59:59.999Z",
+		"systemTo": null
+	},
 	"children": [
 		{
 			"id": "00000000-0000-0000-0000-000000000002",
@@ -48,7 +52,6 @@
 				"priority": 0,
 				"completed": false,
 				"completedAt": null,
-				"collapsed": false,
 				"lastModified": "1999-12-31T23:59:59.999Z",
 				"layoutMode": null,
 				"inChat": null,
@@ -86,7 +89,6 @@
 				"priority": 1,
 				"completed": true,
 				"completedAt": "2000-01-15T10:30:00Z",
-				"collapsed": false,
 				"lastModified": "2000-01-15T10:30:00Z",
 				"layoutMode": null,
 				"inChat": null,

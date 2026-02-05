@@ -80,9 +80,6 @@ class NodeMetadata
     // Timestamp when the node was completed (null if not completed)
     completedAt : Instant?;
 
-    // Whether this node is collapsed in the UI
-    collapsed   : Boolean;
-
     // Last modified timestamp from backup (lm field)
     lastModified: Instant?;
 
@@ -100,6 +97,24 @@ class NodeMetadata
     numberedStart: Integer?;
 }
 
+/*
+ * NodeCollapsed tracks the collapsed state of nodes.
+ * This is local UI state (not from the API or backup files) with different
+ * semantics from NodeMetadata - it persists user preferences for node expansion.
+ *
+ * Uses a sparse 1:1 table since the state comes from a different source,
+ * so is never updated at the same time temporally as NodeMetadata.
+ */
+class NodeCollapsed
+    systemTemporal
+{
+    // References the NodeContent this collapsed state belongs to
+    nodeId   : String key private final minLength(36) maxLength(36);
+
+    // Whether this node is collapsed in the UI
+    collapsed: Boolean;
+}
+
 // Note: NodeEmbedding is stored separately (e.g., SQLite) rather than in H2
 // because Klass doesn't have native binary type support and vector operations
 // are better handled by specialized databases.
@@ -111,6 +126,15 @@ association NodeHasMetadata
     metadata : NodeMetadata[0..1] owned;
 
     relationship this.id == NodeMetadata.nodeId
+}
+
+// Association: NodeCollapsed belongs to NodeContent (sparse 1:1 for UI state)
+association NodeHasCollapsed
+{
+    node          : NodeContent[1..1] final;
+    collapsedState: NodeCollapsed[0..1] owned;
+
+    relationship this.id == NodeCollapsed.nodeId
 }
 
 // Self-referential association for parent-child hierarchy
@@ -549,7 +573,6 @@ projection NodeMetadataProjection on NodeMetadata
     priority        : "NodeMetadata priority",
     completed       : "NodeMetadata completed",
     completedAt     : "NodeMetadata completedAt",
-    collapsed       : "NodeMetadata collapsed",
     lastModified    : "NodeMetadata lastModified",
     layoutMode      : "NodeMetadata layoutMode",
     inChat          : "NodeMetadata inChat",
@@ -560,6 +583,14 @@ projection NodeMetadataProjection on NodeMetadata
     createdOn       : "NodeMetadata createdOn",
     createdBy       : UserProjection,
     lastUpdatedBy   : UserProjection,
+}
+
+// Projection for NodeCollapsed (UI state for node expansion)
+projection NodeCollapsedProjection on NodeCollapsed
+{
+    collapsed : "NodeCollapsed collapsed",
+    systemFrom: "NodeCollapsed systemFrom",
+    systemTo  : "NodeCollapsed systemTo",
 }
 
 // Lightweight projection for listing nodes without nested data
@@ -576,22 +607,23 @@ projection NodeSummaryProjection on NodeContent
 // Full projection including children and all metadata
 projection NodeProjection on NodeContent
 {
-    id           : "NodeContent id",
-    name         : "NodeContent name",
-    note         : "NodeContent note",
-    systemFrom   : "NodeContent systemFrom",
-    systemTo     : "NodeContent systemTo",
-    parent       : NodeContentProjection,
-    metadata     : NodeMetadataProjection,
-    children     : NodeSummaryProjection,
-    tags         : NodeTagMappingProjection,
-    calendar     : NodeCalendarProjection,
-    shares       : SharedNodeProjection,
-    mirrors      : MirrorProjection,
-    backlinks    : BacklinkProjection,
-    incomingLinks: BacklinkProjection,
-    s3File       : NodeS3FileProjection,
-    virtualRoots : VirtualRootMappingProjection,
+    id            : "NodeContent id",
+    name          : "NodeContent name",
+    note          : "NodeContent note",
+    systemFrom    : "NodeContent systemFrom",
+    systemTo      : "NodeContent systemTo",
+    parent        : NodeContentProjection,
+    metadata      : NodeMetadataProjection,
+    collapsedState: NodeCollapsedProjection,
+    children      : NodeSummaryProjection,
+    tags          : NodeTagMappingProjection,
+    calendar      : NodeCalendarProjection,
+    shares        : SharedNodeProjection,
+    mirrors       : MirrorProjection,
+    backlinks     : BacklinkProjection,
+    incomingLinks : BacklinkProjection,
+    s3File        : NodeS3FileProjection,
+    virtualRoots  : VirtualRootMappingProjection,
 }
 
 projection BackupImportTimestampProjection on BackupImportTimestamp

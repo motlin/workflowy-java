@@ -22,6 +22,7 @@ projection NodeContentProjection on NodeContent
     name: "NodeContent name",
     note: "NodeContent note",
     metadata: NodeMetadataProjection,
+    collapsedState: NodeCollapsedProjection,
     children: {
         id: "NodeContent id",
     },
@@ -63,7 +64,6 @@ projection NodeMetadataProjection on NodeMetadata
     priority: "NodeMetadata priority",
     completed: "NodeMetadata completed",
     completedAt: "NodeMetadata completedAt",
-    collapsed: "NodeMetadata collapsed",
     lastModified: "NodeMetadata lastModified",
     layoutMode: "NodeMetadata layoutMode",
     inChat: "NodeMetadata inChat",
@@ -75,6 +75,13 @@ projection NodeMetadataProjection on NodeMetadata
     lastUpdatedBy: {
         userId: "User userId",
     },
+}
+
+projection NodeCollapsedProjection on NodeCollapsed
+{
+    systemFrom: "NodeCollapsed systemFrom",
+    systemTo: "NodeCollapsed systemTo",
+    collapsed: "NodeCollapsed collapsed",
 }
 
 projection MirrorProjection on Mirror

@@ -185,7 +185,6 @@ public final class WorkflowyDataConverter {
 		nodeMetadata.setCompletedAt(
 			WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.completedTimestamp())
 		);
-		nodeMetadata.setCollapsed(false);
 		nodeMetadata.setLastModified(
 			WorkflowyTimestampConverter.convertWorkflowyTimestamp(inputItem.lastModifiedTimestamp())
 		);
@@ -456,7 +455,6 @@ public final class WorkflowyDataConverter {
 				// Exclude fields not compared in TypeScript backup import.
 				// Only compare: completed, completedAt, layoutMode
 				metadataMergeOptions.doNotCompare(
-					NodeMetadataFinder.collapsed(),
 					NodeMetadataFinder.inChat(),
 					NodeMetadataFinder.changes(),
 					NodeMetadataFinder.numberedStart(),

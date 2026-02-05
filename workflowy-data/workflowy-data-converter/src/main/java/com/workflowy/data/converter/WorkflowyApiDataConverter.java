@@ -238,6 +238,7 @@ public final class WorkflowyApiDataConverter {
 				TagList updatedTags = new TagList();
 				updatedTags.addAll(this.tags.values());
 				TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
+				tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
 				existingTags.merge(updatedTags, tagMergeOptions);
 
 				LOGGER.info("Merging {} node contents", this.nodeContents.size());
@@ -247,6 +248,7 @@ public final class WorkflowyApiDataConverter {
 				TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(
 					NodeContentFinder.getFinderInstance()
 				);
+				contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
 				existingContents.merge(updatedContents, contentMergeOptions);
 
 				LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
@@ -256,8 +258,10 @@ public final class WorkflowyApiDataConverter {
 				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
 					NodeMetadataFinder.getFinderInstance()
 				);
-				// Exclude audit fields
+				// Exclude temporal and audit fields
 				metadataMergeOptions.doNotCompare(
+					NodeMetadataFinder.systemFrom(),
+					NodeMetadataFinder.systemTo(),
 					NodeMetadataFinder.createdById(),
 					NodeMetadataFinder.createdOn(),
 					NodeMetadataFinder.lastUpdatedById()
@@ -276,6 +280,7 @@ public final class WorkflowyApiDataConverter {
 				TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions = new TopLevelMergeOptions<>(
 					NodeTagMappingFinder.getFinderInstance()
 				);
+				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
 				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
 				storeApiHighWatermark(importTime);

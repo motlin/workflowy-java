@@ -393,6 +393,7 @@ public final class WorkflowyDataConverter {
 				TagList updatedTags = new TagList();
 				updatedTags.addAll(this.tags.values());
 				TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
+				tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
 				existingTags.merge(updatedTags, tagMergeOptions);
 
 				LOGGER.info("Merging {} node contents", this.nodeContents.size());
@@ -402,6 +403,7 @@ public final class WorkflowyDataConverter {
 				TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(
 					NodeContentFinder.getFinderInstance()
 				);
+				contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
 				existingContents.merge(updatedContents, contentMergeOptions);
 
 				LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
@@ -440,8 +442,10 @@ public final class WorkflowyDataConverter {
 				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
 					NodeMetadataFinder.getFinderInstance()
 				);
-				// Exclude audit fields
+				// Exclude temporal and audit fields
 				metadataMergeOptions.doNotCompare(
+					NodeMetadataFinder.systemFrom(),
+					NodeMetadataFinder.systemTo(),
 					NodeMetadataFinder.createdById(),
 					NodeMetadataFinder.createdOn(),
 					NodeMetadataFinder.lastUpdatedById()
@@ -465,6 +469,7 @@ public final class WorkflowyDataConverter {
 				TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions = new TopLevelMergeOptions<>(
 					NodeTagMappingFinder.getFinderInstance()
 				);
+				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
 				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
 				LOGGER.info("Merging {} mirrors", this.mirrors.size());
@@ -472,6 +477,7 @@ public final class WorkflowyDataConverter {
 				TopLevelMergeOptions<Mirror> mirrorMergeOptions = new TopLevelMergeOptions<>(
 					MirrorFinder.getFinderInstance()
 				);
+				mirrorMergeOptions.doNotCompare(MirrorFinder.systemFrom(), MirrorFinder.systemTo());
 				existingMirrors.merge(this.mirrors, mirrorMergeOptions);
 
 				LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
@@ -479,6 +485,7 @@ public final class WorkflowyDataConverter {
 				TopLevelMergeOptions<NodeCalendar> calendarMergeOptions = new TopLevelMergeOptions<>(
 					NodeCalendarFinder.getFinderInstance()
 				);
+				calendarMergeOptions.doNotCompare(NodeCalendarFinder.systemFrom(), NodeCalendarFinder.systemTo());
 				existingCalendars.merge(this.nodeCalendars, calendarMergeOptions);
 
 				LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
@@ -486,6 +493,7 @@ public final class WorkflowyDataConverter {
 				TopLevelMergeOptions<NodeS3File> s3FileMergeOptions = new TopLevelMergeOptions<>(
 					NodeS3FileFinder.getFinderInstance()
 				);
+				s3FileMergeOptions.doNotCompare(NodeS3FileFinder.systemFrom(), NodeS3FileFinder.systemTo());
 				existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
 
 				LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
@@ -494,6 +502,10 @@ public final class WorkflowyDataConverter {
 				);
 				TopLevelMergeOptions<VirtualRootMapping> virtualRootMergeOptions = new TopLevelMergeOptions<>(
 					VirtualRootMappingFinder.getFinderInstance()
+				);
+				virtualRootMergeOptions.doNotCompare(
+					VirtualRootMappingFinder.systemFrom(),
+					VirtualRootMappingFinder.systemTo()
 				);
 				existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
 

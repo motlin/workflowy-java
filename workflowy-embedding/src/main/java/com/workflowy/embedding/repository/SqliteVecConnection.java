@@ -39,7 +39,7 @@ public class SqliteVecConnection implements AutoCloseable {
 
 	public SqliteVecConnection(String databasePath) throws SQLException {
 		this.databasePath = databasePath;
-		this.connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
+		this.connection = DriverManager.getConnection("jdbc:sqlite:" + databasePath + "?enable_load_extension=true");
 
 		this.initializeDatabase();
 	}
@@ -74,27 +74,25 @@ public class SqliteVecConnection implements AutoCloseable {
 		String osName = System.getProperty("os.name").toLowerCase();
 		String osArch = System.getProperty("os.arch").toLowerCase();
 
+		String platformDir;
 		String libraryName;
 		if (osName.contains("mac")) {
-			if (osArch.contains("aarch64") || osArch.contains("arm")) {
-				libraryName = "vec0-darwin-aarch64.dylib";
-			} else {
-				libraryName = "vec0-darwin-x86_64.dylib";
-			}
+			libraryName = "vec0.dylib";
+			platformDir = (osArch.contains("aarch64") || osArch.contains("arm"))
+				? "macos-aarch64" : "macos-x86_64";
 		} else if (osName.contains("linux")) {
-			if (osArch.contains("aarch64") || osArch.contains("arm")) {
-				libraryName = "vec0-linux-aarch64.so";
-			} else {
-				libraryName = "vec0-linux-x86_64.so";
-			}
+			libraryName = "vec0.so";
+			platformDir = (osArch.contains("aarch64") || osArch.contains("arm"))
+				? "linux-aarch64" : "linux-x86_64";
 		} else if (osName.contains("windows")) {
-			libraryName = "vec0-windows-x86_64.dll";
+			libraryName = "vec0.dll";
+			platformDir = "windows-x86_64";
 		} else {
 			LOGGER.warn("Unsupported OS for sqlite-vec: {}", osName);
 			return null;
 		}
 
-		String resourcePath = "/sqlite-vec/" + libraryName;
+		String resourcePath = "/sqlite-vec/" + platformDir + "/" + libraryName;
 		try (InputStream is = this.getClass().getResourceAsStream(resourcePath)) {
 			if (is == null) {
 				LOGGER.warn("sqlite-vec native library not found in resources: {}", resourcePath);

@@ -13,6 +13,7 @@
     <properties>
         <djl.version>0.36.0</djl.version>
         <sqlite.version>3.51.2.0</sqlite.version>
+        <sqlite-vec.version>0.1.6</sqlite-vec.version>
     </properties>
 
     <dependencies>
@@ -102,4 +103,114 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.github.download-maven-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>download-sqlite-vec-macos-aarch64</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://github.com/asg017/sqlite-vec/releases/download/v${sqlite-vec.version}/sqlite-vec-${sqlite-vec.version}-loadable-macos-aarch64.tar.gz</url>
+                            <outputDirectory>${project.build.directory}/sqlite-vec-native/macos-aarch64</outputDirectory>
+                            <unpack>true</unpack>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-sqlite-vec-macos-x86_64</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://github.com/asg017/sqlite-vec/releases/download/v${sqlite-vec.version}/sqlite-vec-${sqlite-vec.version}-loadable-macos-x86_64.tar.gz</url>
+                            <outputDirectory>${project.build.directory}/sqlite-vec-native/macos-x86_64</outputDirectory>
+                            <unpack>true</unpack>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-sqlite-vec-linux-aarch64</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://github.com/asg017/sqlite-vec/releases/download/v${sqlite-vec.version}/sqlite-vec-${sqlite-vec.version}-loadable-linux-aarch64.tar.gz</url>
+                            <outputDirectory>${project.build.directory}/sqlite-vec-native/linux-aarch64</outputDirectory>
+                            <unpack>true</unpack>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-sqlite-vec-linux-x86_64</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://github.com/asg017/sqlite-vec/releases/download/v${sqlite-vec.version}/sqlite-vec-${sqlite-vec.version}-loadable-linux-x86_64.tar.gz</url>
+                            <outputDirectory>${project.build.directory}/sqlite-vec-native/linux-x86_64</outputDirectory>
+                            <unpack>true</unpack>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-sqlite-vec-windows-x86_64</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <url>https://github.com/asg017/sqlite-vec/releases/download/v${sqlite-vec.version}/sqlite-vec-${sqlite-vec.version}-loadable-windows-x86_64.tar.gz</url>
+                            <outputDirectory>${project.build.directory}/sqlite-vec-native/windows-x86_64</outputDirectory>
+                            <unpack>true</unpack>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-sqlite-vec-resources</id>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/sqlite-vec-native/macos-aarch64</directory>
+                                    <targetPath>sqlite-vec/macos-aarch64</targetPath>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/sqlite-vec-native/macos-x86_64</directory>
+                                    <targetPath>sqlite-vec/macos-x86_64</targetPath>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/sqlite-vec-native/linux-aarch64</directory>
+                                    <targetPath>sqlite-vec/linux-aarch64</targetPath>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/sqlite-vec-native/linux-x86_64</directory>
+                                    <targetPath>sqlite-vec/linux-x86_64</targetPath>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/sqlite-vec-native/windows-x86_64</directory>
+                                    <targetPath>sqlite-vec/windows-x86_64</targetPath>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

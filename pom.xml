@@ -41,7 +41,7 @@
         <app.rootPackageName>com.workflowy</app.rootPackageName>
         <app.name>Workflowy</app.name>
         <mainClass>${app.rootPackageName}.dropwizard.application.WorkflowyApplication</mainClass>
-        <liftwizard.version>2.1.41</liftwizard.version>
+        <liftwizard.version>2.1.42</liftwizard.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

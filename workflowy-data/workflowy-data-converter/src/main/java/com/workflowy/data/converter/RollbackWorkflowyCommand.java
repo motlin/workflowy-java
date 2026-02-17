@@ -101,7 +101,7 @@ public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration> exte
 
 		LOGGER.info("Rolling back to: {}", rollbackTarget);
 
-		ReladomoTemporalRollback rollback = new ReladomoTemporalRollback(rollbackTarget);
+		var rollback = new ReladomoTemporalRollback(rollbackTarget);
 		rollback.rollbackAllTables();
 
 		WorkflowyDataConverter.resetWatermark(dataStore);

@@ -169,7 +169,7 @@ public final class WorkflowyDataConverter {
 	}
 
 	private NodeContent createNodeContent(InputItem inputItem, String parentId) {
-		NodeContent nodeContent = new NodeContent();
+		var nodeContent = new NodeContent();
 		nodeContent.setId(inputItem.id());
 		nodeContent.setParentId(parentId);
 		nodeContent.setName(inputItem.name() != null ? inputItem.name() : "");
@@ -178,7 +178,7 @@ public final class WorkflowyDataConverter {
 	}
 
 	private NodeMetadata createNodeMetadata(InputItem inputItem, int priority) {
-		NodeMetadata nodeMetadata = new NodeMetadata();
+		var nodeMetadata = new NodeMetadata();
 		nodeMetadata.setNodeId(inputItem.id());
 		nodeMetadata.setShortId(WorkflowyFileUtils.computeShortId(inputItem.id()));
 		nodeMetadata.setPriority(priority);
@@ -231,13 +231,13 @@ public final class WorkflowyDataConverter {
 
 		for (String tagName : extractedTags) {
 			this.tags.computeIfAbsent(tagName, (t) -> {
-					Tag newTag = new Tag();
+					var newTag = new Tag();
 					newTag.setName(t);
 					newTag.setColor(null);
 					return newTag;
 				});
 
-			NodeTagMapping mapping = new NodeTagMapping();
+			var mapping = new NodeTagMapping();
 			mapping.setNodeId(nodeContent.getId());
 			mapping.setTagName(tagName);
 			this.nodeTagMappings.add(mapping);
@@ -282,7 +282,7 @@ public final class WorkflowyDataConverter {
 
 	private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta) {
 		for (String sourceId : mirrorMeta.getMirrorSourceIds()) {
-			Mirror mirror = new Mirror();
+			var mirror = new Mirror();
 			mirror.setOriginalId(sourceId);
 			mirror.setMirrorId(nodeId);
 			this.mirrors.add(mirror);
@@ -295,7 +295,7 @@ public final class WorkflowyDataConverter {
 		if (calendarMeta.date() != null) {
 			Timestamp dateValue = WorkflowyTimestampConverter.parseCalendarDate(calendarMeta.date());
 			if (dateValue != null) {
-				NodeCalendar nodeCalendar = new NodeCalendar();
+				var nodeCalendar = new NodeCalendar();
 				nodeCalendar.setId(UUID.randomUUID().toString());
 				nodeCalendar.setNodeId(nodeId);
 				nodeCalendar.setDateValue(dateValue);
@@ -305,7 +305,7 @@ public final class WorkflowyDataConverter {
 				nodeCalendar.setTimestamp(calendarMeta.timestamp());
 				nodeCalendar.setValue(calendarMeta.value());
 				if (calendarMeta.levels() != null) {
-					NodeCalendarLevels levels = new NodeCalendarLevels();
+					var levels = new NodeCalendarLevels();
 					levels.setCalendarId(nodeCalendar.getId());
 					levels.setDay(calendarMeta.levels().day());
 					levels.setWeek(calendarMeta.levels().week());
@@ -326,7 +326,7 @@ public final class WorkflowyDataConverter {
 	}
 
 	private void processS3FileMetadata(String nodeId, InputS3FileMetadata s3FileMeta) {
-		NodeS3File nodeS3File = new NodeS3File();
+		var nodeS3File = new NodeS3File();
 		nodeS3File.setId(UUID.randomUUID().toString());
 		nodeS3File.setNodeId(nodeId);
 		nodeS3File.setFile(s3FileMeta.isFile() != null && s3FileMeta.isFile());
@@ -350,7 +350,7 @@ public final class WorkflowyDataConverter {
 
 	private void processVirtualRootIds(String nodeId, Map<String, Boolean> virtualRootIds) {
 		for (String virtualRootId : virtualRootIds.keySet()) {
-			VirtualRootMapping mapping = new VirtualRootMapping();
+			var mapping = new VirtualRootMapping();
 			mapping.setNodeId(nodeId);
 			mapping.setVirtualRootId(virtualRootId);
 			this.virtualRootMappings.add(mapping);
@@ -362,7 +362,7 @@ public final class WorkflowyDataConverter {
 		if (existingUser == null) {
 			LOGGER.info("Creating user: {}", this.userId);
 			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) -> {
-					User user = new User();
+					var user = new User();
 					user.setUserId(this.userId);
 					user.setEmail(this.userId);
 					user.insert();
@@ -389,19 +389,17 @@ public final class WorkflowyDataConverter {
 
 				LOGGER.info("Merging {} tags", this.tags.size());
 				TagList existingTags = TagFinder.findMany(TagFinder.all());
-				TagList updatedTags = new TagList();
+				var updatedTags = new TagList();
 				updatedTags.addAll(this.tags.values());
-				TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
+				var tagMergeOptions = new TopLevelMergeOptions<Tag>(TagFinder.getFinderInstance());
 				tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
 				existingTags.merge(updatedTags, tagMergeOptions);
 
 				LOGGER.info("Merging {} node contents", this.nodeContents.size());
 				NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
-				NodeContentList updatedContents = new NodeContentList();
+				var updatedContents = new NodeContentList();
 				updatedContents.addAll(this.nodeContents.values());
-				TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(
-					NodeContentFinder.getFinderInstance()
-				);
+				var contentMergeOptions = new TopLevelMergeOptions<NodeContent>(NodeContentFinder.getFinderInstance());
 				contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
 				existingContents.merge(updatedContents, contentMergeOptions);
 
@@ -436,9 +434,9 @@ public final class WorkflowyDataConverter {
 					// New nodes not in priorityUpdates keep their initial priority (shouldn't happen)
 				}
 
-				NodeMetadataList updatedMetadatas = new NodeMetadataList();
+				var updatedMetadatas = new NodeMetadataList();
 				updatedMetadatas.addAll(this.nodeMetadatas.values());
-				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
+				var metadataMergeOptions = new TopLevelMergeOptions<NodeMetadata>(
 					NodeMetadataFinder.getFinderInstance()
 				);
 				// Exclude temporal and audit fields
@@ -464,7 +462,7 @@ public final class WorkflowyDataConverter {
 
 				LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
 				NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
-				TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions = new TopLevelMergeOptions<>(
+				var mappingMergeOptions = new TopLevelMergeOptions<NodeTagMapping>(
 					NodeTagMappingFinder.getFinderInstance()
 				);
 				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
@@ -472,15 +470,13 @@ public final class WorkflowyDataConverter {
 
 				LOGGER.info("Merging {} mirrors", this.mirrors.size());
 				MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
-				TopLevelMergeOptions<Mirror> mirrorMergeOptions = new TopLevelMergeOptions<>(
-					MirrorFinder.getFinderInstance()
-				);
+				var mirrorMergeOptions = new TopLevelMergeOptions<Mirror>(MirrorFinder.getFinderInstance());
 				mirrorMergeOptions.doNotCompare(MirrorFinder.systemFrom(), MirrorFinder.systemTo());
 				existingMirrors.merge(this.mirrors, mirrorMergeOptions);
 
 				LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
 				NodeCalendarList existingCalendars = NodeCalendarFinder.findMany(NodeCalendarFinder.all());
-				TopLevelMergeOptions<NodeCalendar> calendarMergeOptions = new TopLevelMergeOptions<>(
+				var calendarMergeOptions = new TopLevelMergeOptions<NodeCalendar>(
 					NodeCalendarFinder.getFinderInstance()
 				);
 				calendarMergeOptions.doNotCompare(NodeCalendarFinder.systemFrom(), NodeCalendarFinder.systemTo());
@@ -488,9 +484,7 @@ public final class WorkflowyDataConverter {
 
 				LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
 				NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());
-				TopLevelMergeOptions<NodeS3File> s3FileMergeOptions = new TopLevelMergeOptions<>(
-					NodeS3FileFinder.getFinderInstance()
-				);
+				var s3FileMergeOptions = new TopLevelMergeOptions<NodeS3File>(NodeS3FileFinder.getFinderInstance());
 				s3FileMergeOptions.doNotCompare(NodeS3FileFinder.systemFrom(), NodeS3FileFinder.systemTo());
 				existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
 
@@ -498,7 +492,7 @@ public final class WorkflowyDataConverter {
 				VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(
 					VirtualRootMappingFinder.all()
 				);
-				TopLevelMergeOptions<VirtualRootMapping> virtualRootMergeOptions = new TopLevelMergeOptions<>(
+				var virtualRootMergeOptions = new TopLevelMergeOptions<VirtualRootMapping>(
 					VirtualRootMappingFinder.getFinderInstance()
 				);
 				virtualRootMergeOptions.doNotCompare(
@@ -641,7 +635,7 @@ public final class WorkflowyDataConverter {
 		BackupImportTimestamp workflowyTimestamp = BackupImportTimestampFinder.findOne(workflowyCriteria);
 
 		if (workflowyTimestamp == null) {
-			BackupImportTimestamp newTimestamp = new BackupImportTimestamp();
+			var newTimestamp = new BackupImportTimestamp();
 			newTimestamp.setName("workflowy");
 			newTimestamp.setTimestamp(highWatermark);
 			newTimestamp.insert();

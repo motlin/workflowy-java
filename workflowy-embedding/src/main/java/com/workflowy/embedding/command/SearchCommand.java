@@ -90,11 +90,11 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 		LOGGER.info("Threshold: {}", threshold != null ? threshold : model.getDefaultThreshold());
 
 		try (
-			SqliteVecConnection sqliteConnection = new SqliteVecConnection(dbPath);
+			var sqliteConnection = new SqliteVecConnection(dbPath);
 			EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig)
 		) {
-			EmbeddingRepository repository = new EmbeddingRepository(sqliteConnection);
-			SearchEngine searchEngine = new SearchEngine(engine, repository);
+			var repository = new EmbeddingRepository(sqliteConnection);
+			var searchEngine = new SearchEngine(engine, repository);
 
 			List<SearchResult> results = searchEngine.search(query, limit, threshold);
 

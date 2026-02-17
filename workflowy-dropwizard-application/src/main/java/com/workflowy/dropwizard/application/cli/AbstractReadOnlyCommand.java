@@ -94,7 +94,7 @@ public abstract class AbstractReadOnlyCommand extends EnvironmentCommand<Workflo
 	}
 
 	protected void writeErrorOutput(CommandException e) throws IOException {
-		ErrorResponse error = new ErrorResponse(e.getCode(), e.getMessage());
+		var error = new ErrorResponse(e.getCode(), e.getMessage());
 		this.writeJsonOutput(error);
 	}
 

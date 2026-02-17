@@ -87,11 +87,11 @@ public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & Embeddi
 		LOGGER.info("Force: {}", force);
 
 		try (
-			SqliteVecConnection sqliteConnection = new SqliteVecConnection(dbPath);
+			var sqliteConnection = new SqliteVecConnection(dbPath);
 			EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig)
 		) {
-			EmbeddingRepository repository = new EmbeddingRepository(sqliteConnection);
-			EmbeddingGenerator generator = new EmbeddingGenerator(engine, repository, batchSize, force);
+			var repository = new EmbeddingRepository(sqliteConnection);
+			var generator = new EmbeddingGenerator(engine, repository, batchSize, force);
 
 			GenerationResult result = generator.generate((progress) ->
 				LOGGER.info(

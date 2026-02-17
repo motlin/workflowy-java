@@ -26,7 +26,7 @@ public class CacheStatusCommand extends AbstractReadOnlyCommand {
 
 	@Override
 	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
-		CacheStatusDto status = new CacheStatusDto();
+		var status = new CacheStatusDto();
 		status.setQueryTime(Instant.now());
 		status.setDatabaseType("H2");
 

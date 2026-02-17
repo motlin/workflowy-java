@@ -65,7 +65,7 @@ public class ImportWorkflowyApiCommand<T extends AbstractKlassConfiguration> ext
 		DataStore dataStore = configuration.getKlassFactory().getDataStoreFactory().createDataStore();
 
 		String apiExportFileString = namespace.getString("api_export_file");
-		File apiExportFile = new File(apiExportFileString);
+		var apiExportFile = new File(apiExportFileString);
 
 		if (!apiExportFile.exists()) {
 			throw new IllegalArgumentException("API export file not found: " + apiExportFileString);

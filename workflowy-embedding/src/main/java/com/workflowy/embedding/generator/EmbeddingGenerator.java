@@ -107,13 +107,7 @@ public class EmbeddingGenerator {
 			NodeContent node = nodes.get(i);
 			float[] embedding = embeddings.get(i);
 
-			NodeEmbedding nodeEmbedding = new NodeEmbedding(
-				node.getId(),
-				model.getKey(),
-				embedding,
-				Instant.now(),
-				FAR_FUTURE
-			);
+			var nodeEmbedding = new NodeEmbedding(node.getId(), model.getKey(), embedding, Instant.now(), FAR_FUTURE);
 			nodeEmbeddings.add(nodeEmbedding);
 		}
 

@@ -177,7 +177,7 @@ public class EmbeddingRepository {
 					String nodeId = rs.getString("node_id");
 					double distance = rs.getDouble("distance");
 
-					SearchResult result = new SearchResult(nodeId, distance);
+					var result = new SearchResult(nodeId, distance);
 					results.add(result);
 				}
 			}

@@ -21,7 +21,7 @@ public final class NodeContentDTOMapper {
 	}
 
 	public static NodeContentDTO toDTO(NodeContent content, int depth) {
-		NodeContentDTO dto = new NodeContentDTO();
+		var dto = new NodeContentDTO();
 		dto.setId(content.getId());
 		dto.setName(content.getName());
 		dto.setNote(content.getNote());
@@ -64,7 +64,7 @@ public final class NodeContentDTOMapper {
 	}
 
 	private static NodeMetadataDTO toMetadataDTO(NodeMetadata metadata) {
-		NodeMetadataDTO dto = new NodeMetadataDTO();
+		var dto = new NodeMetadataDTO();
 		dto.setPriority(metadata.getPriority());
 		dto.setCompleted(metadata.isCompleted());
 		dto.setCompletedAt(metadata.getCompletedAt() != null ? metadata.getCompletedAt().toInstant() : null);

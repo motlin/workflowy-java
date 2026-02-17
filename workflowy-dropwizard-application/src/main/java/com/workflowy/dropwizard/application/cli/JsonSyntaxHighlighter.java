@@ -14,8 +14,8 @@ public final class JsonSyntaxHighlighter {
 	}
 
 	public static String highlight(String json) throws IOException {
-		StringBuilder result = new StringBuilder();
-		JsonFactory factory = new JsonFactory();
+		var result = new StringBuilder();
+		var factory = new JsonFactory();
 
 		try (JsonParser parser = factory.createParser(json)) {
 			int jsonIndex = 0;

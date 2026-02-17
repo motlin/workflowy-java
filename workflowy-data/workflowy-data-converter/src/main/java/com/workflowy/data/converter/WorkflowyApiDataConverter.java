@@ -94,7 +94,7 @@ public final class WorkflowyApiDataConverter {
 		@Nonnull DataStore dataStore
 	) {
 		LOGGER.info("Processing API export file: {}", apiExportFile);
-		WorkflowyApiDataConverter converter = new WorkflowyApiDataConverter(objectMapper, dataStore, DEFAULT_USER_ID);
+		var converter = new WorkflowyApiDataConverter(objectMapper, dataStore, DEFAULT_USER_ID);
 
 		try {
 			ApiResponse apiResponse = objectMapper.readValue(apiExportFile, ApiResponse.class);
@@ -120,7 +120,7 @@ public final class WorkflowyApiDataConverter {
 		@Nonnull Instant importTime
 	) {
 		LOGGER.info("Processing {} API export nodes", nodes.size());
-		WorkflowyApiDataConverter converter = new WorkflowyApiDataConverter(objectMapper, dataStore, DEFAULT_USER_ID);
+		var converter = new WorkflowyApiDataConverter(objectMapper, dataStore, DEFAULT_USER_ID);
 		converter.processNodes(nodes, importTime);
 	}
 
@@ -146,7 +146,7 @@ public final class WorkflowyApiDataConverter {
 	}
 
 	private NodeContent createNodeContent(ApiInputItem node) {
-		NodeContent nodeContent = new NodeContent();
+		var nodeContent = new NodeContent();
 		nodeContent.setId(node.id());
 		nodeContent.setParentId(node.parentId());
 		nodeContent.setName(node.name() != null ? node.name() : "");
@@ -159,7 +159,7 @@ public final class WorkflowyApiDataConverter {
 	}
 
 	private NodeMetadata createNodeMetadata(ApiInputItem node) {
-		NodeMetadata nodeMetadata = new NodeMetadata();
+		var nodeMetadata = new NodeMetadata();
 		nodeMetadata.setNodeId(node.id());
 		nodeMetadata.setShortId(WorkflowyFileUtils.computeShortId(node.id()));
 		nodeMetadata.setPriority(node.priority());
@@ -192,13 +192,13 @@ public final class WorkflowyApiDataConverter {
 
 		for (String tagName : extractedTags) {
 			this.tags.computeIfAbsent(tagName, (t) -> {
-					Tag newTag = new Tag();
+					var newTag = new Tag();
 					newTag.setName(t);
 					newTag.setColor(null);
 					return newTag;
 				});
 
-			NodeTagMapping mapping = new NodeTagMapping();
+			var mapping = new NodeTagMapping();
 			mapping.setNodeId(nodeContent.getId());
 			mapping.setTagName(tagName);
 			this.nodeTagMappings.add(mapping);
@@ -210,7 +210,7 @@ public final class WorkflowyApiDataConverter {
 		if (existingUser == null) {
 			LOGGER.info("Creating user: {}", this.userId);
 			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) -> {
-					User user = new User();
+					var user = new User();
 					user.setUserId(this.userId);
 					user.setEmail(this.userId);
 					user.insert();
@@ -234,27 +234,25 @@ public final class WorkflowyApiDataConverter {
 
 				LOGGER.info("Merging {} tags", this.tags.size());
 				TagList existingTags = TagFinder.findMany(TagFinder.all());
-				TagList updatedTags = new TagList();
+				var updatedTags = new TagList();
 				updatedTags.addAll(this.tags.values());
-				TopLevelMergeOptions<Tag> tagMergeOptions = new TopLevelMergeOptions<>(TagFinder.getFinderInstance());
+				var tagMergeOptions = new TopLevelMergeOptions<Tag>(TagFinder.getFinderInstance());
 				tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
 				existingTags.merge(updatedTags, tagMergeOptions);
 
 				LOGGER.info("Merging {} node contents", this.nodeContents.size());
 				NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
-				NodeContentList updatedContents = new NodeContentList();
+				var updatedContents = new NodeContentList();
 				updatedContents.addAll(this.nodeContents.values());
-				TopLevelMergeOptions<NodeContent> contentMergeOptions = new TopLevelMergeOptions<>(
-					NodeContentFinder.getFinderInstance()
-				);
+				var contentMergeOptions = new TopLevelMergeOptions<NodeContent>(NodeContentFinder.getFinderInstance());
 				contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
 				existingContents.merge(updatedContents, contentMergeOptions);
 
 				LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
 				NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
-				NodeMetadataList updatedMetadatas = new NodeMetadataList();
+				var updatedMetadatas = new NodeMetadataList();
 				updatedMetadatas.addAll(this.nodeMetadatas.values());
-				TopLevelMergeOptions<NodeMetadata> metadataMergeOptions = new TopLevelMergeOptions<>(
+				var metadataMergeOptions = new TopLevelMergeOptions<NodeMetadata>(
 					NodeMetadataFinder.getFinderInstance()
 				);
 				// Exclude temporal and audit fields
@@ -275,7 +273,7 @@ public final class WorkflowyApiDataConverter {
 
 				LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
 				NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
-				TopLevelMergeOptions<NodeTagMapping> mappingMergeOptions = new TopLevelMergeOptions<>(
+				var mappingMergeOptions = new TopLevelMergeOptions<NodeTagMapping>(
 					NodeTagMappingFinder.getFinderInstance()
 				);
 				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
@@ -329,7 +327,7 @@ public final class WorkflowyApiDataConverter {
 		ApiImportTimestamp timestamp = ApiImportTimestampFinder.findOne(criteria);
 
 		if (timestamp == null) {
-			ApiImportTimestamp newTimestamp = new ApiImportTimestamp();
+			var newTimestamp = new ApiImportTimestamp();
 			newTimestamp.setName("workflowy");
 			newTimestamp.setTimestamp(watermark);
 			newTimestamp.insert();

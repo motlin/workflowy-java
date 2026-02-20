@@ -98,6 +98,9 @@ public final class WorkflowyApiDataConverter {
 
 		try {
 			ApiResponse apiResponse = objectMapper.readValue(apiExportFile, ApiResponse.class);
+			if (apiResponse.error() != null) {
+				throw new RuntimeException("Workflowy API returned an error: " + apiResponse.error());
+			}
 			List<ApiInputItem> nodes = apiResponse.nodes();
 			converter.processNodes(nodes, Instant.now());
 		} catch (IOException e) {

@@ -29,7 +29,9 @@ public record InputMetadata(
 
 	@Nullable InputChangesMetadata changes,
 
-	@JsonProperty("numbered_start") @Nullable Integer numberedStart
+	@JsonProperty("numbered_start") @Nullable Integer numberedStart,
+
+	@Nullable Boolean restorableUniqueNode
 ) {
 	public boolean hasMirror() {
 		return this.mirror != null;

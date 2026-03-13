@@ -5,9 +5,15 @@ import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 
 import com.workflowy.dropwizard.application.cli.CacheStatusCommand;
+import com.workflowy.dropwizard.application.cli.CompleteNodeCommand;
+import com.workflowy.dropwizard.application.cli.CreateNodeCommand;
+import com.workflowy.dropwizard.application.cli.DeleteNodeCommand;
 import com.workflowy.dropwizard.application.cli.ListByIdCommand;
 import com.workflowy.dropwizard.application.cli.ListByPathCommand;
+import com.workflowy.dropwizard.application.cli.MoveNodeCommand;
 import com.workflowy.dropwizard.application.cli.ReadNodeCommand;
+import com.workflowy.dropwizard.application.cli.UncompleteNodeCommand;
+import com.workflowy.dropwizard.application.cli.UpdateNodeCommand;
 import cool.klass.dropwizard.bundle.graphql.KlassGraphQLBundle;
 import cool.klass.serialization.jackson.module.meta.model.module.KlassMetaModelJacksonModule;
 import io.dropwizard.db.DataSourceFactory;
@@ -42,6 +48,12 @@ public class WorkflowyApplication extends AbstractWorkflowyApplication {
 		bootstrap.addCommand(new ListByPathCommand(this));
 		bootstrap.addCommand(new WorkflowyEmbedGenerateCommand(this));
 		bootstrap.addCommand(new WorkflowySearchCommand(this));
+		bootstrap.addCommand(new CreateNodeCommand(this));
+		bootstrap.addCommand(new UpdateNodeCommand(this));
+		bootstrap.addCommand(new DeleteNodeCommand(this));
+		bootstrap.addCommand(new MoveNodeCommand(this));
+		bootstrap.addCommand(new CompleteNodeCommand(this));
+		bootstrap.addCommand(new UncompleteNodeCommand(this));
 	}
 
 	@Override

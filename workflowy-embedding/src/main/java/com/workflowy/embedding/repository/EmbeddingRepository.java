@@ -74,6 +74,16 @@ public class EmbeddingRepository {
 		LIMIT ?
 		""";
 
+	private static final String GET_CONTENT_HASH_SQL = """
+		SELECT content_hash FROM node_content_hash
+		WHERE node_id = ? AND model = ?
+		""";
+
+	private static final String UPSERT_CONTENT_HASH_SQL = """
+		INSERT OR REPLACE INTO node_content_hash (node_id, model, content_hash)
+		VALUES (?, ?, ?)
+		""";
+
 	private final SqliteVecConnection sqliteVecConnection;
 
 	public EmbeddingRepository(SqliteVecConnection sqliteVecConnection) {
@@ -222,6 +232,34 @@ public class EmbeddingRepository {
 			throw e;
 		} finally {
 			conn.setAutoCommit(true);
+		}
+	}
+
+	public String getContentHash(String nodeId, String model) throws SQLException {
+		Connection conn = this.sqliteVecConnection.getConnection();
+
+		try (PreparedStatement stmt = conn.prepareStatement(GET_CONTENT_HASH_SQL)) {
+			stmt.setString(1, nodeId);
+			stmt.setString(2, model);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getString("content_hash");
+				}
+			}
+		}
+
+		return null;
+	}
+
+	public void saveContentHash(String nodeId, String model, String contentHash) throws SQLException {
+		Connection conn = this.sqliteVecConnection.getConnection();
+
+		try (PreparedStatement stmt = conn.prepareStatement(UPSERT_CONTENT_HASH_SQL)) {
+			stmt.setString(1, nodeId);
+			stmt.setString(2, model);
+			stmt.setString(3, contentHash);
+			stmt.executeUpdate();
 		}
 	}
 

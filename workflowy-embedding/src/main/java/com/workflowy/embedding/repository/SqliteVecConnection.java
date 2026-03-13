@@ -41,6 +41,15 @@ public class SqliteVecConnection implements AutoCloseable {
 		)
 		""";
 
+	private static final String CREATE_CONTENT_HASH_TABLE_SQL = """
+		CREATE TABLE IF NOT EXISTS node_content_hash (
+		    node_id TEXT NOT NULL,
+		    model TEXT NOT NULL,
+		    content_hash TEXT NOT NULL,
+		    PRIMARY KEY (node_id, model)
+		)
+		""";
+
 	private final Connection connection;
 	private final String databasePath;
 	private boolean sqliteVecLoaded;
@@ -59,6 +68,7 @@ public class SqliteVecConnection implements AutoCloseable {
 			stmt.execute(CREATE_TABLE_SQL);
 			stmt.execute(CREATE_INDEX_SQL);
 			stmt.execute(CREATE_FTS_TABLE_SQL);
+			stmt.execute(CREATE_CONTENT_HASH_TABLE_SQL);
 		}
 
 		LOGGER.info("SQLite database initialized at: {}", this.databasePath);

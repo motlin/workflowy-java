@@ -256,6 +256,41 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
+	void getContentHash_withNoHash_returnsNull() throws SQLException {
+		String hash = this.repository.getContentHash("nonexistent", "minilm");
+		assertEquals(null, hash);
+	}
+
+	@Test
+	void saveAndGetContentHash_roundTrips() throws SQLException {
+		String nodeId = EmbeddingTestHelper.randomNodeId();
+		this.repository.saveContentHash(nodeId, "minilm", "abc123");
+
+		String hash = this.repository.getContentHash(nodeId, "minilm");
+		assertEquals("abc123", hash);
+	}
+
+	@Test
+	void saveContentHash_updatesExisting() throws SQLException {
+		String nodeId = EmbeddingTestHelper.randomNodeId();
+		this.repository.saveContentHash(nodeId, "minilm", "hash1");
+		this.repository.saveContentHash(nodeId, "minilm", "hash2");
+
+		String hash = this.repository.getContentHash(nodeId, "minilm");
+		assertEquals("hash2", hash);
+	}
+
+	@Test
+	void getContentHash_filtersByModel() throws SQLException {
+		String nodeId = EmbeddingTestHelper.randomNodeId();
+		this.repository.saveContentHash(nodeId, "minilm", "hash-minilm");
+		this.repository.saveContentHash(nodeId, "mpnet", "hash-mpnet");
+
+		assertEquals("hash-minilm", this.repository.getContentHash(nodeId, "minilm"));
+		assertEquals("hash-mpnet", this.repository.getContentHash(nodeId, "mpnet"));
+	}
+
+	@Test
 	void searchKeyword_usesPorterStemming() throws SQLException {
 		String nodeId = EmbeddingTestHelper.randomNodeId();
 		Map<String, String> contents = new LinkedHashMap<>();

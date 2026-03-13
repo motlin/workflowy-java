@@ -1,7 +1,11 @@
 package com.workflowy.embedding.generator;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,25 +47,16 @@ public class EmbeddingGenerator {
 	public GenerationResult generate(Consumer<ProgressUpdate> progressCallback) {
 		EmbeddingModel model = this.engine.getModel();
 
-		Set<String> existingNodeIds;
-		try {
-			existingNodeIds = this.force ? Set.of() : this.repository.getExistingNodeIds(model);
-		} catch (SQLException e) {
-			throw new RuntimeException("Failed to get existing node IDs", e);
-		}
-
 		NodeContentList allNodes = NodeContentFinder.findMany(NodeContentFinder.all());
 
 		MutableList<NodeContent> nonLeafNodes = Lists.mutable.empty();
-		Map<String, String> ftsContents = new LinkedHashMap<>();
+		Map<String, String> embeddingTexts = new LinkedHashMap<>();
 
 		for (int i = 0; i < allNodes.size(); i++) {
 			NodeContent node = allNodes.get(i);
 			if (this.pathBuilder.hasChildren(node.getId())) {
 				nonLeafNodes.add(node);
-
-				String embeddingText = this.pathBuilder.buildEmbeddingText(node.getId());
-				ftsContents.put(node.getId(), embeddingText);
+				embeddingTexts.put(node.getId(), this.pathBuilder.buildEmbeddingText(node.getId()));
 			}
 		}
 
@@ -75,16 +70,24 @@ public class EmbeddingGenerator {
 		for (int i = 0; i < nonLeafNodes.size(); i++) {
 			NodeContent node = nonLeafNodes.get(i);
 
-			if (!this.force && existingNodeIds.contains(node.getId())) {
-				skippedCount++;
-				continue;
+			if (!this.force) {
+				String contentHash = hashContent(embeddingTexts.get(node.getId()));
+				try {
+					String existingHash = this.repository.getContentHash(node.getId(), model.getKey());
+					if (contentHash.equals(existingHash)) {
+						skippedCount++;
+						continue;
+					}
+				} catch (SQLException e) {
+					LOGGER.warn("Failed to check content hash for {}", node.getId(), e);
+				}
 			}
 
 			batch.add(node);
 
 			if (batch.size() >= this.batchSize || i == nonLeafNodes.size() - 1) {
 				try {
-					this.processBatch(batch, model);
+					this.processBatch(batch, model, embeddingTexts);
 					processedCount += batch.size();
 
 					if (progressCallback != null) {
@@ -108,8 +111,8 @@ public class EmbeddingGenerator {
 		}
 
 		try {
-			LOGGER.info("Populating FTS5 index with {} non-leaf nodes...", ftsContents.size());
-			this.repository.populateFts(ftsContents);
+			LOGGER.info("Populating FTS5 index with {} non-leaf nodes...", embeddingTexts.size());
+			this.repository.populateFts(embeddingTexts);
 			LOGGER.info("FTS5 index populated successfully.");
 		} catch (SQLException e) {
 			LOGGER.error("Failed to populate FTS5 index", e);
@@ -118,10 +121,14 @@ public class EmbeddingGenerator {
 		return new GenerationResult(totalNodes, processedCount, skippedCount, errorCount);
 	}
 
-	private void processBatch(List<NodeContent> nodes, EmbeddingModel model) throws SQLException {
+	private void processBatch(
+		List<NodeContent> nodes,
+		EmbeddingModel model,
+		Map<String, String> embeddingTexts
+	) throws SQLException {
 		List<String> texts = nodes
 			.stream()
-			.map((node) -> this.pathBuilder.buildEmbeddingText(node.getId()))
+			.map((node) -> embeddingTexts.get(node.getId()))
 			.toList();
 
 		List<float[]> embeddings = this.engine.generateEmbeddings(texts, false);
@@ -136,6 +143,22 @@ public class EmbeddingGenerator {
 		}
 
 		this.repository.saveBatch(nodeEmbeddings);
+
+		for (int i = 0; i < nodes.size(); i++) {
+			NodeContent node = nodes.get(i);
+			String hash = hashContent(texts.get(i));
+			this.repository.saveContentHash(node.getId(), model.getKey(), hash);
+		}
+	}
+
+	static String hashContent(String content) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+			return HexFormat.of().formatHex(hash);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("SHA-256 not available", e);
+		}
 	}
 
 	public record ProgressUpdate(int current, int total, int processed, int skipped, int errors) {

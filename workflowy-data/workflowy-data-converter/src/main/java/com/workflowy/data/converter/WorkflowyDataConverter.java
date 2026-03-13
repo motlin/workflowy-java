@@ -16,6 +16,9 @@ import com.gs.fw.common.mithra.finder.Operation;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
 import com.workflowy.ApiImportTimestamp;
 import com.workflowy.ApiImportTimestampFinder;
+import com.workflowy.Backlink;
+import com.workflowy.BacklinkFinder;
+import com.workflowy.BacklinkList;
 import com.workflowy.BackupImportTimestamp;
 import com.workflowy.BackupImportTimestampFinder;
 import com.workflowy.Mirror;
@@ -71,6 +74,7 @@ public final class WorkflowyDataConverter {
 	private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
 	private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
 	private final MirrorList mirrors = new MirrorList();
+	private final BacklinkList backlinks = new BacklinkList();
 	private final NodeCalendarList nodeCalendars = new NodeCalendarList();
 	private final NodeS3FileList nodeS3Files = new NodeS3FileList();
 	private final VirtualRootMappingList virtualRootMappings = new VirtualRootMappingList();
@@ -139,11 +143,12 @@ public final class WorkflowyDataConverter {
 		this.extractTagsFromNodes();
 		LOGGER.info("Extracted {} tags and {} node-tag mappings", this.tags.size(), this.nodeTagMappings.size());
 
-		LOGGER.info("Pass 3: Processing metadata (mirrors, dates, S3 files, virtual roots)");
+		LOGGER.info("Pass 3: Processing metadata (mirrors, backlinks, dates, S3 files, virtual roots)");
 		this.processMetadata(rootItems);
 		LOGGER.info(
-			"Created {} mirrors, {} node dates, {} S3 files, {} virtual root mappings",
+			"Created {} mirrors, {} backlinks, {} node dates, {} S3 files, {} virtual root mappings",
 			this.mirrors.size(),
+			this.backlinks.size(),
 			this.nodeCalendars.size(),
 			this.nodeS3Files.size(),
 			this.virtualRootMappings.size()
@@ -281,15 +286,39 @@ public final class WorkflowyDataConverter {
 	}
 
 	private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta) {
+		// Variant 1: { originalId: "...", isMirrorRoot: true } — this node is a mirror of originalId
+		if (mirrorMeta.originalId() != null) {
+			var mirror = new Mirror();
+			mirror.setOriginalId(mirrorMeta.originalId());
+			mirror.setMirrorId(nodeId);
+			this.mirrors.add(mirror);
+		}
+
+		// Variant 2: { mirrorRootIds: { "id1": true, ... } } — each key is an original this node mirrors
 		for (String sourceId : mirrorMeta.getMirrorSourceIds()) {
 			var mirror = new Mirror();
 			mirror.setOriginalId(sourceId);
 			mirror.setMirrorId(nodeId);
 			this.mirrors.add(mirror);
 		}
+
+		// Variant 3: { backlinkMirrorRootIds: { "id1": true, ... } } — reversed: this node is the original
+		for (String backlinkId : mirrorMeta.getBacklinkMirrorIds()) {
+			var mirror = new Mirror();
+			mirror.setOriginalId(nodeId);
+			mirror.setMirrorId(backlinkId);
+			this.mirrors.add(mirror);
+		}
 	}
 
-	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta) {}
+	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta) {
+		if (backlinkMeta.sourceId() != null && backlinkMeta.targetId() != null) {
+			var backlink = new Backlink();
+			backlink.setSourceId(backlinkMeta.sourceId());
+			backlink.setTargetId(backlinkMeta.targetId());
+			this.backlinks.add(backlink);
+		}
+	}
 
 	private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta) {
 		if (calendarMeta.date() != null) {
@@ -473,6 +502,12 @@ public final class WorkflowyDataConverter {
 				var mirrorMergeOptions = new TopLevelMergeOptions<Mirror>(MirrorFinder.getFinderInstance());
 				mirrorMergeOptions.doNotCompare(MirrorFinder.systemFrom(), MirrorFinder.systemTo());
 				existingMirrors.merge(this.mirrors, mirrorMergeOptions);
+
+				LOGGER.info("Merging {} backlinks", this.backlinks.size());
+				BacklinkList existingBacklinks = BacklinkFinder.findMany(BacklinkFinder.all());
+				var backlinkMergeOptions = new TopLevelMergeOptions<Backlink>(BacklinkFinder.getFinderInstance());
+				backlinkMergeOptions.doNotCompare(BacklinkFinder.systemFrom(), BacklinkFinder.systemTo());
+				existingBacklinks.merge(this.backlinks, backlinkMergeOptions);
 
 				LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
 				NodeCalendarList existingCalendars = NodeCalendarFinder.findMany(NodeCalendarFinder.all());

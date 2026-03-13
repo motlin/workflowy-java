@@ -33,6 +33,14 @@ public class SqliteVecConnection implements AutoCloseable {
 		ON node_embeddings (model, system_to)
 		""";
 
+	private static final String CREATE_FTS_TABLE_SQL = """
+		CREATE VIRTUAL TABLE IF NOT EXISTS node_fts USING fts5(
+		    node_id UNINDEXED,
+		    content,
+		    tokenize='porter unicode61'
+		)
+		""";
+
 	private final Connection connection;
 	private final String databasePath;
 	private boolean sqliteVecLoaded;
@@ -50,6 +58,7 @@ public class SqliteVecConnection implements AutoCloseable {
 		try (Statement stmt = this.connection.createStatement()) {
 			stmt.execute(CREATE_TABLE_SQL);
 			stmt.execute(CREATE_INDEX_SQL);
+			stmt.execute(CREATE_FTS_TABLE_SQL);
 		}
 
 		LOGGER.info("SQLite database initialized at: {}", this.databasePath);

@@ -62,6 +62,18 @@ public class EmbeddingRepository {
 		LIMIT ?
 		""";
 
+	private static final String FTS_DELETE_ALL_SQL = "DELETE FROM node_fts";
+
+	private static final String FTS_INSERT_SQL = "INSERT INTO node_fts(node_id, content) VALUES(?, ?)";
+
+	private static final String FTS_SEARCH_SQL = """
+		SELECT node_id, rank as score
+		FROM node_fts
+		WHERE node_fts MATCH ?
+		ORDER BY rank
+		LIMIT ?
+		""";
+
 	private final SqliteVecConnection sqliteVecConnection;
 
 	public EmbeddingRepository(SqliteVecConnection sqliteVecConnection) {
@@ -179,6 +191,54 @@ public class EmbeddingRepository {
 
 					var result = new SearchResult(nodeId, distance);
 					results.add(result);
+				}
+			}
+		}
+
+		return results;
+	}
+
+	public void populateFts(java.util.Map<String, String> nodeContents) throws SQLException {
+		Connection conn = this.sqliteVecConnection.getConnection();
+
+		conn.setAutoCommit(false);
+		try {
+			try (PreparedStatement deleteStmt = conn.prepareStatement(FTS_DELETE_ALL_SQL)) {
+				deleteStmt.executeUpdate();
+			}
+
+			try (PreparedStatement insertStmt = conn.prepareStatement(FTS_INSERT_SQL)) {
+				for (var entry : nodeContents.entrySet()) {
+					insertStmt.setString(1, entry.getKey());
+					insertStmt.setString(2, entry.getValue());
+					insertStmt.addBatch();
+				}
+				insertStmt.executeBatch();
+			}
+
+			conn.commit();
+		} catch (SQLException e) {
+			conn.rollback();
+			throw e;
+		} finally {
+			conn.setAutoCommit(true);
+		}
+	}
+
+	public List<SearchResult> searchKeyword(String query, int limit) throws SQLException {
+		MutableList<SearchResult> results = Lists.mutable.empty();
+		Connection conn = this.sqliteVecConnection.getConnection();
+
+		try (PreparedStatement stmt = conn.prepareStatement(FTS_SEARCH_SQL)) {
+			stmt.setString(1, query);
+			stmt.setInt(2, limit);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					String nodeId = rs.getString("node_id");
+					double score = rs.getDouble("score");
+					double distance = Math.abs(score) / (1.0 + Math.abs(score));
+					results.add(new SearchResult(nodeId, distance));
 				}
 			}
 		}

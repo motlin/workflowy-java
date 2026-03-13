@@ -1,7 +1,9 @@
 package com.workflowy.embedding.repository;
 
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.workflowy.embedding.model.EmbeddingModel;
@@ -163,6 +165,106 @@ class EmbeddingRepositoryTest {
 		List<SearchResult> results = this.repository.search(baseEmbedding, EmbeddingModel.MINILM, 3, null);
 
 		assertEquals(3, results.size());
+	}
+
+	@Test
+	void populateFts_insertsContent() throws SQLException {
+		String nodeId1 = EmbeddingTestHelper.randomNodeId();
+		String nodeId2 = EmbeddingTestHelper.randomNodeId();
+
+		Map<String, String> contents = new LinkedHashMap<>();
+		contents.put(nodeId1, "PATH: Root > Projects\nCONTENT: My Project\n\nProject notes");
+		contents.put(nodeId2, "PATH: Root > Tasks\nCONTENT: Buy groceries\n\nMilk and eggs");
+
+		this.repository.populateFts(contents);
+
+		List<SearchResult> results = this.repository.searchKeyword("groceries", 10);
+		assertEquals(1, results.size());
+		assertEquals(nodeId2, results.get(0).getNodeId());
+	}
+
+	@Test
+	void populateFts_clearsExistingContent() throws SQLException {
+		String nodeId1 = EmbeddingTestHelper.randomNodeId();
+		String nodeId2 = EmbeddingTestHelper.randomNodeId();
+
+		Map<String, String> firstBatch = new LinkedHashMap<>();
+		firstBatch.put(nodeId1, "First batch content about apples");
+		this.repository.populateFts(firstBatch);
+
+		Map<String, String> secondBatch = new LinkedHashMap<>();
+		secondBatch.put(nodeId2, "Second batch content about oranges");
+		this.repository.populateFts(secondBatch);
+
+		List<SearchResult> appleResults = this.repository.searchKeyword("apples", 10);
+		assertTrue(appleResults.isEmpty());
+
+		List<SearchResult> orangeResults = this.repository.searchKeyword("oranges", 10);
+		assertEquals(1, orangeResults.size());
+		assertEquals(nodeId2, orangeResults.get(0).getNodeId());
+	}
+
+	@Test
+	void searchKeyword_withNoResults_returnsEmptyList() throws SQLException {
+		Map<String, String> contents = new LinkedHashMap<>();
+		contents.put(EmbeddingTestHelper.randomNodeId(), "Some content about programming");
+		this.repository.populateFts(contents);
+
+		List<SearchResult> results = this.repository.searchKeyword("zyxwvutsrqp", 10);
+		assertTrue(results.isEmpty());
+	}
+
+	@Test
+	void searchKeyword_respectsLimit() throws SQLException {
+		Map<String, String> contents = new LinkedHashMap<>();
+		for (int i = 0; i < 10; i++) {
+			contents.put(EmbeddingTestHelper.randomNodeId(), "Document about testing software quality " + i);
+		}
+		this.repository.populateFts(contents);
+
+		List<SearchResult> results = this.repository.searchKeyword("testing", 3);
+		assertEquals(3, results.size());
+	}
+
+	@Test
+	void searchKeyword_ranksResults() throws SQLException {
+		String exactId = EmbeddingTestHelper.randomNodeId();
+		String partialId = EmbeddingTestHelper.randomNodeId();
+
+		Map<String, String> contents = new LinkedHashMap<>();
+		contents.put(exactId, "Java programming Java development Java testing");
+		contents.put(partialId, "Python development with some Java");
+		this.repository.populateFts(contents);
+
+		List<SearchResult> results = this.repository.searchKeyword("java", 10);
+		assertEquals(2, results.size());
+		assertEquals(exactId, results.get(0).getNodeId());
+	}
+
+	@Test
+	void searchKeyword_distanceIsBetweenZeroAndOne() throws SQLException {
+		Map<String, String> contents = new LinkedHashMap<>();
+		contents.put(EmbeddingTestHelper.randomNodeId(), "Testing distance normalization values");
+		this.repository.populateFts(contents);
+
+		List<SearchResult> results = this.repository.searchKeyword("testing", 10);
+		assertFalse(results.isEmpty());
+		for (SearchResult result : results) {
+			assertTrue(result.getDistance() >= 0.0);
+			assertTrue(result.getDistance() < 1.0);
+		}
+	}
+
+	@Test
+	void searchKeyword_usesPorterStemming() throws SQLException {
+		String nodeId = EmbeddingTestHelper.randomNodeId();
+		Map<String, String> contents = new LinkedHashMap<>();
+		contents.put(nodeId, "The programmers were programming their programs");
+		this.repository.populateFts(contents);
+
+		List<SearchResult> results = this.repository.searchKeyword("program", 10);
+		assertEquals(1, results.size());
+		assertEquals(nodeId, results.get(0).getNodeId());
 	}
 
 	@Test

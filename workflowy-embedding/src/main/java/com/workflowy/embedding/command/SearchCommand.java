@@ -14,6 +14,7 @@ import com.workflowy.embedding.model.EmbeddingModel;
 import com.workflowy.embedding.repository.EmbeddingRepository;
 import com.workflowy.embedding.repository.SqliteVecConnection;
 import com.workflowy.embedding.search.SearchEngine;
+import com.workflowy.embedding.search.SearchMode;
 import com.workflowy.embedding.search.SearchResult;
 import cool.klass.dropwizard.configuration.AbstractKlassConfiguration;
 import io.dropwizard.Application;
@@ -56,6 +57,12 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 			.type(Double.class)
 			.help("Similarity threshold (0-1). Lower = more similar. Default depends on model.");
 
+		subparser
+			.addArgument("--mode")
+			.type(String.class)
+			.setDefault("vector")
+			.help("Search mode: vector (default), keyword, or hybrid");
+
 		subparser.addArgument("--db-path").type(String.class).help("Override path to the embeddings SQLite database");
 	}
 
@@ -75,6 +82,7 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 		String modelKey = namespace.getString("model");
 		int limit = namespace.getInt("limit");
 		Double threshold = namespace.getDouble("threshold");
+		String modeStr = namespace.getString("mode");
 		String dbPath = namespace.getString("db_path");
 
 		if (dbPath == null) {
@@ -82,9 +90,11 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 		}
 
 		EmbeddingModel model = EmbeddingModel.fromKey(modelKey);
+		SearchMode mode = SearchMode.fromString(modeStr);
 
 		LOGGER.info("Query: {}", query);
 		LOGGER.info("Model: {}", model.getKey());
+		LOGGER.info("Mode: {}", mode);
 		LOGGER.info("Database path: {}", dbPath);
 		LOGGER.info("Limit: {}", limit);
 		LOGGER.info("Threshold: {}", threshold != null ? threshold : model.getDefaultThreshold());
@@ -96,7 +106,7 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 			var repository = new EmbeddingRepository(sqliteConnection);
 			var searchEngine = new SearchEngine(engine, repository);
 
-			List<SearchResult> results = searchEngine.search(query, limit, threshold);
+			List<SearchResult> results = searchEngine.search(query, limit, threshold, mode);
 
 			this.writeResults(results, objectMapper);
 		}

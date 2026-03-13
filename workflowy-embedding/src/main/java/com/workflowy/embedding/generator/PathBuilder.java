@@ -2,6 +2,7 @@ package com.workflowy.embedding.generator;
 
 import com.workflowy.NodeContent;
 import com.workflowy.NodeContentFinder;
+import com.workflowy.NodeContentList;
 import com.workflowy.embedding.util.HtmlStripper;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.MutableList;
@@ -47,16 +48,57 @@ public class PathBuilder {
 		}
 	}
 
+	public String buildChildrenText(String nodeId) {
+		NodeContentList children = NodeContentFinder.findMany(NodeContentFinder.parentId().eq(nodeId));
+
+		if (children.isEmpty()) {
+			return "";
+		}
+
+		MutableList<String> childTexts = Lists.mutable.empty();
+		for (int i = 0; i < children.size(); i++) {
+			NodeContent child = children.get(i);
+			String name = HtmlStripper.stripHtmlTags(child.getName());
+			String note = child.getNote() != null ? HtmlStripper.stripHtmlTags(child.getNote()) : "";
+
+			if (name == null || name.isEmpty()) {
+				continue;
+			}
+
+			if (note.isEmpty()) {
+				childTexts.add(name);
+			} else {
+				childTexts.add(name + ": " + note);
+			}
+		}
+
+		return String.join("\n", childTexts);
+	}
+
+	public boolean hasChildren(String nodeId) {
+		NodeContentList children = NodeContentFinder.findMany(NodeContentFinder.parentId().eq(nodeId));
+		return !children.isEmpty();
+	}
+
 	public String buildEmbeddingText(String nodeId) {
 		String fullPath = this.buildFullPath(nodeId);
 		String textContent = this.buildTextContent(nodeId);
+		String childrenText = this.buildChildrenText(nodeId);
 
-		if (fullPath.isEmpty()) {
-			return textContent;
-		} else if (textContent.isEmpty()) {
-			return fullPath;
-		} else {
-			return fullPath + "\n\n" + textContent;
+		StringBuilder sb = new StringBuilder();
+
+		if (!fullPath.isEmpty()) {
+			sb.append("PATH: ").append(fullPath).append('\n');
 		}
+
+		if (!textContent.isEmpty()) {
+			sb.append("CONTENT: ").append(textContent);
+		}
+
+		if (!childrenText.isEmpty()) {
+			sb.append("\nCHILDREN:\n").append(childrenText);
+		}
+
+		return sb.toString();
 	}
 }

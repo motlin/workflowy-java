@@ -2,7 +2,9 @@ package com.workflowy.embedding.generator;
 
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -49,15 +51,29 @@ public class EmbeddingGenerator {
 		}
 
 		NodeContentList allNodes = NodeContentFinder.findMany(NodeContentFinder.all());
-		int totalNodes = allNodes.size();
+
+		MutableList<NodeContent> nonLeafNodes = Lists.mutable.empty();
+		Map<String, String> ftsContents = new LinkedHashMap<>();
+
+		for (int i = 0; i < allNodes.size(); i++) {
+			NodeContent node = allNodes.get(i);
+			if (this.pathBuilder.hasChildren(node.getId())) {
+				nonLeafNodes.add(node);
+
+				String embeddingText = this.pathBuilder.buildEmbeddingText(node.getId());
+				ftsContents.put(node.getId(), embeddingText);
+			}
+		}
+
+		int totalNodes = nonLeafNodes.size();
 		int skippedCount = 0;
 		int processedCount = 0;
 		int errorCount = 0;
 
 		MutableList<NodeContent> batch = Lists.mutable.withInitialCapacity(this.batchSize);
 
-		for (int i = 0; i < allNodes.size(); i++) {
-			NodeContent node = allNodes.get(i);
+		for (int i = 0; i < nonLeafNodes.size(); i++) {
+			NodeContent node = nonLeafNodes.get(i);
 
 			if (!this.force && existingNodeIds.contains(node.getId())) {
 				skippedCount++;
@@ -66,7 +82,7 @@ public class EmbeddingGenerator {
 
 			batch.add(node);
 
-			if (batch.size() >= this.batchSize || i == allNodes.size() - 1) {
+			if (batch.size() >= this.batchSize || i == nonLeafNodes.size() - 1) {
 				try {
 					this.processBatch(batch, model);
 					processedCount += batch.size();
@@ -89,6 +105,14 @@ public class EmbeddingGenerator {
 
 				batch.clear();
 			}
+		}
+
+		try {
+			LOGGER.info("Populating FTS5 index with {} non-leaf nodes...", ftsContents.size());
+			this.repository.populateFts(ftsContents);
+			LOGGER.info("FTS5 index populated successfully.");
+		} catch (SQLException e) {
+			LOGGER.error("Failed to populate FTS5 index", e);
 		}
 
 		return new GenerationResult(totalNodes, processedCount, skippedCount, errorCount);

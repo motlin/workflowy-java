@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.workflowy.embedding.model.EmbeddingModel;
@@ -208,7 +209,7 @@ public class EmbeddingRepository {
 		return results;
 	}
 
-	public void populateFts(java.util.Map<String, String> nodeContents) throws SQLException {
+	public void populateFts(Map<String, String> nodeContents) throws SQLException {
 		Connection conn = this.sqliteVecConnection.getConnection();
 
 		conn.setAutoCommit(false);

@@ -85,7 +85,7 @@ public class PathBuilder {
 		String textContent = this.buildTextContent(nodeId);
 		String childrenText = this.buildChildrenText(nodeId);
 
-		StringBuilder sb = new StringBuilder();
+		var sb = new StringBuilder();
 
 		if (!fullPath.isEmpty()) {
 			sb.append("PATH: ").append(fullPath).append('\n');

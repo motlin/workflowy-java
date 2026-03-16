@@ -100,7 +100,7 @@ public class WorkflowyApiClient implements AutoCloseable {
 	}
 
 	public void moveNode(@Nonnull String nodeId, @Nonnull String newParentId, @Nullable String position) {
-		MoveNodeRequest request = new MoveNodeRequest(newParentId, position);
+		var request = new MoveNodeRequest(newParentId, position);
 		this.sendPost("/api/v1/nodes/" + nodeId + "/move", request, String.class);
 	}
 

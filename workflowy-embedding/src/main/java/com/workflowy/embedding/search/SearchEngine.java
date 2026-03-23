@@ -1,7 +1,6 @@
 package com.workflowy.embedding.search;
 
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -90,11 +89,12 @@ public class SearchEngine {
 			rrfScores.merge(nodeId, score, Double::sum);
 		}
 
-		return rrfScores.entrySet()
+		return rrfScores
+			.entrySet()
 			.stream()
 			.sorted(Map.Entry.<String, Double>comparingByValue().reversed())
 			.limit(limit)
-			.map(entry -> new SearchResult(entry.getKey(), 1.0 - entry.getValue()))
+			.map((entry) -> new SearchResult(entry.getKey(), 1.0 - entry.getValue()))
 			.toList();
 	}
 

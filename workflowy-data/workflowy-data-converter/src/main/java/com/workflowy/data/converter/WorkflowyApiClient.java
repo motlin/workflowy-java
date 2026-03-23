@@ -41,18 +41,12 @@ public class WorkflowyApiClient implements AutoCloseable {
 	public WorkflowyApiClient(@Nonnull String apiKey, @Nonnull String baseUrl) {
 		this.apiKey = apiKey;
 		this.baseUrl = baseUrl;
-		this.httpClient = HttpClient.newBuilder()
-			.connectTimeout(Duration.ofSeconds(30))
-			.build();
-		this.objectMapper = new ObjectMapper()
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
+		this.objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	public ApiInputItem getNode(@Nonnull String nodeId) {
-		GetNodeResponse response = this.sendGet(
-			"/api/v1/nodes/" + nodeId,
-			GetNodeResponse.class
-		);
+		GetNodeResponse response = this.sendGet("/api/v1/nodes/" + nodeId, GetNodeResponse.class);
 		return response.node();
 	}
 
@@ -62,10 +56,7 @@ public class WorkflowyApiClient implements AutoCloseable {
 	}
 
 	public List<ApiInputItem> getChildNodes(@Nonnull String parentId) {
-		ApiResponse response = this.sendGet(
-			"/api/v1/nodes?parent_id=" + parentId,
-			ApiResponse.class
-		);
+		ApiResponse response = this.sendGet("/api/v1/nodes?parent_id=" + parentId, ApiResponse.class);
 		return response.getNodesOrEmpty();
 	}
 
@@ -75,11 +66,7 @@ public class WorkflowyApiClient implements AutoCloseable {
 	}
 
 	public String createNode(@Nonnull CreateNodeRequest request) {
-		CreateNodeResponse response = this.sendPost(
-			"/api/v1/nodes/",
-			request,
-			CreateNodeResponse.class
-		);
+		CreateNodeResponse response = this.sendPost("/api/v1/nodes/", request, CreateNodeResponse.class);
 		return response.itemId();
 	}
 
@@ -115,9 +102,7 @@ public class WorkflowyApiClient implements AutoCloseable {
 			return null;
 		}
 
-		List<ApiInputItem> currentChildren = parentId != null
-			? this.getChildNodes(parentId)
-			: this.getRootNodes();
+		List<ApiInputItem> currentChildren = parentId != null ? this.getChildNodes(parentId) : this.getRootNodes();
 
 		ApiInputItem current = null;
 

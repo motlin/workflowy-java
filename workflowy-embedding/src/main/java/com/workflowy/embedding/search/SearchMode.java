@@ -10,7 +10,9 @@ public enum SearchMode {
 			case "vector" -> VECTOR;
 			case "keyword" -> KEYWORD;
 			case "hybrid" -> HYBRID;
-			default -> throw new IllegalArgumentException("Unknown search mode: " + mode + ". Use: vector, keyword, hybrid");
+			default -> throw new IllegalArgumentException(
+				"Unknown search mode: " + mode + ". Use: vector, keyword, hybrid"
+			);
 		};
 	}
 }

@@ -9,7 +9,6 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import com.workflowy.NodeContent;
@@ -121,11 +120,8 @@ public class EmbeddingGenerator {
 		return new GenerationResult(totalNodes, processedCount, skippedCount, errorCount);
 	}
 
-	private void processBatch(
-		List<NodeContent> nodes,
-		EmbeddingModel model,
-		Map<String, String> embeddingTexts
-	) throws SQLException {
+	private void processBatch(List<NodeContent> nodes, EmbeddingModel model, Map<String, String> embeddingTexts)
+		throws SQLException {
 		List<String> texts = nodes
 			.stream()
 			.map((node) -> embeddingTexts.get(node.getId()))

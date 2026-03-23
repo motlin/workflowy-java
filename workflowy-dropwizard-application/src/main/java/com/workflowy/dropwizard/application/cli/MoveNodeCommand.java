@@ -18,13 +18,11 @@ public class MoveNodeCommand extends AbstractApiCommand {
 	public void configure(Subparser subparser) {
 		super.configure(subparser);
 
-		MutuallyExclusiveGroup nodeGroup = subparser.addMutuallyExclusiveGroup("node")
-			.required(true);
+		MutuallyExclusiveGroup nodeGroup = subparser.addMutuallyExclusiveGroup("node").required(true);
 		nodeGroup.addArgument("--node-id").type(String.class).help("Node ID to move");
 		nodeGroup.addArgument("--node-path").type(String.class).help("Comma-separated path to node to move");
 
-		MutuallyExclusiveGroup parentGroup = subparser.addMutuallyExclusiveGroup("parent")
-			.required(true);
+		MutuallyExclusiveGroup parentGroup = subparser.addMutuallyExclusiveGroup("parent").required(true);
 		parentGroup.addArgument("--parent-id").type(String.class).help("Destination parent node ID");
 		parentGroup.addArgument("--parent-path").type(String.class).help("Comma-separated path to destination parent");
 
@@ -41,11 +39,7 @@ public class MoveNodeCommand extends AbstractApiCommand {
 		WorkflowyConfiguration configuration,
 		WorkflowyApiClient apiClient
 	) {
-		String nodeId = this.resolveNodeId(
-			namespace.getString("node_id"),
-			namespace.getString("node_path"),
-			apiClient
-		);
+		String nodeId = this.resolveNodeId(namespace.getString("node_id"), namespace.getString("node_path"), apiClient);
 
 		String newParentId = this.resolveNodeId(
 			namespace.getString("parent_id"),

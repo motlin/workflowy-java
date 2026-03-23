@@ -71,7 +71,10 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 	void buildEmbeddingText_forChildWithNote_returnsPathAndContent() {
 		String embeddingText = this.pathBuilder.buildEmbeddingText("00000000-0000-0000-0000-000000000002");
 
-		assertEquals("PATH: Root Node > Child 1\nCONTENT: Child 1\n\nFirst child note\nCHILDREN:\nGrandchild 1: Nested note", embeddingText);
+		assertEquals(
+			"PATH: Root Node > Child 1\nCONTENT: Child 1\n\nFirst child note\nCHILDREN:\nGrandchild 1: Nested note",
+			embeddingText
+		);
 	}
 
 	@Test
@@ -79,7 +82,10 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 	void buildEmbeddingText_forRootWithNote_returnsNodeAndContent() {
 		String embeddingText = this.pathBuilder.buildEmbeddingText("00000000-0000-0000-0000-000000000001");
 
-		assertEquals("PATH: Root Node\nCONTENT: Root Node\n\nThis is the root\nCHILDREN:\nChild 1: First child note\nChild 2", embeddingText);
+		assertEquals(
+			"PATH: Root Node\nCONTENT: Root Node\n\nThis is the root\nCHILDREN:\nChild 1: First child note\nChild 2",
+			embeddingText
+		);
 	}
 
 	@Test

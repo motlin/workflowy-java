@@ -20,8 +20,7 @@ public class UpdateNodeCommand extends AbstractApiCommand {
 	public void configure(Subparser subparser) {
 		super.configure(subparser);
 
-		MutuallyExclusiveGroup nodeGroup = subparser.addMutuallyExclusiveGroup("node")
-			.required(true);
+		MutuallyExclusiveGroup nodeGroup = subparser.addMutuallyExclusiveGroup("node").required(true);
 		nodeGroup.addArgument("--id", "-i").type(String.class).help("Node ID");
 		nodeGroup.addArgument("--path", "-p").type(String.class).help("Comma-separated path to node");
 
@@ -47,14 +46,12 @@ public class UpdateNodeCommand extends AbstractApiCommand {
 		String layoutMode = namespace.getString("layout_mode");
 
 		if (name == null && note == null && !clearNote && layoutMode == null) {
-			throw new IllegalArgumentException("At least one of --name, --note, --clear-note, or --layout-mode is required");
+			throw new IllegalArgumentException(
+				"At least one of --name, --note, --clear-note, or --layout-mode is required"
+			);
 		}
 
-		String nodeId = this.resolveNodeId(
-			namespace.getString("id"),
-			namespace.getString("path"),
-			apiClient
-		);
+		String nodeId = this.resolveNodeId(namespace.getString("id"), namespace.getString("path"), apiClient);
 
 		if (nodeId == null) {
 			throw new IllegalArgumentException("Could not resolve node");

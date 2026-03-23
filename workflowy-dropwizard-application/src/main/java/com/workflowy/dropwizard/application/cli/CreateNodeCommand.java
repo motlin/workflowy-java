@@ -19,32 +19,15 @@ public class CreateNodeCommand extends AbstractApiCommand {
 	public void configure(Subparser subparser) {
 		super.configure(subparser);
 
-		subparser
-			.addArgument("--name", "-n")
-			.type(String.class)
-			.required(true)
-			.help("Name of the new node");
+		subparser.addArgument("--name", "-n").type(String.class).required(true).help("Name of the new node");
 
-		MutuallyExclusiveGroup parentGroup = subparser.addMutuallyExclusiveGroup("parent")
-			.required(true);
-		parentGroup
-			.addArgument("--parent-id")
-			.type(String.class)
-			.help("Parent node ID (full UUID or short ID)");
-		parentGroup
-			.addArgument("--parent-path")
-			.type(String.class)
-			.help("Comma-separated path to parent node");
+		MutuallyExclusiveGroup parentGroup = subparser.addMutuallyExclusiveGroup("parent").required(true);
+		parentGroup.addArgument("--parent-id").type(String.class).help("Parent node ID (full UUID or short ID)");
+		parentGroup.addArgument("--parent-path").type(String.class).help("Comma-separated path to parent node");
 
-		subparser
-			.addArgument("--note")
-			.type(String.class)
-			.help("Note text for the new node");
+		subparser.addArgument("--note").type(String.class).help("Note text for the new node");
 
-		subparser
-			.addArgument("--layout-mode")
-			.type(String.class)
-			.help("Layout mode (e.g., document, list, board)");
+		subparser.addArgument("--layout-mode").type(String.class).help("Layout mode (e.g., document, list, board)");
 
 		subparser
 			.addArgument("--position")

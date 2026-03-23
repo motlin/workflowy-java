@@ -27,11 +27,7 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-	protected AbstractApiCommand(
-		WorkflowyApplication application,
-		String name,
-		String description
-	) {
+	protected AbstractApiCommand(WorkflowyApplication application, String name, String description) {
 		super(application, name, description);
 	}
 
@@ -78,11 +74,7 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 	}
 
 	@Nullable
-	protected String resolveNodeId(
-		@Nullable String id,
-		@Nullable String path,
-		WorkflowyApiClient apiClient
-	) {
+	protected String resolveNodeId(@Nullable String id, @Nullable String path, WorkflowyApiClient apiClient) {
 		if (id != null) {
 			return this.resolveShortOrFullId(id);
 		}
@@ -99,9 +91,7 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 			return shortOrFullId;
 		}
 
-		NodeContentList matches = NodeContentFinder.findMany(
-			NodeContentFinder.id().startsWith(shortOrFullId)
-		);
+		NodeContentList matches = NodeContentFinder.findMany(NodeContentFinder.id().startsWith(shortOrFullId));
 
 		if (matches.isEmpty()) {
 			throw new IllegalArgumentException("No node found with ID prefix: " + shortOrFullId);
@@ -115,9 +105,7 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 
 	@Nullable
 	private String resolvePathToId(String commaSeparatedPath, WorkflowyApiClient apiClient) {
-		List<String> segments = Arrays.stream(commaSeparatedPath.split(","))
-			.map(String::trim)
-			.toList();
+		List<String> segments = Arrays.stream(commaSeparatedPath.split(",")).map(String::trim).toList();
 
 		// Try H2 cache first
 		String currentId = null;

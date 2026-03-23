@@ -43,10 +43,7 @@ class HybridSearchTest {
 			new SearchResult("node-c", 0.3)
 		);
 
-		List<SearchResult> keywordResults = List.of(
-			new SearchResult("node-d", 0.1),
-			new SearchResult("node-e", 0.2)
-		);
+		List<SearchResult> keywordResults = List.of(new SearchResult("node-d", 0.1), new SearchResult("node-e", 0.2));
 
 		List<SearchResult> fused = SearchEngine.fuseResults(vectorResults, keywordResults, 2);
 		assertEquals(2, fused.size());
@@ -76,10 +73,7 @@ class HybridSearchTest {
 	void fuseResults_overlappingResults_rankedHigher() {
 		// A node appearing in both result sets should always rank higher
 		// than a node appearing in only one (assuming similar positions)
-		List<SearchResult> vectorResults = List.of(
-			new SearchResult("only-vector", 0.1),
-			new SearchResult("both", 0.2)
-		);
+		List<SearchResult> vectorResults = List.of(new SearchResult("only-vector", 0.1), new SearchResult("both", 0.2));
 
 		List<SearchResult> keywordResults = List.of(
 			new SearchResult("only-keyword", 0.1),

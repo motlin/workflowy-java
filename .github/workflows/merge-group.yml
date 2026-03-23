@@ -55,7 +55,7 @@ jobs:
             - uses: jdx/mise-action@v4
 
             - name: "Prettier Format Check"
-              run: npx prettier --check .
+              run: prettier --check .
 
     biome:
         runs-on: ubuntu-latest

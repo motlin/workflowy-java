@@ -90,7 +90,7 @@ jobs:
 
             - name: Run Prettier Format
               run: |
-                  npx prettier --write . '!.github/workflows/**'
+                  prettier --write . '!.github/workflows/**'
 
                   if [[ -n $(git status --porcelain) ]]; then
                     FIX_BRANCH="fix-${{ github.event.pull_request.number }}-prettier"

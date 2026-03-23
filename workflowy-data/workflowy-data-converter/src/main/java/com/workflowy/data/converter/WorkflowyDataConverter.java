@@ -311,6 +311,18 @@ public final class WorkflowyDataConverter {
 		}
 	}
 
+	private MirrorList deduplicateMirrors() {
+		Set<String> seen = new LinkedHashSet<>();
+		var result = new MirrorList();
+		for (Mirror mirror : this.mirrors) {
+			String key = mirror.getOriginalId() + "|" + mirror.getMirrorId();
+			if (seen.add(key)) {
+				result.add(mirror);
+			}
+		}
+		return result;
+	}
+
 	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta) {
 		if (backlinkMeta.sourceId() != null && backlinkMeta.targetId() != null) {
 			var backlink = new Backlink();
@@ -497,11 +509,12 @@ public final class WorkflowyDataConverter {
 				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
 				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
-				LOGGER.info("Merging {} mirrors", this.mirrors.size());
+				MirrorList deduplicatedMirrors = this.deduplicateMirrors();
+				LOGGER.info("Merging {} mirrors ({} before dedup)", deduplicatedMirrors.size(), this.mirrors.size());
 				MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
 				var mirrorMergeOptions = new TopLevelMergeOptions<Mirror>(MirrorFinder.getFinderInstance());
 				mirrorMergeOptions.doNotCompare(MirrorFinder.systemFrom(), MirrorFinder.systemTo());
-				existingMirrors.merge(this.mirrors, mirrorMergeOptions);
+				existingMirrors.merge(deduplicatedMirrors, mirrorMergeOptions);
 
 				LOGGER.info("Merging {} backlinks", this.backlinks.size());
 				BacklinkList existingBacklinks = BacklinkFinder.findMany(BacklinkFinder.all());

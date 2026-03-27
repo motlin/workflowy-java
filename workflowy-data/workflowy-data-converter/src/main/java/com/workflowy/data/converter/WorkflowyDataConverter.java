@@ -40,6 +40,9 @@ import com.workflowy.NodeS3FileList;
 import com.workflowy.NodeTagMapping;
 import com.workflowy.NodeTagMappingFinder;
 import com.workflowy.NodeTagMappingList;
+import com.workflowy.ReferencesRoot;
+import com.workflowy.ReferencesRootFinder;
+import com.workflowy.ReferencesRootList;
 import com.workflowy.Tag;
 import com.workflowy.TagFinder;
 import com.workflowy.TagList;
@@ -77,6 +80,7 @@ public final class WorkflowyDataConverter {
 	private final BacklinkList backlinks = new BacklinkList();
 	private final NodeCalendarList nodeCalendars = new NodeCalendarList();
 	private final NodeS3FileList nodeS3Files = new NodeS3FileList();
+	private final ReferencesRootList referencesRoots = new ReferencesRootList();
 	private final VirtualRootMappingList virtualRootMappings = new VirtualRootMappingList();
 
 	private WorkflowyDataConverter(
@@ -146,11 +150,12 @@ public final class WorkflowyDataConverter {
 		LOGGER.info("Pass 3: Processing metadata (mirrors, backlinks, dates, S3 files, virtual roots)");
 		this.processMetadata(rootItems);
 		LOGGER.info(
-			"Created {} mirrors, {} backlinks, {} node dates, {} S3 files, {} virtual root mappings",
+			"Created {} mirrors, {} backlinks, {} node dates, {} S3 files, {} references roots, {} virtual root mappings",
 			this.mirrors.size(),
 			this.backlinks.size(),
 			this.nodeCalendars.size(),
 			this.nodeS3Files.size(),
+			this.referencesRoots.size(),
 			this.virtualRootMappings.size()
 		);
 
@@ -278,6 +283,12 @@ public final class WorkflowyDataConverter {
 
 		if (metadata.s3File() != null) {
 			this.processS3FileMetadata(inputItem.id(), metadata.s3File());
+		}
+
+		if (Boolean.TRUE.equals(metadata.isReferencesRoot())) {
+			var referencesRoot = new ReferencesRoot();
+			referencesRoot.setNodeId(inputItem.id());
+			this.referencesRoots.add(referencesRoot);
 		}
 
 		if (MapIterate.notEmpty(metadata.virtualRootIds())) {
@@ -535,6 +546,17 @@ public final class WorkflowyDataConverter {
 				var s3FileMergeOptions = new TopLevelMergeOptions<NodeS3File>(NodeS3FileFinder.getFinderInstance());
 				s3FileMergeOptions.doNotCompare(NodeS3FileFinder.systemFrom(), NodeS3FileFinder.systemTo());
 				existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
+
+				LOGGER.info("Merging {} references roots", this.referencesRoots.size());
+				ReferencesRootList existingReferencesRoots = ReferencesRootFinder.findMany(ReferencesRootFinder.all());
+				var referencesRootMergeOptions = new TopLevelMergeOptions<ReferencesRoot>(
+					ReferencesRootFinder.getFinderInstance()
+				);
+				referencesRootMergeOptions.doNotCompare(
+					ReferencesRootFinder.systemFrom(),
+					ReferencesRootFinder.systemTo()
+				);
+				existingReferencesRoots.merge(this.referencesRoots, referencesRootMergeOptions);
 
 				LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
 				VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(

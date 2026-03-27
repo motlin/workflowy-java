@@ -28,6 +28,9 @@ import com.workflowy.NodeMetadataList;
 import com.workflowy.NodeTagMapping;
 import com.workflowy.NodeTagMappingFinder;
 import com.workflowy.NodeTagMappingList;
+import com.workflowy.ReferencesRoot;
+import com.workflowy.ReferencesRootFinder;
+import com.workflowy.ReferencesRootList;
 import com.workflowy.Tag;
 import com.workflowy.TagFinder;
 import com.workflowy.TagList;
@@ -70,6 +73,7 @@ public final class WorkflowyApiDataConverter {
 	private final MutableMap<String, NodeMetadata> nodeMetadatas = MapAdapter.adapt(new LinkedHashMap<>());
 	private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
 	private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
+	private final ReferencesRootList referencesRoots = new ReferencesRootList();
 
 	private WorkflowyApiDataConverter(
 		@Nonnull ObjectMapper objectMapper,
@@ -134,6 +138,12 @@ public final class WorkflowyApiDataConverter {
 			NodeMetadata nodeMetadata = this.createNodeMetadata(node);
 			this.nodeContents.put(node.id(), nodeContent);
 			this.nodeMetadatas.put(node.id(), nodeMetadata);
+
+			if (Boolean.TRUE.equals(node.data().isReferencesRoot())) {
+				var referencesRoot = new ReferencesRoot();
+				referencesRoot.setNodeId(node.id());
+				this.referencesRoots.add(referencesRoot);
+			}
 		}
 		LOGGER.info(
 			"Created {} node contents and {} node metadatas",
@@ -281,6 +291,17 @@ public final class WorkflowyApiDataConverter {
 				);
 				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
 				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
+
+				LOGGER.info("Merging {} references roots", this.referencesRoots.size());
+				ReferencesRootList existingReferencesRoots = ReferencesRootFinder.findMany(ReferencesRootFinder.all());
+				var referencesRootMergeOptions = new TopLevelMergeOptions<ReferencesRoot>(
+					ReferencesRootFinder.getFinderInstance()
+				);
+				referencesRootMergeOptions.doNotCompare(
+					ReferencesRootFinder.systemFrom(),
+					ReferencesRootFinder.systemTo()
+				);
+				existingReferencesRoots.merge(this.referencesRoots, referencesRootMergeOptions);
 
 				storeApiHighWatermark(importTime);
 

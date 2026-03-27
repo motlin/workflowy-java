@@ -402,6 +402,25 @@ association NodeHasS3File
 }
 
 /*
+ * ReferencesRoot tracks nodes with metadata.isReferencesRoot = true.
+ * This is a sparse 1:1 boolean flag stored as a separate table since
+ * very few nodes (~27 out of ~108k) have this flag.
+ */
+class ReferencesRoot
+    systemTemporal
+{
+    nodeId: String key private final minLength(36) maxLength(36);
+}
+
+association NodeHasReferencesRoot
+{
+    node          : NodeContent[1..1] final;
+    referencesRoot: ReferencesRoot[0..1] owned;
+
+    relationship this.id == ReferencesRoot.nodeId
+}
+
+/*
  * VirtualRootMapping tracks virtual root references.
  * From backup: metadata.virtualRootIds (Map<String, Boolean>)
  * Maps a node to the virtual root nodes it references.
@@ -559,6 +578,12 @@ projection NodeContentProjection on NodeContent
     parent    : NodeContentProjection,
 }
 
+projection ReferencesRootProjection on ReferencesRoot
+{
+    systemFrom: "ReferencesRoot systemFrom",
+    systemTo  : "ReferencesRoot systemTo",
+}
+
 projection VirtualRootMappingProjection on VirtualRootMapping
 {
     virtualRoot: NodeContentProjection,
@@ -624,6 +649,7 @@ projection NodeProjection on NodeContent
     incomingLinks : BacklinkProjection,
     s3File        : NodeS3FileProjection,
     virtualRoots  : VirtualRootMappingProjection,
+    referencesRoot: ReferencesRootProjection,
 }
 
 projection BackupImportTimestampProjection on BackupImportTimestamp

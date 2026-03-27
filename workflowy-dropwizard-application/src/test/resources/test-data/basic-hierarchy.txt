@@ -23,6 +23,9 @@ systemFrom               , systemTo               , nodeId                      
 "1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000003", false
 "1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000004", false
 
+class com.workflowy.ReferencesRoot
+systemFrom               , systemTo               , nodeId
+
 class com.workflowy.Backlink
 systemFrom               , systemTo               , sourceId                              , targetId
 "1999-12-31 23:59:59.999", "9999-12-01 23:59:00.0", "00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000003"

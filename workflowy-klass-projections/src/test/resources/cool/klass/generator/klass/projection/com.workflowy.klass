@@ -52,6 +52,7 @@ projection NodeContentProjection on NodeContent
     tags: NodeTagMappingProjection,
     calendar: NodeCalendarProjection,
     s3File: NodeS3FileProjection,
+    referencesRoot: ReferencesRootProjection,
     virtualRoots: VirtualRootMappingProjection,
 }
 
@@ -163,6 +164,12 @@ projection NodeS3FileProjection on NodeS3File
     imageOriginalWidth: "NodeS3File imageOriginalWidth",
     imageOriginalHeight: "NodeS3File imageOriginalHeight",
     imageOriginalPixels: "NodeS3File imageOriginalPixels",
+}
+
+projection ReferencesRootProjection on ReferencesRoot
+{
+    systemFrom: "ReferencesRoot systemFrom",
+    systemTo: "ReferencesRoot systemTo",
 }
 
 projection VirtualRootMappingProjection on VirtualRootMapping

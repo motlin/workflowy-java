@@ -325,7 +325,23 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-13-VIRTUAL_ROOT_MAPPING">
+    <changeSet author="Klass" id="initial-table-13-REFERENCES_ROOT">
+        <createTable tableName="REFERENCES_ROOT">
+            <column name="NODE_ID" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="REFERENCES_ROOT_PK" />
+            </column>
+
+            <column name="SYSTEM_FROM" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="SYSTEM_TO" type="timestamp">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="REFERENCES_ROOT_PK" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Klass" id="initial-table-14-VIRTUAL_ROOT_MAPPING">
         <createTable tableName="VIRTUAL_ROOT_MAPPING">
             <column name="NODE_ID" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="VIRTUAL_ROOT_MAPPING_PK" />
@@ -345,7 +361,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-14-BACKUP_IMPORT_TIMESTAMP">
+    <changeSet author="Klass" id="initial-table-15-BACKUP_IMPORT_TIMESTAMP">
         <createTable tableName="BACKUP_IMPORT_TIMESTAMP">
             <column name="NAME" type="varchar(64)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="BACKUP_IMPORT_TIMESTAMP_PK" />
@@ -365,7 +381,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-table-15-API_IMPORT_TIMESTAMP">
+    <changeSet author="Klass" id="initial-table-16-API_IMPORT_TIMESTAMP">
         <createTable tableName="API_IMPORT_TIMESTAMP">
             <column name="NAME" type="varchar(64)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="API_IMPORT_TIMESTAMP_PK" />
@@ -502,7 +518,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-13-VIRTUAL_ROOT_MAPPING_IDX_NODE">
+    <changeSet author="Klass" id="initial-indices-14-VIRTUAL_ROOT_MAPPING_IDX_NODE">
         <createIndex
                 indexName="VIRTUAL_ROOT_MAPPING_IDX_NODE"
                 tableName="VIRTUAL_ROOT_MAPPING">
@@ -511,7 +527,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="Klass" id="initial-indices-13-VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT">
+    <changeSet author="Klass" id="initial-indices-14-VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT">
         <createIndex
                 indexName="VIRTUAL_ROOT_MAPPING_IDX_VIRTUAL_ROOT"
                 tableName="VIRTUAL_ROOT_MAPPING">

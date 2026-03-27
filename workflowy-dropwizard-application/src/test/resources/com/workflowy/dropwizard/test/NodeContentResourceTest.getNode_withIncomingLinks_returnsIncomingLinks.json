@@ -62,5 +62,6 @@
 		}
 	],
 	"s3File": null,
-	"virtualRoots": []
+	"virtualRoots": [],
+	"referencesRoot": null
 }

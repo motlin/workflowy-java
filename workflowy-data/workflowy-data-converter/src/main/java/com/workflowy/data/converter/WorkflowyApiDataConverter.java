@@ -15,6 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gs.fw.common.mithra.MithraManagerProvider;
 import com.gs.fw.common.mithra.finder.Operation;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
+import com.workflowy.AiMetadata;
+import com.workflowy.AiMetadataFinder;
+import com.workflowy.AiMetadataList;
 import com.workflowy.ApiImportTimestamp;
 import com.workflowy.ApiImportTimestampFinder;
 import com.workflowy.BackupImportTimestamp;
@@ -73,6 +76,7 @@ public final class WorkflowyApiDataConverter {
 	private final MutableMap<String, NodeMetadata> nodeMetadatas = MapAdapter.adapt(new LinkedHashMap<>());
 	private final MutableMap<String, Tag> tags = MapAdapter.adapt(new LinkedHashMap<>());
 	private final NodeTagMappingList nodeTagMappings = new NodeTagMappingList();
+	private final AiMetadataList aiMetadatas = new AiMetadataList();
 	private final ReferencesRootList referencesRoots = new ReferencesRootList();
 
 	private WorkflowyApiDataConverter(
@@ -183,8 +187,14 @@ public final class WorkflowyApiDataConverter {
 		nodeMetadata.setLastUpdatedById(this.userId);
 
 		nodeMetadata.setLayoutMode(normalizeLayoutMode(node.data().layoutMode()));
+
 		InputAiMetadata ai = node.data().ai();
-		nodeMetadata.setInChat(ai != null && Boolean.TRUE.equals(ai.inChat()));
+		if (ai != null && Boolean.TRUE.equals(ai.inChat())) {
+			var aiMetadata = new AiMetadata();
+			aiMetadata.setNodeId(node.id());
+			aiMetadata.setInChat(true);
+			this.aiMetadatas.add(aiMetadata);
+		}
 
 		return nodeMetadata;
 	}
@@ -291,6 +301,12 @@ public final class WorkflowyApiDataConverter {
 				);
 				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
 				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
+
+				LOGGER.info("Merging {} AI metadatas", this.aiMetadatas.size());
+				AiMetadataList existingAiMetadatas = AiMetadataFinder.findMany(AiMetadataFinder.all());
+				var aiMetadataMergeOptions = new TopLevelMergeOptions<AiMetadata>(AiMetadataFinder.getFinderInstance());
+				aiMetadataMergeOptions.doNotCompare(AiMetadataFinder.systemFrom(), AiMetadataFinder.systemTo());
+				existingAiMetadatas.merge(this.aiMetadatas, aiMetadataMergeOptions);
 
 				LOGGER.info("Merging {} references roots", this.referencesRoots.size());
 				ReferencesRootList existingReferencesRoots = ReferencesRootFinder.findMany(ReferencesRootFinder.all());

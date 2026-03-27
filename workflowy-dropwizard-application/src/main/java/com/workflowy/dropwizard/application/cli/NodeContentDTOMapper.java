@@ -70,7 +70,6 @@ public final class NodeContentDTOMapper {
 		dto.setCompletedAt(metadata.getCompletedAt() != null ? metadata.getCompletedAt().toInstant() : null);
 		dto.setLastModified(metadata.getLastModified() != null ? metadata.getLastModified().toInstant() : null);
 		dto.setLayoutMode(metadata.getLayoutMode());
-		dto.setInChat(metadata.isInChatNull() ? null : metadata.isInChat());
 		dto.setChanges(metadata.getChanges());
 		dto.setCreatedOn(metadata.getCreatedOn() != null ? metadata.getCreatedOn().toInstant() : null);
 		dto.setSystemFrom(metadata.getSystemFrom().toInstant());

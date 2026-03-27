@@ -19,7 +19,6 @@
 		"completedAt": "2000-01-15T10:30:00Z",
 		"lastModified": "2000-01-15T10:30:00Z",
 		"layoutMode": null,
-		"inChat": null,
 		"changes": null,
 		"numberedStart": null,
 		"systemFrom": "1999-12-31T23:59:59.999Z",
@@ -63,5 +62,6 @@
 	],
 	"s3File": null,
 	"virtualRoots": [],
-	"referencesRoot": null
+	"referencesRoot": null,
+	"aiMetadata": null
 }

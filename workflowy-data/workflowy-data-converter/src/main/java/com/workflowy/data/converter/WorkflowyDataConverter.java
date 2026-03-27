@@ -14,6 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gs.fw.common.mithra.MithraManagerProvider;
 import com.gs.fw.common.mithra.finder.Operation;
 import com.gs.fw.common.mithra.list.merge.TopLevelMergeOptions;
+import com.workflowy.AiMetadata;
+import com.workflowy.AiMetadataFinder;
+import com.workflowy.AiMetadataList;
 import com.workflowy.ApiImportTimestamp;
 import com.workflowy.ApiImportTimestampFinder;
 import com.workflowy.Backlink;
@@ -80,6 +83,7 @@ public final class WorkflowyDataConverter {
 	private final BacklinkList backlinks = new BacklinkList();
 	private final NodeCalendarList nodeCalendars = new NodeCalendarList();
 	private final NodeS3FileList nodeS3Files = new NodeS3FileList();
+	private final AiMetadataList aiMetadatas = new AiMetadataList();
 	private final ReferencesRootList referencesRoots = new ReferencesRootList();
 	private final VirtualRootMappingList virtualRootMappings = new VirtualRootMappingList();
 
@@ -150,13 +154,14 @@ public final class WorkflowyDataConverter {
 		LOGGER.info("Pass 3: Processing metadata (mirrors, backlinks, dates, S3 files, virtual roots)");
 		this.processMetadata(rootItems);
 		LOGGER.info(
-			"Created {} mirrors, {} backlinks, {} node dates, {} S3 files, {} references roots, {} virtual root mappings",
+			"Created {} mirrors, {} backlinks, {} node dates, {} S3 files, {} references roots, {} virtual root mappings, {} AI metadatas",
 			this.mirrors.size(),
 			this.backlinks.size(),
 			this.nodeCalendars.size(),
 			this.nodeS3Files.size(),
 			this.referencesRoots.size(),
-			this.virtualRootMappings.size()
+			this.virtualRootMappings.size(),
+			this.aiMetadatas.size()
 		);
 
 		this.mergeIntoDatabase(backupInstant);
@@ -206,9 +211,13 @@ public final class WorkflowyDataConverter {
 		if (metadata != null) {
 			nodeMetadata.setLayoutMode(normalizeLayoutMode(metadata.layoutMode()));
 
-			// Set inChat consistently with API converter (false when not present)
 			InputAiMetadata ai = metadata.ai();
-			nodeMetadata.setInChat(ai != null && Boolean.TRUE.equals(ai.inChat()));
+			if (ai != null && Boolean.TRUE.equals(ai.inChat())) {
+				var aiMetadata = new AiMetadata();
+				aiMetadata.setNodeId(inputItem.id());
+				aiMetadata.setInChat(true);
+				this.aiMetadatas.add(aiMetadata);
+			}
 
 			if (metadata.changes() != null) {
 				try {
@@ -493,7 +502,6 @@ public final class WorkflowyDataConverter {
 				// Exclude fields not compared in TypeScript backup import.
 				// Only compare: completed, completedAt, layoutMode
 				metadataMergeOptions.doNotCompare(
-					NodeMetadataFinder.inChat(),
 					NodeMetadataFinder.changes(),
 					NodeMetadataFinder.numberedStart(),
 					NodeMetadataFinder.lastModified() // Exclude timestamp-only changes
@@ -558,6 +566,12 @@ public final class WorkflowyDataConverter {
 					VirtualRootMappingFinder.systemTo()
 				);
 				existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
+
+				LOGGER.info("Merging {} AI metadatas", this.aiMetadatas.size());
+				AiMetadataList existingAiMetadatas = AiMetadataFinder.findMany(AiMetadataFinder.all());
+				var aiMetadataMergeOptions = new TopLevelMergeOptions<AiMetadata>(AiMetadataFinder.getFinderInstance());
+				aiMetadataMergeOptions.doNotCompare(AiMetadataFinder.systemFrom(), AiMetadataFinder.systemTo());
+				existingAiMetadatas.merge(this.aiMetadatas, aiMetadataMergeOptions);
 
 				WorkflowyDataConverter.storeBackupHighWatermark(backupFileDate);
 

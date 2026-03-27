@@ -86,10 +86,6 @@ class NodeMetadata
     // Display layout mode (bullets, todo, h1, h2, h3, code-block, quote-block)
     layoutMode  : String? maxLength(32);
 
-    // Whether this node is included in AI chat (from metadata.ai.inChat)
-    // TODO: Consider moving to AiMetadata sparse table when AI associations are defined
-    inChat      : Boolean?;
-
     // Changes metadata stored as JSON (from metadata.changes)
     changes     : String? maxLength(10000);
 
@@ -113,6 +109,27 @@ class NodeCollapsed
 
     // Whether this node is collapsed in the UI
     collapsed: Boolean;
+}
+
+/*
+ * AiMetadata tracks AI-related metadata for nodes.
+ * This is a sparse 1:1 table since only a tiny fraction of nodes
+ * have AI metadata (e.g., inChat: true from metadata.ai.inChat).
+ */
+class AiMetadata
+    systemTemporal
+{
+    nodeId: String key private final minLength(36) maxLength(36);
+    inChat: Boolean;
+}
+
+// Association: AiMetadata belongs to NodeContent (sparse 1:1 for AI state)
+association NodeHasAiMetadata
+{
+    node      : NodeContent[1..1] final;
+    aiMetadata: AiMetadata[0..1] owned;
+
+    relationship this.id == AiMetadata.nodeId
 }
 
 // Note: NodeEmbedding is stored separately (e.g., SQLite) rather than in H2
@@ -587,6 +604,13 @@ projection VirtualRootMappingProjection on VirtualRootMapping
     systemTo   : "VirtualRootMapping systemTo",
 }
 
+projection AiMetadataProjection on AiMetadata
+{
+    inChat    : "AiMetadata inChat",
+    systemFrom: "AiMetadata systemFrom",
+    systemTo  : "AiMetadata systemTo",
+}
+
 // Projection for NodeMetadata (non-embedding fields)
 projection NodeMetadataProjection on NodeMetadata
 {
@@ -596,7 +620,6 @@ projection NodeMetadataProjection on NodeMetadata
     completedAt     : "NodeMetadata completedAt",
     lastModified    : "NodeMetadata lastModified",
     layoutMode      : "NodeMetadata layoutMode",
-    inChat          : "NodeMetadata inChat",
     changes         : "NodeMetadata changes",
     numberedStart   : "NodeMetadata numberedStart",
     systemFrom      : "NodeMetadata systemFrom",
@@ -646,6 +669,7 @@ projection NodeProjection on NodeContent
     s3File        : NodeS3FileProjection,
     virtualRoots  : VirtualRootMappingProjection,
     referencesRoot: ReferencesRootProjection,
+    aiMetadata    : AiMetadataProjection,
 }
 
 projection BackupImportTimestampProjection on BackupImportTimestamp

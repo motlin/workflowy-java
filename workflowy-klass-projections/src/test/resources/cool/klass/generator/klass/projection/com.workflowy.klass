@@ -21,6 +21,7 @@ projection NodeContentProjection on NodeContent
     systemTo: "NodeContent systemTo",
     name: "NodeContent name",
     note: "NodeContent note",
+    aiMetadata: AiMetadataProjection,
     metadata: NodeMetadataProjection,
     collapsedState: NodeCollapsedProjection,
     children: {
@@ -67,7 +68,6 @@ projection NodeMetadataProjection on NodeMetadata
     completedAt: "NodeMetadata completedAt",
     lastModified: "NodeMetadata lastModified",
     layoutMode: "NodeMetadata layoutMode",
-    inChat: "NodeMetadata inChat",
     changes: "NodeMetadata changes",
     numberedStart: "NodeMetadata numberedStart",
     createdBy: {
@@ -83,6 +83,13 @@ projection NodeCollapsedProjection on NodeCollapsed
     systemFrom: "NodeCollapsed systemFrom",
     systemTo: "NodeCollapsed systemTo",
     collapsed: "NodeCollapsed collapsed",
+}
+
+projection AiMetadataProjection on AiMetadata
+{
+    systemFrom: "AiMetadata systemFrom",
+    systemTo: "AiMetadata systemTo",
+    inChat: "AiMetadata inChat",
 }
 
 projection MirrorProjection on Mirror

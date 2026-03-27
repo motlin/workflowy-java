@@ -344,37 +344,25 @@ public final class WorkflowyDataConverter {
 	}
 
 	private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta) {
-		if (calendarMeta.date() != null) {
-			Timestamp dateValue = WorkflowyTimestampConverter.parseCalendarDate(calendarMeta.date());
-			if (dateValue != null) {
-				var nodeCalendar = new NodeCalendar();
-				nodeCalendar.setId(UUID.randomUUID().toString());
-				nodeCalendar.setNodeId(nodeId);
-				nodeCalendar.setDateValue(dateValue);
-				nodeCalendar.setRoot(calendarMeta.isRoot());
-				nodeCalendar.setLevel(calendarMeta.level());
-				nodeCalendar.setDateId(calendarMeta.dateId());
-				nodeCalendar.setTimestamp(calendarMeta.timestamp());
-				nodeCalendar.setValue(calendarMeta.value());
-				if (calendarMeta.levels() != null) {
-					var levels = new NodeCalendarLevels();
-					levels.setCalendarId(nodeCalendar.getId());
-					levels.setDay(calendarMeta.levels().day());
-					levels.setWeek(calendarMeta.levels().week());
-					levels.setMonth(calendarMeta.levels().month());
-					levels.setYear(calendarMeta.levels().year());
-					nodeCalendar.setLevels(levels);
-				}
-				if (calendarMeta.foundDates() != null) {
-					try {
-						nodeCalendar.setFoundDates(this.objectMapper.writeValueAsString(calendarMeta.foundDates()));
-					} catch (Exception e) {
-						LOGGER.warn("Failed to serialize foundDates for node {}: {}", nodeId, e.getMessage());
-					}
-				}
-				this.nodeCalendars.add(nodeCalendar);
-			}
+		var nodeCalendar = new NodeCalendar();
+		nodeCalendar.setId(UUID.randomUUID().toString());
+		nodeCalendar.setNodeId(nodeId);
+		nodeCalendar.setRoot(calendarMeta.isRoot());
+		nodeCalendar.setLevel(calendarMeta.level());
+		nodeCalendar.setDateId(calendarMeta.dateId());
+		nodeCalendar.setTimestamp(calendarMeta.timestamp());
+		nodeCalendar.setValue(calendarMeta.value());
+		nodeCalendar.setFoundDates(calendarMeta.foundDates());
+		if (calendarMeta.levels() != null) {
+			var levels = new NodeCalendarLevels();
+			levels.setCalendarId(nodeCalendar.getId());
+			levels.setDay(calendarMeta.levels().day());
+			levels.setWeek(calendarMeta.levels().week());
+			levels.setMonth(calendarMeta.levels().month());
+			levels.setYear(calendarMeta.levels().year());
+			nodeCalendar.setLevels(levels);
 		}
+		this.nodeCalendars.add(nodeCalendar);
 	}
 
 	private void processS3FileMetadata(String nodeId, InputS3FileMetadata s3FileMeta) {

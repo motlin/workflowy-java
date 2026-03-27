@@ -17,14 +17,6 @@ public final class WorkflowyTimestampConverter {
 		return Timestamp.from(Instant.ofEpochSecond(epochSeconds));
 	}
 
-	public static Timestamp parseCalendarDate(Object dateValue) {
-		if (dateValue instanceof Number number) {
-			long epochSeconds = number.longValue();
-			return Timestamp.from(Instant.ofEpochSecond(epochSeconds));
-		}
-		return null;
-	}
-
 	/**
 	 * Convert a Unix timestamp (seconds since Jan 1, 1970) to a Timestamp.
 	 * Used for API export data which uses standard Unix timestamps.

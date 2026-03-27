@@ -245,21 +245,17 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="NODE_CALENDAR_PK" />
             </column>
 
-            <column name="DATE_VALUE" type="timestamp">
-                <constraints nullable="false" />
-            </column>
-
             <column name="ROOT" type="boolean" />
 
             <column name="LEVEL" type="varchar(32)" />
 
-            <column name="DATE_ID" type="varchar(64)" />
+            <column name="DATE_ID" type="int" />
 
             <column name="TIMESTAMP" type="bigint" />
 
-            <column name="VALUE" type="int" />
+            <column name="VALUE" type="varchar(16)" />
 
-            <column name="FOUND_DATES" type="varchar(10000)" />
+            <column name="FOUND_DATES" type="boolean" />
         </createTable>
     </changeSet>
 

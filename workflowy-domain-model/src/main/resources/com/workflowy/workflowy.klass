@@ -321,15 +321,12 @@ class NodeCalendar
 {
     id        : String key minLength(36) maxLength(36);
     nodeId    : String private final minLength(36) maxLength(36);
-    dateValue : Instant;
     root      : Boolean?;
     level     : String? maxLength(32);
-    dateId    : String? maxLength(64);
+    dateId    : Integer?;
     timestamp : Long?;
-    value     : Integer?;
-
-    // Found dates stored as JSON (complex structure)
-    foundDates: String? maxLength(10000);
+    value     : String? maxLength(16);
+    foundDates: Boolean?;
 }
 
 /*
@@ -513,7 +510,6 @@ projection NodeCalendarLevelsProjection on NodeCalendarLevels
 projection NodeCalendarProjection on NodeCalendar
 {
     id        : "NodeCalendar id",
-    dateValue : "NodeCalendar dateValue",
     root      : "NodeCalendar root",
     level     : "NodeCalendar level",
     dateId    : "NodeCalendar dateId",

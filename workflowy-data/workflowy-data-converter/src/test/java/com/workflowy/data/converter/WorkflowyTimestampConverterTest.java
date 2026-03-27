@@ -47,40 +47,6 @@ class WorkflowyTimestampConverterTest {
 	}
 
 	@Test
-	void parseCalendarDate_withNull_returnsNull() {
-		assertNull(WorkflowyTimestampConverter.parseCalendarDate(null));
-	}
-
-	@Test
-	void parseCalendarDate_withNumber_returnsTimestamp() {
-		long epochSeconds = Instant.parse("2024-03-15T00:00:00Z").getEpochSecond();
-		Timestamp result = WorkflowyTimestampConverter.parseCalendarDate(epochSeconds);
-		assertNotNull(result);
-		assertEquals(Instant.parse("2024-03-15T00:00:00Z"), result.toInstant());
-	}
-
-	@Test
-	void parseCalendarDate_withInteger_returnsTimestamp() {
-		int epochSeconds = 1710460800;
-		Timestamp result = WorkflowyTimestampConverter.parseCalendarDate(epochSeconds);
-		assertNotNull(result);
-		assertEquals(Instant.ofEpochSecond(epochSeconds), result.toInstant());
-	}
-
-	@Test
-	void parseCalendarDate_withDouble_returnsTimestamp() {
-		double epochSeconds = 1710460800.0;
-		Timestamp result = WorkflowyTimestampConverter.parseCalendarDate(epochSeconds);
-		assertNotNull(result);
-		assertEquals(Instant.ofEpochSecond(1710460800L), result.toInstant());
-	}
-
-	@Test
-	void parseCalendarDate_withString_returnsNull() {
-		assertNull(WorkflowyTimestampConverter.parseCalendarDate("2024-03-15"));
-	}
-
-	@Test
 	void workflowyTimestampToInstant_withNull_returnsNull() {
 		assertNull(WorkflowyTimestampConverter.workflowyTimestampToInstant(null));
 	}

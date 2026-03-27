@@ -5,17 +5,15 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record InputCalendarMetadata(
-	@Nullable Boolean date,
-
 	@JsonProperty("root") @Nullable Boolean isRoot,
 
 	@Nullable String level,
 
 	@Nullable InputCalendarLevelsMetadata levels,
 
-	@Nullable Integer value,
+	@Nullable String value,
 
-	@Nullable String dateId,
+	@Nullable Integer dateId,
 
 	@Nullable Long timestamp,
 

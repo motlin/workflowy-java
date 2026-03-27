@@ -131,7 +131,6 @@ projection NodeCalendarProjection on NodeCalendar
     id: "NodeCalendar id",
     systemFrom: "NodeCalendar systemFrom",
     systemTo: "NodeCalendar systemTo",
-    dateValue: "NodeCalendar dateValue",
     root: "NodeCalendar root",
     level: "NodeCalendar level",
     dateId: "NodeCalendar dateId",

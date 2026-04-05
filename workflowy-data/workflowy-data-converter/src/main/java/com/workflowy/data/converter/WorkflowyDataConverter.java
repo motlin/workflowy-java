@@ -356,19 +356,36 @@ public final class WorkflowyDataConverter {
 		var nodeCalendar = new NodeCalendar();
 		nodeCalendar.setId(UUID.randomUUID().toString());
 		nodeCalendar.setNodeId(nodeId);
-		nodeCalendar.setRoot(calendarMeta.isRoot());
+		if (calendarMeta.isRoot() != null) {
+			nodeCalendar.setRoot(calendarMeta.isRoot());
+		}
 		nodeCalendar.setLevel(calendarMeta.level());
-		nodeCalendar.setDateId(calendarMeta.dateId());
-		nodeCalendar.setTimestamp(calendarMeta.timestamp());
+		if (calendarMeta.dateId() != null) {
+			nodeCalendar.setDateId(calendarMeta.dateId());
+		}
+		if (calendarMeta.timestamp() != null) {
+			nodeCalendar.setTimestamp(calendarMeta.timestamp());
+		}
 		nodeCalendar.setValue(calendarMeta.value());
-		nodeCalendar.setFoundDates(calendarMeta.foundDates());
+		if (calendarMeta.foundDates() != null) {
+			nodeCalendar.setFoundDates(calendarMeta.foundDates());
+		}
 		if (calendarMeta.levels() != null) {
 			var levels = new NodeCalendarLevels();
 			levels.setCalendarId(nodeCalendar.getId());
-			levels.setDay(calendarMeta.levels().day());
-			levels.setWeek(calendarMeta.levels().week());
-			levels.setMonth(calendarMeta.levels().month());
-			levels.setYear(calendarMeta.levels().year());
+			var inputLevels = calendarMeta.levels();
+			if (inputLevels.day() != null) {
+				levels.setDay(inputLevels.day());
+			}
+			if (inputLevels.week() != null) {
+				levels.setWeek(inputLevels.week());
+			}
+			if (inputLevels.month() != null) {
+				levels.setMonth(inputLevels.month());
+			}
+			if (inputLevels.year() != null) {
+				levels.setYear(inputLevels.year());
+			}
 			nodeCalendar.setLevels(levels);
 		}
 		this.nodeCalendars.add(nodeCalendar);

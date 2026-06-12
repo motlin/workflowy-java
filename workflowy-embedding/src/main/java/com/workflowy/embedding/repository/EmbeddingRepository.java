@@ -183,7 +183,7 @@ public class EmbeddingRepository {
 		String sql = threshold != null ? SEARCH_WITH_THRESHOLD_SQL : SEARCH_SQL;
 
 		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-			int paramIndex = 1;
+			var paramIndex = 1;
 			stmt.setBytes(paramIndex++, queryBytes);
 			stmt.setString(paramIndex++, model.getKey());
 			stmt.setString(paramIndex++, FAR_FUTURE_DATE);
@@ -287,7 +287,7 @@ public class EmbeddingRepository {
 
 	private static byte[] floatArrayToBytes(float[] floats) {
 		byte[] bytes = new byte[floats.length * 4];
-		for (int i = 0; i < floats.length; i++) {
+		for (var i = 0; i < floats.length; i++) {
 			int intBits = Float.floatToIntBits(floats[i]);
 			bytes[i * 4] = (byte) (intBits & 0xFF);
 			bytes[i * 4 + 1] = (byte) ((intBits >> 8) & 0xFF);

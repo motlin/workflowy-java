@@ -1,7 +1,6 @@
 package com.workflowy.data.converter;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javax.annotation.Nonnull;
 
@@ -60,7 +59,7 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extend
 		DataStore dataStore = configuration.getKlassFactory().getDataStoreFactory().createDataStore();
 
 		String backupsPathString = namespace.getString("backups_path");
-		Path backupsPath = Paths.get(backupsPathString);
+		Path backupsPath = Path.of(backupsPathString);
 		Boolean resetWatermark = namespace.getBoolean("reset_watermark");
 
 		LOGGER.info("backupsPath = {}", backupsPath);

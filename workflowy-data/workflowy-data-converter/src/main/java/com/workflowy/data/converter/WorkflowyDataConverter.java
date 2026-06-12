@@ -625,7 +625,7 @@ public final class WorkflowyDataConverter {
 
 		// Group nodes by parent using nodeContents (which has parentId)
 		Map<String, List<SiblingInfo>> siblingsByParent = new LinkedHashMap<>();
-		int backupIndex = 0;
+		var backupIndex = 0;
 		for (var entry : this.nodeContents.entrySet()) {
 			String nodeId = entry.getKey();
 			NodeContent content = entry.getValue();
@@ -665,7 +665,7 @@ public final class WorkflowyDataConverter {
 
 			if (orderChanged || hasNewNodes) {
 				// Recalculate all priorities for this group
-				int priority = 0;
+				var priority = 0;
 				for (SiblingInfo sibling : siblings) {
 					priorityUpdates.put(sibling.nodeId(), priority);
 					priority += 100;

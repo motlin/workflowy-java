@@ -1,8 +1,5 @@
 package com.workflowy.dropwizard.application.cli;
 
-import java.util.Arrays;
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -15,7 +12,8 @@ import com.workflowy.dropwizard.application.WorkflowyConfiguration;
 import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
-import net.sourceforge.argparse4j.inf.Subparser;
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.list.fixed.ArrayAdapter;
 import org.eclipse.jetty.util.component.ContainerLifeCycle;
 import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
@@ -29,11 +27,6 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 
 	protected AbstractApiCommand(WorkflowyApplication application, String name, String description) {
 		super(application, name, description);
-	}
-
-	@Override
-	public void configure(Subparser subparser) {
-		super.configure(subparser);
 	}
 
 	@Override
@@ -100,12 +93,12 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 			throw new IllegalArgumentException("Multiple nodes match prefix: " + shortOrFullId);
 		}
 
-		return matches.get(0).getId();
+		return matches.getFirst().getId();
 	}
 
 	@Nullable
 	private String resolvePathToId(String commaSeparatedPath, WorkflowyApiClient apiClient) {
-		List<String> segments = Arrays.stream(commaSeparatedPath.split(",")).map(String::trim).toList();
+		MutableList<String> segments = ArrayAdapter.adapt(commaSeparatedPath.split(",")).collect(String::trim).toList();
 
 		// Try H2 cache first
 		String currentId = null;
@@ -118,7 +111,7 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 			}
 
 			NodeContent match = null;
-			for (int i = 0; i < children.size(); i++) {
+			for (var i = 0; i < children.size(); i++) {
 				NodeContent child = children.get(i);
 				if (segment.equals(child.getName())) {
 					match = child;

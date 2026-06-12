@@ -2,7 +2,6 @@ package com.workflowy.data.converter;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -83,7 +82,7 @@ public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration> exte
 		DataStore dataStore = configuration.getKlassFactory().getDataStoreFactory().createDataStore();
 
 		String backupsPathString = namespace.getString("backups_path");
-		Path backupsPath = Paths.get(backupsPathString);
+		Path backupsPath = Path.of(backupsPathString);
 		int count = namespace.getInt("count");
 
 		LOGGER.info("backupsPath = {}", backupsPath);

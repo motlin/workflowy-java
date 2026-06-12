@@ -40,7 +40,7 @@ public class NodeEmbedding {
 
 	public byte[] getEmbeddingAsBytes() {
 		byte[] bytes = new byte[this.embedding.length * 4];
-		for (int i = 0; i < this.embedding.length; i++) {
+		for (var i = 0; i < this.embedding.length; i++) {
 			int intBits = Float.floatToIntBits(this.embedding[i]);
 			bytes[i * 4] = (byte) (intBits & 0xFF);
 			bytes[i * 4 + 1] = (byte) ((intBits >> 8) & 0xFF);
@@ -52,7 +52,7 @@ public class NodeEmbedding {
 
 	public static float[] bytesToFloatArray(byte[] bytes) {
 		float[] floats = new float[bytes.length / 4];
-		for (int i = 0; i < floats.length; i++) {
+		for (var i = 0; i < floats.length; i++) {
 			int intBits =
 				(bytes[i * 4] & 0xFF)
 				| ((bytes[i * 4 + 1] & 0xFF) << 8)

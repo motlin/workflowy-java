@@ -7,7 +7,9 @@ public final class WorkflowyTimestampConverter {
 
 	public static final long WORKFLOWY_EPOCH_OFFSET = 1262304000L;
 
-	private WorkflowyTimestampConverter() {}
+	private WorkflowyTimestampConverter() {
+		throw new AssertionError("Suppress default constructor for noninstantiability");
+	}
 
 	public static Timestamp convertWorkflowyTimestamp(Long workflowyTimestamp) {
 		if (workflowyTimestamp == null) {

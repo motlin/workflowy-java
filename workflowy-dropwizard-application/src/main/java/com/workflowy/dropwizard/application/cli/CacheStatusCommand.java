@@ -10,18 +10,11 @@ import com.workflowy.NodeMetadataList;
 import com.workflowy.dropwizard.application.WorkflowyApplication;
 import com.workflowy.dropwizard.application.WorkflowyConfiguration;
 import net.sourceforge.argparse4j.inf.Namespace;
-import net.sourceforge.argparse4j.inf.Subparser;
 
 public class CacheStatusCommand extends AbstractReadOnlyCommand {
 
 	public CacheStatusCommand(WorkflowyApplication application) {
 		super(application, "cache-status", "Display cache and database statistics");
-	}
-
-	@Override
-	public void configure(Subparser subparser) {
-		super.configure(subparser);
-		// No additional arguments required
 	}
 
 	@Override

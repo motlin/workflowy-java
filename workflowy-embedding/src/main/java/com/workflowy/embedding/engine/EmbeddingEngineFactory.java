@@ -11,7 +11,9 @@ public final class EmbeddingEngineFactory {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddingEngineFactory.class);
 
-	private EmbeddingEngineFactory() {}
+	private EmbeddingEngineFactory() {
+		throw new AssertionError("Suppress default constructor for noninstantiability");
+	}
 
 	public static EmbeddingEngine create(EmbeddingModel model, EmbeddingConfiguration configuration) {
 		return create(model, configuration.getOpenaiApiKey(), configuration.getModelCachePath());

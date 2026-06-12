@@ -65,7 +65,7 @@ class OnnxEmbeddingEngineTest {
 	void generateEmbedding_outputIsNormalized() {
 		float[] embedding = engine.generateEmbedding("Test sentence for normalization", false);
 
-		double norm = 0.0;
+		var norm = 0.0;
 		for (float value : embedding) {
 			norm += value * value;
 		}
@@ -119,7 +119,7 @@ class OnnxEmbeddingEngineTest {
 
 	@Test
 	void generateEmbedding_sameTextProducesSameEmbedding() {
-		String text = "Deterministic embedding test";
+		var text = "Deterministic embedding test";
 
 		float[] embedding1 = engine.generateEmbedding(text, false);
 		float[] embedding2 = engine.generateEmbedding(text, false);
@@ -129,7 +129,7 @@ class OnnxEmbeddingEngineTest {
 
 	@Test
 	void generateEmbedding_queryVsPassage_producesSlightlyDifferentResults() {
-		String text = "Search query about machine learning";
+		var text = "Search query about machine learning";
 
 		float[] queryEmbedding = engine.generateEmbedding(text, true);
 		float[] passageEmbedding = engine.generateEmbedding(text, false);
@@ -148,11 +148,11 @@ class OnnxEmbeddingEngineTest {
 	}
 
 	private static double cosineSimilarity(float[] a, float[] b) {
-		double dotProduct = 0.0;
-		double normA = 0.0;
-		double normB = 0.0;
+		var dotProduct = 0.0;
+		var normA = 0.0;
+		var normB = 0.0;
 
-		for (int i = 0; i < a.length; i++) {
+		for (var i = 0; i < a.length; i++) {
 			dotProduct += a[i] * b[i];
 			normA += a[i] * a[i];
 			normB += b[i] * b[i];

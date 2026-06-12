@@ -176,7 +176,7 @@ public class WorkflowyApiClient implements AutoCloseable {
 
 			if (responseType == String.class) {
 				@SuppressWarnings("unchecked")
-				T result = (T) response.body();
+				var result = (T) response.body();
 				return result;
 			}
 

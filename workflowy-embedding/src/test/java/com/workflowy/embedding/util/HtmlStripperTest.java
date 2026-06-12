@@ -93,15 +93,15 @@ class HtmlStripperTest {
 
 	@Test
 	void stripHtmlTags_withComplexWorkflowyContent_handlesCorrectly() {
-		String input = "<b>Task:</b>&nbsp;Complete the&nbsp;<i>project</i>&amp;review";
-		String expected = "Task: Complete the project&review";
+		var input = "<b>Task:</b>&nbsp;Complete the&nbsp;<i>project</i>&amp;review";
+		var expected = "Task: Complete the project&review";
 		assertEquals(expected, HtmlStripper.stripHtmlTags(input));
 	}
 
 	@Test
 	void stripHtmlTags_withMultipleEntities_replacesAll() {
-		String input = "&lt;div&gt; &quot;test&quot; &amp; &#39;value&apos;";
-		String expected = "<div> \"test\" & 'value'";
+		var input = "&lt;div&gt; &quot;test&quot; &amp; &#39;value&apos;";
+		var expected = "<div> \"test\" & 'value'";
 		assertEquals(expected, HtmlStripper.stripHtmlTags(input));
 	}
 }

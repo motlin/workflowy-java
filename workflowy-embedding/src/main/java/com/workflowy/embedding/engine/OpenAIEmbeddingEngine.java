@@ -70,7 +70,7 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 			JsonNode embeddingArray = responseJson.get("data").get(0).get("embedding");
 
 			float[] embedding = new float[embeddingArray.size()];
-			for (int i = 0; i < embeddingArray.size(); i++) {
+			for (var i = 0; i < embeddingArray.size(); i++) {
 				embedding[i] = (float) embeddingArray.get(i).asDouble();
 			}
 
@@ -116,7 +116,7 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 			for (JsonNode item : dataArray) {
 				JsonNode embeddingArray = item.get("embedding");
 				float[] embedding = new float[embeddingArray.size()];
-				for (int i = 0; i < embeddingArray.size(); i++) {
+				for (var i = 0; i < embeddingArray.size(); i++) {
 					embedding[i] = (float) embeddingArray.get(i).asDouble();
 				}
 				embeddings.add(embedding);

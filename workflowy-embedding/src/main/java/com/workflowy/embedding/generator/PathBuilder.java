@@ -22,7 +22,7 @@ public class PathBuilder {
 
 			String name = HtmlStripper.stripHtmlTags(node.getName());
 			if (name != null && !name.isEmpty()) {
-				path.add(0, name);
+				path.addFirst(name);
 			}
 
 			currentId = node.getParentId();
@@ -56,7 +56,7 @@ public class PathBuilder {
 		}
 
 		MutableList<String> childTexts = Lists.mutable.empty();
-		for (int i = 0; i < children.size(); i++) {
+		for (var i = 0; i < children.size(); i++) {
 			NodeContent child = children.get(i);
 			String name = HtmlStripper.stripHtmlTags(child.getName());
 			String note = child.getNote() != null ? HtmlStripper.stripHtmlTags(child.getNote()) : "";

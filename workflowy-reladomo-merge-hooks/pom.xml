@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2025 Craig Motlin
+  ~ Copyright 2026 Craig Motlin
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.12.0</version>
                         <configuration>
                             <additionalDependencies>
                                 <additionalDependency>
@@ -118,7 +119,9 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.11.0</version>
                         <configuration>
                             <ignoredUnusedDeclaredDependencies combine.children="append">
                                 <dependency>${project.groupId}:${app.artifactId}-reladomo-pojos</dependency>

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -145,7 +146,7 @@ class EmbeddingRepositoryTest {
 		List<SearchResult> results = this.repository.search(baseEmbedding, EmbeddingModel.MINILM, 10, null);
 
 		assertEquals(2, results.size());
-		assertTrue(results.get(0).getDistance() <= results.get(1).getDistance());
+		assertTrue(results.getFirst().getDistance() <= results.get(1).getDistance());
 	}
 
 	@Test
@@ -156,7 +157,7 @@ class EmbeddingRepositoryTest {
 
 		float[] baseEmbedding = EmbeddingTestHelper.createRandomEmbedding(EmbeddingModel.MINILM.getDimensions());
 
-		for (int i = 0; i < 10; i++) {
+		for (var i = 0; i < 10; i++) {
 			String nodeId = EmbeddingTestHelper.randomNodeId();
 			float[] similar = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.1f * (i + 1));
 			this.repository.save(EmbeddingTestHelper.createNodeEmbedding(nodeId, EmbeddingModel.MINILM, similar));
@@ -180,7 +181,7 @@ class EmbeddingRepositoryTest {
 
 		List<SearchResult> results = this.repository.searchKeyword("groceries", 10);
 		assertEquals(1, results.size());
-		assertEquals(nodeId2, results.get(0).getNodeId());
+		assertEquals(nodeId2, results.getFirst().getNodeId());
 	}
 
 	@Test
@@ -201,7 +202,7 @@ class EmbeddingRepositoryTest {
 
 		List<SearchResult> orangeResults = this.repository.searchKeyword("oranges", 10);
 		assertEquals(1, orangeResults.size());
-		assertEquals(nodeId2, orangeResults.get(0).getNodeId());
+		assertEquals(nodeId2, orangeResults.getFirst().getNodeId());
 	}
 
 	@Test
@@ -217,7 +218,7 @@ class EmbeddingRepositoryTest {
 	@Test
 	void searchKeyword_respectsLimit() throws SQLException {
 		Map<String, String> contents = new LinkedHashMap<>();
-		for (int i = 0; i < 10; i++) {
+		for (var i = 0; i < 10; i++) {
 			contents.put(EmbeddingTestHelper.randomNodeId(), "Document about testing software quality " + i);
 		}
 		this.repository.populateFts(contents);
@@ -238,7 +239,7 @@ class EmbeddingRepositoryTest {
 
 		List<SearchResult> results = this.repository.searchKeyword("java", 10);
 		assertEquals(2, results.size());
-		assertEquals(exactId, results.get(0).getNodeId());
+		assertEquals(exactId, results.getFirst().getNodeId());
 	}
 
 	@Test
@@ -258,7 +259,7 @@ class EmbeddingRepositoryTest {
 	@Test
 	void getContentHash_withNoHash_returnsNull() throws SQLException {
 		String hash = this.repository.getContentHash("nonexistent", "minilm");
-		assertEquals(null, hash);
+		assertNull(hash);
 	}
 
 	@Test
@@ -299,7 +300,7 @@ class EmbeddingRepositoryTest {
 
 		List<SearchResult> results = this.repository.searchKeyword("program", 10);
 		assertEquals(1, results.size());
-		assertEquals(nodeId, results.get(0).getNodeId());
+		assertEquals(nodeId, results.getFirst().getNodeId());
 	}
 
 	@Test

@@ -31,14 +31,14 @@ class HashtagExtractorTest {
 	void extractHashtags_withSingleHashtag_returnsHashtag() {
 		List<String> result = HashtagExtractor.extractHashtags("Task with #priority");
 		assertEquals(1, result.size());
-		assertEquals("priority", result.get(0));
+		assertEquals("priority", result.getFirst());
 	}
 
 	@Test
 	void extractHashtags_withSingleMention_returnsMention() {
 		List<String> result = HashtagExtractor.extractHashtags("Assigned to @john");
 		assertEquals(1, result.size());
-		assertEquals("john", result.get(0));
+		assertEquals("john", result.getFirst());
 	}
 
 	@Test
@@ -62,28 +62,28 @@ class HashtagExtractorTest {
 	void extractHashtags_withDuplicateHashtags_returnsUnique() {
 		List<String> result = HashtagExtractor.extractHashtags("#task and another #task");
 		assertEquals(1, result.size());
-		assertEquals("task", result.get(0));
+		assertEquals("task", result.getFirst());
 	}
 
 	@Test
 	void extractHashtags_withHtmlTags_stripsHtmlFirst() {
 		List<String> result = HashtagExtractor.extractHashtags("<b>#priority</b> task");
 		assertEquals(1, result.size());
-		assertEquals("priority", result.get(0));
+		assertEquals("priority", result.getFirst());
 	}
 
 	@Test
 	void extractHashtags_withDashesInHashtag_includesDashes() {
 		List<String> result = HashtagExtractor.extractHashtags("#high-priority task");
 		assertEquals(1, result.size());
-		assertEquals("high-priority", result.get(0));
+		assertEquals("high-priority", result.getFirst());
 	}
 
 	@Test
 	void extractHashtags_withUnderscoresInHashtag_includesUnderscores() {
 		List<String> result = HashtagExtractor.extractHashtags("#work_item");
 		assertEquals(1, result.size());
-		assertEquals("work_item", result.get(0));
+		assertEquals("work_item", result.getFirst());
 	}
 
 	@Test
@@ -106,14 +106,14 @@ class HashtagExtractorTest {
 	void extractHashtags_withHashtagAtStart_findsIt() {
 		List<String> result = HashtagExtractor.extractHashtags("#todo finish the report");
 		assertEquals(1, result.size());
-		assertEquals("todo", result.get(0));
+		assertEquals("todo", result.getFirst());
 	}
 
 	@Test
 	void extractHashtags_withHashtagAtEnd_findsIt() {
 		List<String> result = HashtagExtractor.extractHashtags("Complete the report #done");
 		assertEquals(1, result.size());
-		assertEquals("done", result.get(0));
+		assertEquals("done", result.getFirst());
 	}
 
 	@Test
@@ -128,6 +128,6 @@ class HashtagExtractorTest {
 		List<String> result = HashtagExtractor.extractHashtags("Contact user@example.com");
 		// The regex will match @example, but that's the current behavior
 		assertEquals(1, result.size());
-		assertEquals("example", result.get(0));
+		assertEquals("example", result.getFirst());
 	}
 }

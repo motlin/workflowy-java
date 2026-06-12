@@ -20,7 +20,9 @@ public final class HuggingFaceModelDownloader {
 	private static final String MODEL_FILENAME = "model.onnx";
 	private static final String TOKENIZER_FILENAME = "tokenizer.json";
 
-	private HuggingFaceModelDownloader() {}
+	private HuggingFaceModelDownloader() {
+		throw new AssertionError("Suppress default constructor for noninstantiability");
+	}
 
 	public static Path ensureModelDownloaded(EmbeddingModel model, String cachePath) throws IOException {
 		Path modelDir = Path.of(cachePath, model.getKey());
@@ -63,7 +65,7 @@ public final class HuggingFaceModelDownloader {
 
 	private static void downloadFile(String urlString, Path destination) throws IOException {
 		URI uri = URI.create(urlString);
-		HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+		var connection = (HttpURLConnection) uri.toURL().openConnection();
 		connection.setRequestProperty("User-Agent", "workflowy-java/1.0");
 		connection.setConnectTimeout(30000);
 		connection.setReadTimeout(300000);

@@ -89,7 +89,7 @@ class JsonSyntaxHighlighterTest {
 
 	@Test
 	void highlight_withComplexJson_maintainsStructure() throws IOException {
-		String input = """
+		var input = """
 			{
 			  "name": "Test",
 			  "count": 5,
@@ -123,7 +123,7 @@ class JsonSyntaxHighlighterTest {
 
 	@Test
 	void highlight_preservesWhitespaceStructure() throws IOException {
-		String input = "{\n  \"key\": \"value\"\n}";
+		var input = "{\n  \"key\": \"value\"\n}";
 		String result = JsonSyntaxHighlighter.highlight(input);
 		// Check that the structure with newlines is preserved
 		assertTrue(result.contains("\n"));

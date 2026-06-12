@@ -77,13 +77,13 @@ public class SearchEngine {
 	) {
 		MutableMap<String, Double> rrfScores = Maps.mutable.empty();
 
-		for (int rank = 0; rank < vectorResults.size(); rank++) {
+		for (var rank = 0; rank < vectorResults.size(); rank++) {
 			String nodeId = vectorResults.get(rank).getNodeId();
 			double score = 1.0 / (RRF_K + rank + 1);
 			rrfScores.merge(nodeId, score, Double::sum);
 		}
 
-		for (int rank = 0; rank < keywordResults.size(); rank++) {
+		for (var rank = 0; rank < keywordResults.size(); rank++) {
 			String nodeId = keywordResults.get(rank).getNodeId();
 			double score = 1.0 / (RRF_K + rank + 1);
 			rrfScores.merge(nodeId, score, Double::sum);

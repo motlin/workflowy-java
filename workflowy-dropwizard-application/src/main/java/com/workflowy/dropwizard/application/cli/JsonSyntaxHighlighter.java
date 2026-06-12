@@ -18,7 +18,7 @@ public final class JsonSyntaxHighlighter {
 		var factory = new JsonFactory();
 
 		try (JsonParser parser = factory.createParser(json)) {
-			int jsonIndex = 0;
+			var jsonIndex = 0;
 			JsonToken token;
 
 			while ((token = parser.nextToken()) != null) {

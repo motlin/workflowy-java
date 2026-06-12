@@ -15,7 +15,9 @@ public final class HashtagExtractor {
 
 	private static final Pattern HASHTAG_PATTERN = Pattern.compile("[#@]([a-zA-Z0-9_-]+)");
 
-	private HashtagExtractor() {}
+	private HashtagExtractor() {
+		throw new AssertionError("Suppress default constructor for noninstantiability");
+	}
 
 	/**
 	 * Extract all hashtags from the given text.

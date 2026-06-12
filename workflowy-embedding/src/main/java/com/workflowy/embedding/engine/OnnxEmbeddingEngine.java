@@ -2,7 +2,6 @@ package com.workflowy.embedding.engine;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import ai.djl.Application;
@@ -47,7 +46,7 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 
 	private void initializeModel() {
 		try {
-			Path cachePath = Paths.get(this.modelCachePath);
+			Path cachePath = Path.of(this.modelCachePath);
 			System.setProperty("DJL_CACHE_DIR", cachePath.toString());
 
 			Criteria<String, float[]> criteria = Criteria.builder()
@@ -148,26 +147,26 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 
 		@Override
 		public float[] processOutput(TranslatorContext ctx, NDList list) {
-			NDArray lastHiddenState = list.get(0);
+			NDArray lastHiddenState = list.getFirst();
 
 			// Mean pool over all dimensions except the last (hidden) dimension
 			// This handles both batched [batch, seq, hidden] and unbatched [seq, hidden] outputs
 			long[] shape = lastHiddenState.getShape().getShape();
 			int[] meanDims = new int[shape.length - 1];
-			for (int i = 0; i < meanDims.length; i++) {
+			for (var i = 0; i < meanDims.length; i++) {
 				meanDims[i] = i;
 			}
 			NDArray meanPooled = lastHiddenState.mean(meanDims);
 
 			float[] values = meanPooled.toFloatArray();
-			float sumOfSquares = 0;
+			var sumOfSquares = 0F;
 			for (float v : values) {
 				sumOfSquares += v * v;
 			}
-			float l2Norm = (float) Math.sqrt(sumOfSquares);
+			var l2Norm = (float) Math.sqrt(sumOfSquares);
 
 			float[] normalized = new float[values.length];
-			for (int i = 0; i < values.length; i++) {
+			for (var i = 0; i < values.length; i++) {
 				normalized[i] = values[i] / l2Norm;
 			}
 

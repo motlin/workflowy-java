@@ -31,7 +31,7 @@ class HybridSearchTest {
 		// node-a: vector rank 0 → 1/(60+0+1) = 1/61, keyword rank 2 → 1/(60+2+1) = 1/63
 		// node-b: vector rank 1 → 1/(60+1+1) = 1/62, keyword rank 0 → 1/(60+0+1) = 1/61
 		// node-b should rank first (1/62 + 1/61 > 1/61 + 1/63)
-		assertEquals("node-b", fused.get(0).getNodeId());
+		assertEquals("node-b", fused.getFirst().getNodeId());
 		assertEquals("node-a", fused.get(1).getNodeId());
 	}
 
@@ -60,7 +60,7 @@ class HybridSearchTest {
 		// node-a: vector rank 0 → RRF score = 1/(60+0+1) = 1/61
 		// distance = 1.0 - 1/61
 		double expectedDistance = 1.0 - (1.0 / 61.0);
-		assertEquals(expectedDistance, fused.get(0).getDistance(), 0.0001);
+		assertEquals(expectedDistance, fused.getFirst().getDistance(), 0.0001);
 	}
 
 	@Test
@@ -82,7 +82,7 @@ class HybridSearchTest {
 
 		List<SearchResult> fused = SearchEngine.fuseResults(vectorResults, keywordResults, 10);
 
-		assertEquals("both", fused.get(0).getNodeId());
+		assertEquals("both", fused.getFirst().getNodeId());
 	}
 
 	@Test
@@ -107,7 +107,7 @@ class HybridSearchTest {
 		// 1/61 + 1/63 = (63+61)/(61*63) = 124/3843 ≈ 0.03227
 		// 2/62 = 1/31 ≈ 0.03226
 		// All very close — verify they're at least sorted by distance ascending
-		for (int i = 0; i < fused.size() - 1; i++) {
+		for (var i = 0; i < fused.size() - 1; i++) {
 			assertTrue(fused.get(i).getDistance() <= fused.get(i + 1).getDistance());
 		}
 	}

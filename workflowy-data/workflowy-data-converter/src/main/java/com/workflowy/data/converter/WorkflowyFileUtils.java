@@ -13,7 +13,9 @@ public final class WorkflowyFileUtils {
 	private static final Pattern FILE_DATE_PATTERN = Pattern.compile("\\.(\\d{4}-\\d{2}-\\d{2})\\.");
 	private static final Pattern FILE_EMAIL_PATTERN = Pattern.compile("^\\((.+?)\\)\\.");
 
-	private WorkflowyFileUtils() {}
+	private WorkflowyFileUtils() {
+		throw new AssertionError("Suppress default constructor for noninstantiability");
+	}
 
 	public static String extractUserIdFromFilename(String filename) {
 		Matcher matcher = FILE_EMAIL_PATTERN.matcher(filename);

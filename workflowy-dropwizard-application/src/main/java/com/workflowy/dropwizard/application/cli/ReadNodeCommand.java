@@ -53,7 +53,7 @@ public class ReadNodeCommand extends AbstractReadOnlyCommand {
 		// Apply deep fetch based on depth
 		NodeContentDTOMapper.applyDeepFetch(nodes, depth);
 
-		NodeContent node = nodes.get(0);
+		NodeContent node = nodes.getFirst();
 		NodeContentDTO dto = NodeContentDTOMapper.toDTO(node, depth);
 
 		return dto;

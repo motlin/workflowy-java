@@ -16,7 +16,9 @@ public final class EmbeddingTestHelper {
 
 	private static final Random RANDOM = new Random(42);
 
-	private EmbeddingTestHelper() {}
+	private EmbeddingTestHelper() {
+		throw new AssertionError("Suppress default constructor for noninstantiability");
+	}
 
 	public static Path createTempDatabasePath() throws IOException {
 		Path tempFile = Files.createTempFile("test-embeddings-", ".db");
@@ -31,7 +33,7 @@ public final class EmbeddingTestHelper {
 
 	public static float[] createRandomEmbedding(int dimensions) {
 		float[] embedding = new float[dimensions];
-		for (int i = 0; i < dimensions; i++) {
+		for (var i = 0; i < dimensions; i++) {
 			embedding[i] = RANDOM.nextFloat() * 2 - 1;
 		}
 		return normalize(embedding);
@@ -39,21 +41,21 @@ public final class EmbeddingTestHelper {
 
 	public static float[] createSimilarEmbedding(float[] original, float variance) {
 		float[] similar = new float[original.length];
-		for (int i = 0; i < original.length; i++) {
+		for (var i = 0; i < original.length; i++) {
 			similar[i] = original[i] + (RANDOM.nextFloat() * 2 - 1) * variance;
 		}
 		return normalize(similar);
 	}
 
 	public static float[] normalize(float[] vector) {
-		float magnitude = 0;
+		var magnitude = 0F;
 		for (float v : vector) {
 			magnitude += v * v;
 		}
 		magnitude = (float) Math.sqrt(magnitude);
 
 		float[] normalized = new float[vector.length];
-		for (int i = 0; i < vector.length; i++) {
+		for (var i = 0; i < vector.length; i++) {
 			normalized[i] = vector[i] / magnitude;
 		}
 		return normalized;

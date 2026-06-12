@@ -119,7 +119,7 @@ public abstract class AbstractReadOnlyCommand extends EnvironmentCommand<Workflo
 			throw new CommandException("AMBIGUOUS_ID", "Multiple nodes match prefix: " + shortOrFullId);
 		}
 
-		return matches.get(0).getId();
+		return matches.getFirst().getId();
 	}
 
 	protected NodeContent findNodeById(String nodeId) throws CommandException {

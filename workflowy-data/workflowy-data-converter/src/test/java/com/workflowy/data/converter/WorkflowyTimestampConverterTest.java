@@ -31,7 +31,7 @@ class WorkflowyTimestampConverterTest {
 
 	@Test
 	void convertWorkflowyTimestamp_withPositiveValue_returnsCorrectTimestamp() {
-		long workflowyTimestamp = 86400L;
+		var workflowyTimestamp = 86400L;
 		Timestamp result = WorkflowyTimestampConverter.convertWorkflowyTimestamp(workflowyTimestamp);
 		assertNotNull(result);
 		assertEquals(Instant.parse("2010-01-02T00:00:00Z"), result.toInstant());

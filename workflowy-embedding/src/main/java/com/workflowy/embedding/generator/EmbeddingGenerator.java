@@ -51,7 +51,7 @@ public class EmbeddingGenerator {
 		MutableList<NodeContent> nonLeafNodes = Lists.mutable.empty();
 		Map<String, String> embeddingTexts = new LinkedHashMap<>();
 
-		for (int i = 0; i < allNodes.size(); i++) {
+		for (var i = 0; i < allNodes.size(); i++) {
 			NodeContent node = allNodes.get(i);
 			if (this.pathBuilder.hasChildren(node.getId())) {
 				nonLeafNodes.add(node);
@@ -60,13 +60,13 @@ public class EmbeddingGenerator {
 		}
 
 		int totalNodes = nonLeafNodes.size();
-		int skippedCount = 0;
-		int processedCount = 0;
-		int errorCount = 0;
+		var skippedCount = 0;
+		var processedCount = 0;
+		var errorCount = 0;
 
 		MutableList<NodeContent> batch = Lists.mutable.withInitialCapacity(this.batchSize);
 
-		for (int i = 0; i < nonLeafNodes.size(); i++) {
+		for (var i = 0; i < nonLeafNodes.size(); i++) {
 			NodeContent node = nonLeafNodes.get(i);
 
 			if (!this.force) {
@@ -130,7 +130,7 @@ public class EmbeddingGenerator {
 		List<float[]> embeddings = this.engine.generateEmbeddings(texts, false);
 
 		MutableList<NodeEmbedding> nodeEmbeddings = Lists.mutable.empty();
-		for (int i = 0; i < nodes.size(); i++) {
+		for (var i = 0; i < nodes.size(); i++) {
 			NodeContent node = nodes.get(i);
 			float[] embedding = embeddings.get(i);
 
@@ -140,7 +140,7 @@ public class EmbeddingGenerator {
 
 		this.repository.saveBatch(nodeEmbeddings);
 
-		for (int i = 0; i < nodes.size(); i++) {
+		for (var i = 0; i < nodes.size(); i++) {
 			NodeContent node = nodes.get(i);
 			String hash = hashContent(texts.get(i));
 			this.repository.saveContentHash(node.getId(), model.getKey(), hash);

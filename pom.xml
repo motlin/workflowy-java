@@ -41,7 +41,7 @@
         <app.rootPackageName>com.workflowy</app.rootPackageName>
         <app.name>Workflowy</app.name>
         <mainClass>${app.rootPackageName}.dropwizard.application.WorkflowyApplication</mainClass>
-        <liftwizard.version>2.1.46</liftwizard.version>
+        <liftwizard.version>2.1.47</liftwizard.version>
 
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>

@@ -126,7 +126,7 @@ jobs:
                       maven-rewrite-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@v1
+            - uses: twosigma/maven-cache-cleaner@v2
 
             - uses: jdx/mise-action@v4
 
@@ -177,7 +177,7 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@v1
+            - uses: twosigma/maven-cache-cleaner@v2
 
             - uses: jdx/mise-action@v4
 
@@ -228,7 +228,7 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@v1
+            - uses: twosigma/maven-cache-cleaner@v2
 
             - uses: jdx/mise-action@v4
 
@@ -279,7 +279,7 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@v1
+            - uses: twosigma/maven-cache-cleaner@v2
 
             - uses: jdx/mise-action@v4
 
@@ -330,7 +330,7 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@v1
+            - uses: twosigma/maven-cache-cleaner@v2
 
             - uses: jdx/mise-action@v4
 
@@ -381,7 +381,7 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@v1
+            - uses: twosigma/maven-cache-cleaner@v2
 
             - uses: jdx/mise-action@v4
 
@@ -432,7 +432,7 @@ jobs:
                       maven-errorprone-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@v1
+            - uses: twosigma/maven-cache-cleaner@v2
 
             - uses: jdx/mise-action@v4
 

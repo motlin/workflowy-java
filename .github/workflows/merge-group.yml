@@ -16,7 +16,7 @@ jobs:
     pre-commit:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: actions/setup-python@v6
               with:
                   python-version: "3.x"
@@ -26,7 +26,7 @@ jobs:
     maven-test:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - uses: actions/cache@v5
               with:
@@ -48,7 +48,7 @@ jobs:
     prettier:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   ref: ${{ github.event.pull_request.head.sha }}
 
@@ -60,7 +60,7 @@ jobs:
     biome:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   ref: ${{ github.event.pull_request.head.sha }}
 
@@ -72,7 +72,7 @@ jobs:
     reviewdog-markdownlint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - uses: reviewdog/action-markdownlint@v0.26.2
               with:
@@ -83,7 +83,7 @@ jobs:
     reviewdog-yamllint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - uses: reviewdog/action-yamllint@v1.21.0
               with:
@@ -94,7 +94,7 @@ jobs:
     reviewdog-actionlint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - uses: reviewdog/action-actionlint@v1.72.0
               with:

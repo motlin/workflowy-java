@@ -7,6 +7,9 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
 
+permissions:
+    contents: read
+
 env:
     # TODO: Update this to match your project's Maven group ID with slashes
     GROUP_ID: "com/example"

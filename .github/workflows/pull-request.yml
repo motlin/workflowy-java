@@ -19,7 +19,7 @@ jobs:
     forbid-merge-commits:
         runs-on: ubuntu-latest
         steps:
-            - uses: motlin/forbid-merge-commits-action@e79f9ed1c54b0bfb9e8a4ecaa8acfabfd01c1953 # main
+            - uses: motlin/forbid-merge-commits-action@e79f9ed1c54b0bfb9e8a4ecaa8acfabfd01c1953  # main
 
     automerge-dependabot:
         if: github.event.pull_request.user.login == 'dependabot[bot]'
@@ -28,7 +28,7 @@ jobs:
             pull-requests: write
             contents: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
 
             - name: Enable auto-merge for Dependabot PR
               run: gh pr merge --rebase --auto "${{ github.event.pull_request.number }}"
@@ -41,13 +41,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -78,13 +78,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -115,13 +115,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
               with:
                   key: maven-rewrite-${{ hashFiles('**/pom.xml') }}
                   path: ~/.m2/repository
@@ -129,9 +129,9 @@ jobs:
                       maven-rewrite-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3 # v2.1.0
+            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3  # v2.1.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -166,13 +166,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
               with:
                   key: maven-spotless-pom-${{ hashFiles('**/pom.xml') }}
                   path: ~/.m2/repository
@@ -180,9 +180,9 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3 # v2.1.0
+            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3  # v2.1.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -217,13 +217,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
               with:
                   key: maven-spotless-formats-${{ hashFiles('**/pom.xml') }}
                   path: ~/.m2/repository
@@ -231,9 +231,9 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3 # v2.1.0
+            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3  # v2.1.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -268,13 +268,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
               with:
                   key: maven-spotless-java-${{ hashFiles('**/pom.xml') }}
                   path: ~/.m2/repository
@@ -282,9 +282,9 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3 # v2.1.0
+            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3  # v2.1.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -319,13 +319,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
               with:
                   key: maven-spotless-prettier-java-sort-imports-${{ hashFiles('**/pom.xml') }}
                   path: ~/.m2/repository
@@ -333,9 +333,9 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3 # v2.1.0
+            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3  # v2.1.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -370,13 +370,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
               with:
                   key: maven-spotless-java-cleanthat-${{ hashFiles('**/pom.xml') }}
                   path: ~/.m2/repository
@@ -384,9 +384,9 @@ jobs:
                       maven-spotless-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3 # v2.1.0
+            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3  # v2.1.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -421,13 +421,13 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
               with:
                   key: maven-errorprone-${{ hashFiles('**/pom.xml') }}
                   path: ~/.m2/repository
@@ -435,9 +435,9 @@ jobs:
                       maven-errorprone-
                       maven-
 
-            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3 # v2.1.0
+            - uses: twosigma/maven-cache-cleaner@0f3e445b9beae1b63bd0ca4fa347f9f91e0a59b3  # v2.1.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |
@@ -477,17 +477,17 @@ jobs:
             contents: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
               with:
                   ref: ${{ github.event.pull_request.head.ref }}
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+            - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
               with:
                   python-version: "3.x"
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
 
             - name: Configure Git
               run: |

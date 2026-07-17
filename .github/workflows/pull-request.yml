@@ -47,7 +47,7 @@ jobs:
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -84,7 +84,7 @@ jobs:
                   repository: ${{ github.event.pull_request.head.repo.full_name }}
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -131,7 +131,7 @@ jobs:
 
             - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -182,7 +182,7 @@ jobs:
 
             - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -233,7 +233,7 @@ jobs:
 
             - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -284,7 +284,7 @@ jobs:
 
             - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -335,7 +335,7 @@ jobs:
 
             - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -386,7 +386,7 @@ jobs:
 
             - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -437,7 +437,7 @@ jobs:
 
             - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |
@@ -487,7 +487,7 @@ jobs:
               with:
                   python-version: "3.x"
 
-            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d  # v4.2.0
+            - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea  # v4.2.1
 
             - name: Configure Git
               run: |

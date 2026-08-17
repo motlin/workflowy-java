@@ -15,6 +15,7 @@ default:
 workflowy_backups_path := env('WORKFLOWY_BACKUPS_PATH', '')
 
 # Full data pipeline: download backups, import data
+[arg("DAYS", long="days", help="Number of days to process")]
 [group('data')]
 workflowy DAYS="10000": download-backups (import-data DAYS)
 
@@ -29,50 +30,54 @@ download-backups:
 workflowy_api_key := env('WORKFLOWY_API_KEY', '')
 
 # Import Workflowy backup data into the database, then fetch latest from API
+[arg("MVN", long="mvn", help="Maven binary to use")]
+[arg("DAYS", long="days", help="Number of days to process")]
 [group('data')]
 import-data DAYS="10000" MVN=default_mvn:
     #!/usr/bin/env bash
     set -Eeuo pipefail
-    {{MVN}} install \
+    {{ MVN }} install \
         --projects workflowy-dropwizard-application \
         --also-make \
         -DskipTests
-    {{MVN}} exec:exec@import-workflowy \
+    {{ MVN }} exec:exec@import-workflowy \
         --projects workflowy-dropwizard-application \
         --activate-profiles import-workflowy \
-        -DbackupsPath={{workflowy_backups_path}} \
-        -DdaysLimit={{DAYS}}
-    if [[ -n "{{workflowy_api_key}}" ]]; then
+        -DbackupsPath={{ workflowy_backups_path }} \
+        -DdaysLimit={{ DAYS }}
+    if [[ -n "{{ workflowy_api_key }}" ]]; then
         echo "📥 Fetching latest from Workflowy API..."
         EXPORT_FILE=$(mktemp).json
-        curl -s -H "Authorization: Bearer {{workflowy_api_key}}" \
+        curl -s -H "Authorization: Bearer {{ workflowy_api_key }}" \
             "https://workflowy.com/api/v1/nodes-export" > "$EXPORT_FILE"
-        {{MVN}} exec:exec@import-workflowy-api \
+        {{ MVN }} exec:exec@import-workflowy-api \
             --projects workflowy-dropwizard-application \
             --activate-profiles import-workflowy-api \
             -DapiExportFile="$EXPORT_FILE"
         rm "$EXPORT_FILE"
     fi
     echo "🧠 Generating embeddings for new nodes..."
-    {{MVN}} exec:java \
+    {{ MVN }} exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
         -Dexec.args="embed-generate workflowy-dropwizard-application/config.json5"
 
 # Roll back to before the Nth-to-last backup import
+[arg("MVN", long="mvn", help="Maven binary to use")]
+[arg("COUNT", long="count", help="Number of backups")]
 [group('data')]
 rollback-backups COUNT MVN=default_mvn:
     #!/usr/bin/env bash
     set -Eeuo pipefail
-    echo "⏪ Rolling back {{COUNT}} backup(s)..."
-    {{MVN}} install \
+    echo "⏪ Rolling back {{ COUNT }} backup(s)..."
+    {{ MVN }} install \
         --projects workflowy-dropwizard-application \
         --also-make \
         -DskipTests
-    {{MVN}} exec:java \
+    {{ MVN }} exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="rollback-backups workflowy-dropwizard-application/config.json5 --backups-path {{workflowy_backups_path}} --count {{COUNT}}"
+        -Dexec.args="rollback-backups workflowy-dropwizard-application/config.json5 --backups-path {{ workflowy_backups_path }} --count {{ COUNT }}"
 
 # `mise install`
 mise:
@@ -90,25 +95,26 @@ precommit: mvn
     uv tool run pre-commit run --all-files
 
 # Demo CLI commands (shows JSON output from all 4 commands)
+[arg("MVN", long="mvn", help="Maven binary to use")]
 [group('cli')]
 demo MVN=default_mvn:
     #!/usr/bin/env bash
     set -Eeuo pipefail
     echo "🔨 Building application..."
-    {{MVN}} compile -pl workflowy-dropwizard-application -am -DskipTests --quiet
+    {{ MVN }} compile -pl workflowy-dropwizard-application -am -DskipTests --quiet
 
     CONFIG=workflowy-dropwizard-application/config.json5
 
     echo ""
     echo "📊 cache-status: Show cache statistics"
-    {{MVN}} exec:java \
+    {{ MVN }} exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
         -Dexec.args="cache-status $CONFIG --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
 
     echo ""
     echo "📂 list-by-id: List root nodes"
-    ROOT_OUTPUT=$({{MVN}} exec:java \
+    ROOT_OUTPUT=$({{ MVN }} exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
         -Dexec.args="list-by-id $CONFIG --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p')
@@ -120,7 +126,7 @@ demo MVN=default_mvn:
     if [[ -n "$FIRST_ID" ]]; then
         echo ""
         echo "📖 read-node: Read node '$FIRST_ID' with depth=1"
-        {{MVN}} exec:java \
+        {{ MVN }} exec:java \
             --projects workflowy-dropwizard-application \
             -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
             -Dexec.args="read-node $CONFIG --id \"$FIRST_ID\" --depth 1 --color" --quiet 2>&1 | sed -n '/^{$/,/^}$/p'
@@ -128,7 +134,7 @@ demo MVN=default_mvn:
         if [[ -n "$FIRST_NAME" ]]; then
             echo ""
             echo "🗂️ list-by-path: Navigate to '$FIRST_NAME'"
-            {{MVN}} exec:java \
+            {{ MVN }} exec:java \
                 --projects workflowy-dropwizard-application \
                 -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
                 -Dexec.args="list-by-path $CONFIG --path \"$FIRST_NAME\" --color" --quiet 2>&1 | sed -n '/^\[$/,/^\]$/p'
@@ -144,30 +150,32 @@ cli +ARGS:
     mvn exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
-        -Dexec.args="{{ARGS}} workflowy-dropwizard-application/config.json5" --quiet
+        -Dexec.args="{{ ARGS }} workflowy-dropwizard-application/config.json5" --quiet
 
 # Roll back to keep data up to a specific backup date (deletes all data after)
+[arg("MVN", long="mvn", help="Maven binary to use")]
+[arg("BACKUP_DATE", long="backup-date", help="Backup date")]
 [group('data')]
 rollback-to-backup BACKUP_DATE MVN=default_mvn:
     #!/usr/bin/env bash
     set -Eeuo pipefail
-    echo "🔍 Finding SYSTEM_TO for backup dated {{BACKUP_DATE}}..."
+    echo "🔍 Finding SYSTEM_TO for backup dated {{ BACKUP_DATE }}..."
 
     # Query DATA_IMPORT_TIMESTAMP to find the SYSTEM_TO for this backup date
     SYSTEM_TO=$(java -cp ~/.m2/repository/com/h2database/h2/2.3.232/h2-2.3.232.jar \
         org.h2.tools.Shell \
         -url "jdbc:h2:file:./workflowy-dropwizard-application/target/h2db/workflowy-h2;MODE=LEGACY" \
         -user sa -password "" \
-        -sql "SELECT SYSTEM_TO FROM DATA_IMPORT_TIMESTAMP WHERE CAST(timestamp AS DATE) = '{{BACKUP_DATE}}'" \
+        -sql "SELECT SYSTEM_TO FROM DATA_IMPORT_TIMESTAMP WHERE CAST(timestamp AS DATE) = '{{ BACKUP_DATE }}'" \
         | tail -1 | tr -d ' ')
 
     if [[ -z "$SYSTEM_TO" || "$SYSTEM_TO" == "(0rows,"* ]]; then
-        echo "❌ No backup found for date {{BACKUP_DATE}}"
+        echo "❌ No backup found for date {{ BACKUP_DATE }}"
         exit 1
     fi
 
-    echo "⏪ Rolling back to SYSTEM_FROM >= $SYSTEM_TO (keeping data up to {{BACKUP_DATE}})..."
-    {{MVN}} exec:java \
+    echo "⏪ Rolling back to SYSTEM_FROM >= $SYSTEM_TO (keeping data up to {{ BACKUP_DATE }})..."
+    {{ MVN }} exec:java \
         --projects workflowy-dropwizard-application \
         -Dexec.mainClass=com.workflowy.dropwizard.application.WorkflowyApplication \
         -Dexec.args="rollback-temporal workflowy-dropwizard-application/config.json5 --date ${SYSTEM_TO}"

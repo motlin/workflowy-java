@@ -12,56 +12,69 @@ import com.workflowy.embedding.model.EmbeddingModel;
 import com.workflowy.embedding.model.NodeEmbedding;
 import com.workflowy.embedding.repository.SqliteVecConnection;
 
-public final class EmbeddingTestHelper {
-
+public final class EmbeddingTestHelper
+{
 	private static final Random RANDOM = new Random(42);
 
-	private EmbeddingTestHelper() {
+	private EmbeddingTestHelper()
+	{
 		throw new AssertionError("Suppress default constructor for noninstantiability");
 	}
 
-	public static Path createTempDatabasePath() throws IOException {
+	public static Path createTempDatabasePath()
+		throws IOException
+	{
 		Path tempFile = Files.createTempFile("test-embeddings-", ".db");
 		Files.delete(tempFile);
 		return tempFile;
 	}
 
-	public static SqliteVecConnection createTempDatabase() throws IOException, SQLException {
+	public static SqliteVecConnection createTempDatabase()
+		throws IOException, SQLException
+	{
 		Path dbPath = createTempDatabasePath();
 		return new SqliteVecConnection(dbPath.toString());
 	}
 
-	public static float[] createRandomEmbedding(int dimensions) {
+	public static float[] createRandomEmbedding(int dimensions)
+	{
 		float[] embedding = new float[dimensions];
-		for (var i = 0; i < dimensions; i++) {
+		for (var i = 0; i < dimensions; i++)
+		{
 			embedding[i] = RANDOM.nextFloat() * 2 - 1;
 		}
 		return normalize(embedding);
 	}
 
-	public static float[] createSimilarEmbedding(float[] original, float variance) {
+	public static float[] createSimilarEmbedding(float[] original, float variance)
+	{
 		float[] similar = new float[original.length];
-		for (var i = 0; i < original.length; i++) {
+		for (var i = 0; i < original.length; i++)
+		{
 			similar[i] = original[i] + (RANDOM.nextFloat() * 2 - 1) * variance;
 		}
 		return normalize(similar);
 	}
 
-	public static float[] normalize(float[] vector) {
+	public static float[] normalize(float[] vector)
+	{
 		var magnitude = 0F;
-		for (float v : vector) {
+		for (float v : vector)
+		{
 			magnitude += v * v;
 		}
 		magnitude = (float) Math.sqrt(magnitude);
 
 		float[] normalized = new float[vector.length];
-		for (var i = 0; i < vector.length; i++) {
+		for (var i = 0; i < vector.length; i++)
+		{
 			normalized[i] = vector[i] / magnitude;
 		}
 		return normalized;
 	}
 
-	public static NodeEmbedding createNodeEmbedding(String nodeId, EmbeddingModel model) {
+	public static NodeEmbedding createNodeEmbedding(String nodeId, EmbeddingModel model)
+	{
 		return new NodeEmbedding(
 			nodeId,
 			model.getKey(),
@@ -71,7 +84,8 @@ public final class EmbeddingTestHelper {
 		);
 	}
 
-	public static NodeEmbedding createNodeEmbedding(String nodeId, EmbeddingModel model, float[] embedding) {
+	public static NodeEmbedding createNodeEmbedding(String nodeId, EmbeddingModel model, float[] embedding)
+	{
 		return new NodeEmbedding(
 			nodeId,
 			model.getKey(),
@@ -81,7 +95,8 @@ public final class EmbeddingTestHelper {
 		);
 	}
 
-	public static String randomNodeId() {
+	public static String randomNodeId()
+	{
 		return UUID.randomUUID().toString();
 	}
 }

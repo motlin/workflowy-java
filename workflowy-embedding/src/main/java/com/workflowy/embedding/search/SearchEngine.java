@@ -16,8 +16,8 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SearchEngine {
-
+public class SearchEngine
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchEngine.class);
 
 	private static final int RRF_K = 60;
@@ -26,42 +26,55 @@ public class SearchEngine {
 	private final EmbeddingRepository repository;
 	private final PathBuilder pathBuilder;
 
-	public SearchEngine(EmbeddingEngine engine, EmbeddingRepository repository) {
+	public SearchEngine(EmbeddingEngine engine, EmbeddingRepository repository)
+	{
 		this.engine = engine;
 		this.repository = repository;
 		this.pathBuilder = new PathBuilder();
 	}
 
-	public List<SearchResult> search(String query, int limit, Double threshold) throws SQLException {
+	public List<SearchResult> search(String query, int limit, Double threshold)
+		throws SQLException
+	{
 		return this.search(query, limit, threshold, SearchMode.VECTOR);
 	}
 
-	public List<SearchResult> search(String query, int limit, Double threshold, SearchMode mode) throws SQLException {
-		List<SearchResult> results = switch (mode) {
+	public List<SearchResult> search(String query, int limit, Double threshold, SearchMode mode)
+		throws SQLException
+	{
+		List<SearchResult> results = switch (mode)
+		{
 			case VECTOR -> this.searchVector(query, limit, threshold);
 			case KEYWORD -> this.searchKeyword(query, limit);
 			case HYBRID -> this.searchHybrid(query, limit, threshold);
 		};
 
-		for (SearchResult result : results) {
+		for (SearchResult result : results)
+		{
 			this.enrichResult(result);
 		}
 
 		return results;
 	}
 
-	private List<SearchResult> searchVector(String query, int limit, Double threshold) throws SQLException {
+	private List<SearchResult> searchVector(String query, int limit, Double threshold)
+		throws SQLException
+	{
 		EmbeddingModel model = this.engine.getModel();
 		double effectiveThreshold = threshold != null ? threshold : model.getDefaultThreshold();
 		float[] queryEmbedding = this.engine.generateEmbedding(query, true);
 		return this.repository.search(queryEmbedding, model, limit, effectiveThreshold);
 	}
 
-	private List<SearchResult> searchKeyword(String query, int limit) throws SQLException {
+	private List<SearchResult> searchKeyword(String query, int limit)
+		throws SQLException
+	{
 		return this.repository.searchKeyword(query, limit);
 	}
 
-	List<SearchResult> searchHybrid(String query, int limit, Double threshold) throws SQLException {
+	List<SearchResult> searchHybrid(String query, int limit, Double threshold)
+		throws SQLException
+	{
 		int candidateLimit = limit * 3;
 
 		List<SearchResult> vectorResults = this.searchVector(query, candidateLimit, threshold);
@@ -74,16 +87,19 @@ public class SearchEngine {
 		List<SearchResult> vectorResults,
 		List<SearchResult> keywordResults,
 		int limit
-	) {
+	)
+	{
 		MutableMap<String, Double> rrfScores = Maps.mutable.empty();
 
-		for (var rank = 0; rank < vectorResults.size(); rank++) {
+		for (var rank = 0; rank < vectorResults.size(); rank++)
+		{
 			String nodeId = vectorResults.get(rank).getNodeId();
 			double score = 1.0 / (RRF_K + rank + 1);
 			rrfScores.merge(nodeId, score, Double::sum);
 		}
 
-		for (var rank = 0; rank < keywordResults.size(); rank++) {
+		for (var rank = 0; rank < keywordResults.size(); rank++)
+		{
 			String nodeId = keywordResults.get(rank).getNodeId();
 			double score = 1.0 / (RRF_K + rank + 1);
 			rrfScores.merge(nodeId, score, Double::sum);
@@ -98,10 +114,12 @@ public class SearchEngine {
 			.toList();
 	}
 
-	private void enrichResult(SearchResult result) {
+	private void enrichResult(SearchResult result)
+	{
 		NodeContent node = NodeContentFinder.findOne(NodeContentFinder.id().eq(result.getNodeId()));
 
-		if (node != null) {
+		if (node != null)
+		{
 			result.setName(HtmlStripper.stripHtmlTags(node.getName()));
 			result.setNote(node.getNote() != null ? HtmlStripper.stripHtmlTags(node.getNote()) : null);
 			result.setFullPath(this.pathBuilder.buildFullPath(result.getNodeId()));

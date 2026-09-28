@@ -21,24 +21,23 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractReadOnlyCommand extends EnvironmentCommand<WorkflowyConfiguration> {
-
+public abstract class AbstractReadOnlyCommand
+	extends EnvironmentCommand<WorkflowyConfiguration>
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReadOnlyCommand.class);
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 	protected ObjectMapper objectMapper;
 	private boolean colorOutput;
 
-	protected AbstractReadOnlyCommand(
-		Application<WorkflowyConfiguration> application,
-		String name,
-		String description
-	) {
+	protected AbstractReadOnlyCommand(Application<WorkflowyConfiguration> application, String name, String description)
+	{
 		super(application, name, description);
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 		subparser
 			.addArgument("--color")
@@ -58,7 +57,9 @@ public abstract class AbstractReadOnlyCommand extends EnvironmentCommand<Workflo
 		@Nonnull Environment environment,
 		Namespace namespace,
 		@Nonnull WorkflowyConfiguration configuration
-	) throws Exception {
+	)
+		throws Exception
+	{
 		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
 		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
@@ -68,12 +69,17 @@ public abstract class AbstractReadOnlyCommand extends EnvironmentCommand<Workflo
 		this.objectMapper = environment.getObjectMapper();
 		this.colorOutput = namespace.getBoolean("color");
 
-		try {
+		try
+		{
 			Object result = this.executeCommand(namespace, configuration);
 			this.writeJsonOutput(result);
-		} catch (CommandException e) {
+		}
+		catch (CommandException e)
+		{
 			this.writeErrorOutput(e);
-		} finally {
+		}
+		finally
+		{
 			this.containerLifeCycle.stop();
 		}
 
@@ -83,28 +89,37 @@ public abstract class AbstractReadOnlyCommand extends EnvironmentCommand<Workflo
 	protected abstract Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
 		throws CommandException;
 
-	protected void writeJsonOutput(Object result) throws IOException {
+	protected void writeJsonOutput(Object result)
+		throws IOException
+	{
 		String json = this.objectMapper.writer(new JsonPrettyPrinter()).writeValueAsString(result);
 
-		if (this.colorOutput) {
+		if (this.colorOutput)
+		{
 			json = JsonSyntaxHighlighter.highlight(json);
 		}
 
 		System.out.print(json);
 	}
 
-	protected void writeErrorOutput(CommandException e) throws IOException {
+	protected void writeErrorOutput(CommandException e)
+		throws IOException
+	{
 		var error = new ErrorResponse(e.getCode(), e.getMessage());
 		this.writeJsonOutput(error);
 	}
 
-	protected String resolveNodeId(String shortOrFullId) throws CommandException {
-		if (shortOrFullId == null) {
+	protected String resolveNodeId(String shortOrFullId)
+		throws CommandException
+	{
+		if (shortOrFullId == null)
+		{
 			return null;
 		}
 
 		// Full UUID format: 36 chars (with hyphens)
-		if (shortOrFullId.length() == 36) {
+		if (shortOrFullId.length() == 36)
+		{
 			return shortOrFullId;
 		}
 
@@ -112,21 +127,26 @@ public abstract class AbstractReadOnlyCommand extends EnvironmentCommand<Workflo
 		Operation operation = NodeContentFinder.id().startsWith(shortOrFullId);
 		NodeContentList matches = NodeContentFinder.findMany(operation);
 
-		if (matches.isEmpty()) {
+		if (matches.isEmpty())
+		{
 			throw new CommandException("NOT_FOUND", "No node found with ID prefix: " + shortOrFullId);
 		}
-		if (matches.size() > 1) {
+		if (matches.size() > 1)
+		{
 			throw new CommandException("AMBIGUOUS_ID", "Multiple nodes match prefix: " + shortOrFullId);
 		}
 
 		return matches.getFirst().getId();
 	}
 
-	protected NodeContent findNodeById(String nodeId) throws CommandException {
+	protected NodeContent findNodeById(String nodeId)
+		throws CommandException
+	{
 		Operation operation = NodeContentFinder.id().eq(nodeId);
 		NodeContent node = NodeContentFinder.findOne(operation);
 
-		if (node == null) {
+		if (node == null)
+		{
 			throw new CommandException("NOT_FOUND", "Node not found: " + nodeId);
 		}
 

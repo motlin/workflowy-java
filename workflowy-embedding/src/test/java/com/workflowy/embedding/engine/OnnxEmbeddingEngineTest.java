@@ -18,33 +18,39 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("integration")
-class OnnxEmbeddingEngineTest {
-
+class OnnxEmbeddingEngineTest
+{
 	private static OnnxEmbeddingEngine engine;
 	private static Path modelCachePath;
 
 	@BeforeAll
-	static void setUpClass() throws IOException {
+	static void setUpClass()
+		throws IOException
+	{
 		modelCachePath = Files.createTempDirectory("onnx-test-cache");
 		engine = new OnnxEmbeddingEngine(EmbeddingModel.MINILM, modelCachePath.toString());
 	}
 
 	@AfterAll
-	static void tearDownClass() {
-		if (engine != null) {
+	static void tearDownClass()
+	{
+		if (engine != null)
+		{
 			engine.close();
 		}
 	}
 
 	@Test
-	void constructor_withOpenAIModel_throwsException() {
+	void constructor_withOpenAIModel_throwsException()
+	{
 		assertThrows(IllegalArgumentException.class, () ->
 			new OnnxEmbeddingEngine(EmbeddingModel.OPENAI_SMALL, modelCachePath.toString())
 		);
 	}
 
 	@Test
-	void generateEmbedding_withShortText_returnsCorrectDimensions() {
+	void generateEmbedding_withShortText_returnsCorrectDimensions()
+	{
 		float[] embedding = engine.generateEmbedding("Hello world", false);
 
 		assertNotNull(embedding);
@@ -52,7 +58,8 @@ class OnnxEmbeddingEngineTest {
 	}
 
 	@Test
-	void generateEmbedding_withLongText_returnsCorrectDimensions() {
+	void generateEmbedding_withLongText_returnsCorrectDimensions()
+	{
 		String longText = "This is a very long text that contains many words. ".repeat(50);
 
 		float[] embedding = engine.generateEmbedding(longText, false);
@@ -62,11 +69,13 @@ class OnnxEmbeddingEngineTest {
 	}
 
 	@Test
-	void generateEmbedding_outputIsNormalized() {
+	void generateEmbedding_outputIsNormalized()
+	{
 		float[] embedding = engine.generateEmbedding("Test sentence for normalization", false);
 
 		var norm = 0.0;
-		for (float value : embedding) {
+		for (float value : embedding)
+		{
 			norm += value * value;
 		}
 		norm = Math.sqrt(norm);
@@ -75,7 +84,8 @@ class OnnxEmbeddingEngineTest {
 	}
 
 	@Test
-	void generateEmbedding_similarTextProducesSimilarEmbeddings() {
+	void generateEmbedding_similarTextProducesSimilarEmbeddings()
+	{
 		float[] embedding1 = engine.generateEmbedding("The cat sat on the mat", false);
 		float[] embedding2 = engine.generateEmbedding("A cat is sitting on a mat", false);
 		float[] embedding3 = engine.generateEmbedding("Quantum physics and thermodynamics", false);
@@ -106,19 +116,22 @@ class OnnxEmbeddingEngineTest {
 	}
 
 	@Test
-	void generateEmbeddings_withMultipleTexts_returnsAll() {
+	void generateEmbeddings_withMultipleTexts_returnsAll()
+	{
 		List<String> texts = List.of("First sentence", "Second sentence", "Third sentence");
 
 		List<float[]> embeddings = engine.generateEmbeddings(texts, false);
 
 		assertEquals(3, embeddings.size());
-		for (float[] embedding : embeddings) {
+		for (float[] embedding : embeddings)
+		{
 			assertEquals(EmbeddingModel.MINILM.getDimensions(), embedding.length);
 		}
 	}
 
 	@Test
-	void generateEmbedding_sameTextProducesSameEmbedding() {
+	void generateEmbedding_sameTextProducesSameEmbedding()
+	{
 		var text = "Deterministic embedding test";
 
 		float[] embedding1 = engine.generateEmbedding(text, false);
@@ -128,7 +141,8 @@ class OnnxEmbeddingEngineTest {
 	}
 
 	@Test
-	void generateEmbedding_queryVsPassage_producesSlightlyDifferentResults() {
+	void generateEmbedding_queryVsPassage_producesSlightlyDifferentResults()
+	{
 		var text = "Search query about machine learning";
 
 		float[] queryEmbedding = engine.generateEmbedding(text, true);
@@ -143,16 +157,19 @@ class OnnxEmbeddingEngineTest {
 	}
 
 	@Test
-	void getModel_returnsConfiguredModel() {
+	void getModel_returnsConfiguredModel()
+	{
 		assertEquals(EmbeddingModel.MINILM, engine.getModel());
 	}
 
-	private static double cosineSimilarity(float[] a, float[] b) {
+	private static double cosineSimilarity(float[] a, float[] b)
+	{
 		var dotProduct = 0.0;
 		var normA = 0.0;
 		var normB = 0.0;
 
-		for (var i = 0; i < a.length; i++) {
+		for (var i = 0; i < a.length; i++)
+		{
 			dotProduct += a[i] * b[i];
 			normA += a[i] * a[i];
 			normB += b[i] * b[i];

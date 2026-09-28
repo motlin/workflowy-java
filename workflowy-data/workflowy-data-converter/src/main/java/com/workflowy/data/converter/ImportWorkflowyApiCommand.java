@@ -28,22 +28,26 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Usage: {@code java -jar app.jar import-workflowy-api --api-export-file /path/to/export.json config.yml}
  */
-public class ImportWorkflowyApiCommand<T extends AbstractKlassConfiguration> extends EnvironmentCommand<T> {
-
+public class ImportWorkflowyApiCommand<T extends AbstractKlassConfiguration>
+	extends EnvironmentCommand<T>
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImportWorkflowyApiCommand.class);
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-	public ImportWorkflowyApiCommand(Application<T> application) {
+	public ImportWorkflowyApiCommand(Application<T> application)
+	{
 		this(application, "import-workflowy-api", "Import Workflowy API export file into the database.");
 	}
 
-	protected ImportWorkflowyApiCommand(Application<T> application, String name, String description) {
+	protected ImportWorkflowyApiCommand(Application<T> application, String name, String description)
+	{
 		super(application, name, description);
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser
@@ -55,7 +59,8 @@ public class ImportWorkflowyApiCommand<T extends AbstractKlassConfiguration> ext
 
 	@Override
 	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
-		throws Exception {
+		throws Exception
+	{
 		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
 		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
@@ -67,7 +72,8 @@ public class ImportWorkflowyApiCommand<T extends AbstractKlassConfiguration> ext
 		String apiExportFileString = namespace.getString("api_export_file");
 		var apiExportFile = new File(apiExportFileString);
 
-		if (!apiExportFile.exists()) {
+		if (!apiExportFile.exists())
+		{
 			throw new IllegalArgumentException("API export file not found: " + apiExportFileString);
 		}
 

@@ -1,3 +1,6 @@
 package com.workflowy;
 
-public class MirrorDatabaseObject extends MirrorDatabaseObjectAbstract {}
+public class MirrorDatabaseObject
+	extends MirrorDatabaseObjectAbstract
+{
+}

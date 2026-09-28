@@ -24,8 +24,9 @@ import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OnnxEmbeddingEngine implements EmbeddingEngine {
-
+public class OnnxEmbeddingEngine
+	implements EmbeddingEngine
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(OnnxEmbeddingEngine.class);
 
 	private final EmbeddingModel model;
@@ -33,8 +34,10 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 	private ZooModel<String, float[]> zooModel;
 	private Predictor<String, float[]> predictor;
 
-	public OnnxEmbeddingEngine(EmbeddingModel model, String modelCachePath) {
-		if (!model.isLocal()) {
+	public OnnxEmbeddingEngine(EmbeddingModel model, String modelCachePath)
+	{
+		if (!model.isLocal())
+		{
 			throw new IllegalArgumentException("Model must be a local ONNX model: " + model);
 		}
 
@@ -44,8 +47,10 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 		this.initializeModel();
 	}
 
-	private void initializeModel() {
-		try {
+	private void initializeModel()
+	{
+		try
+		{
 			Path cachePath = Path.of(this.modelCachePath);
 			System.setProperty("DJL_CACHE_DIR", cachePath.toString());
 
@@ -61,76 +66,97 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 			this.predictor = this.zooModel.newPredictor();
 
 			LOGGER.info("ONNX model loaded: {}", this.model.getModelName());
-		} catch (ModelNotFoundException | MalformedModelException | IOException e) {
+		}
+		catch (ModelNotFoundException | MalformedModelException | IOException e)
+		{
 			throw new RuntimeException("Failed to load ONNX model: " + this.model.getModelName(), e);
 		}
 	}
 
 	@Override
-	public float[] generateEmbedding(String text, boolean isQuery) {
+	public float[] generateEmbedding(String text, boolean isQuery)
+	{
 		String prefixedText = this.applyPrefix(text, isQuery);
 
-		try {
+		try
+		{
 			return this.predictor.predict(prefixedText);
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			throw new RuntimeException("Failed to generate embedding", e);
 		}
 	}
 
 	@Override
-	public List<float[]> generateEmbeddings(List<String> texts, boolean isQuery) {
+	public List<float[]> generateEmbeddings(List<String> texts, boolean isQuery)
+	{
 		MutableList<float[]> embeddings = Lists.mutable.empty();
-		for (String text : texts) {
+		for (String text : texts)
+		{
 			embeddings.add(this.generateEmbedding(text, isQuery));
 		}
 		return embeddings;
 	}
 
-	private String applyPrefix(String text, boolean isQuery) {
+	private String applyPrefix(String text, boolean isQuery)
+	{
 		String prefix = isQuery ? this.model.getQueryPrefix().orElse("") : this.model.getPassagePrefix().orElse("");
 		return prefix + text;
 	}
 
 	@Override
-	public EmbeddingModel getModel() {
+	public EmbeddingModel getModel()
+	{
 		return this.model;
 	}
 
 	@Override
-	public void close() {
-		if (this.predictor != null) {
+	public void close()
+	{
+		if (this.predictor != null)
+		{
 			this.predictor.close();
 		}
-		if (this.zooModel != null) {
+		if (this.zooModel != null)
+		{
 			this.zooModel.close();
 		}
 	}
 
-	private static class SentenceTransformerTranslator implements Translator<String, float[]> {
-
+	private static class SentenceTransformerTranslator
+		implements Translator<String, float[]>
+	{
 		private final EmbeddingModel model;
 		private HuggingFaceTokenizer tokenizer;
 
-		public SentenceTransformerTranslator(EmbeddingModel model) {
+		public SentenceTransformerTranslator(EmbeddingModel model)
+		{
 			this.model = model;
 		}
 
 		@Override
-		public Batchifier getBatchifier() {
+		public Batchifier getBatchifier()
+		{
 			return null;
 		}
 
 		@Override
-		public void prepare(TranslatorContext ctx) {
-			try {
+		public void prepare(TranslatorContext ctx)
+		{
+			try
+			{
 				this.tokenizer = HuggingFaceTokenizer.newInstance(this.model.getModelName());
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				throw new RuntimeException("Failed to load tokenizer", e);
 			}
 		}
 
 		@Override
-		public NDList processInput(TranslatorContext ctx, String input) {
+		public NDList processInput(TranslatorContext ctx, String input)
+		{
 			Encoding encoding = this.tokenizer.encode(input);
 
 			NDManager manager = ctx.getNDManager();
@@ -146,27 +172,31 @@ public class OnnxEmbeddingEngine implements EmbeddingEngine {
 		}
 
 		@Override
-		public float[] processOutput(TranslatorContext ctx, NDList list) {
+		public float[] processOutput(TranslatorContext ctx, NDList list)
+		{
 			NDArray lastHiddenState = list.getFirst();
 
 			// Mean pool over all dimensions except the last (hidden) dimension
 			// This handles both batched [batch, seq, hidden] and unbatched [seq, hidden] outputs
 			long[] shape = lastHiddenState.getShape().getShape();
 			int[] meanDims = new int[shape.length - 1];
-			for (var i = 0; i < meanDims.length; i++) {
+			for (var i = 0; i < meanDims.length; i++)
+			{
 				meanDims[i] = i;
 			}
 			NDArray meanPooled = lastHiddenState.mean(meanDims);
 
 			float[] values = meanPooled.toFloatArray();
 			var sumOfSquares = 0F;
-			for (float v : values) {
+			for (float v : values)
+			{
 				sumOfSquares += v * v;
 			}
 			var l2Norm = (float) Math.sqrt(sumOfSquares);
 
 			float[] normalized = new float[values.length];
-			for (var i = 0; i < values.length; i++) {
+			for (var i = 0; i < values.length; i++)
+			{
 				normalized[i] = values[i] / l2Norm;
 			}
 

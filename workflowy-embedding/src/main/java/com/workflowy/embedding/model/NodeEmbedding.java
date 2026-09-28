@@ -2,15 +2,16 @@ package com.workflowy.embedding.model;
 
 import java.time.Instant;
 
-public class NodeEmbedding {
-
+public class NodeEmbedding
+{
 	private final String nodeId;
 	private final String model;
 	private final float[] embedding;
 	private final Instant systemFrom;
 	private final Instant systemTo;
 
-	public NodeEmbedding(String nodeId, String model, float[] embedding, Instant systemFrom, Instant systemTo) {
+	public NodeEmbedding(String nodeId, String model, float[] embedding, Instant systemFrom, Instant systemTo)
+	{
 		this.nodeId = nodeId;
 		this.model = model;
 		this.embedding = embedding;
@@ -18,29 +19,36 @@ public class NodeEmbedding {
 		this.systemTo = systemTo;
 	}
 
-	public String getNodeId() {
+	public String getNodeId()
+	{
 		return this.nodeId;
 	}
 
-	public String getModel() {
+	public String getModel()
+	{
 		return this.model;
 	}
 
-	public float[] getEmbedding() {
+	public float[] getEmbedding()
+	{
 		return this.embedding;
 	}
 
-	public Instant getSystemFrom() {
+	public Instant getSystemFrom()
+	{
 		return this.systemFrom;
 	}
 
-	public Instant getSystemTo() {
+	public Instant getSystemTo()
+	{
 		return this.systemTo;
 	}
 
-	public byte[] getEmbeddingAsBytes() {
+	public byte[] getEmbeddingAsBytes()
+	{
 		byte[] bytes = new byte[this.embedding.length * 4];
-		for (var i = 0; i < this.embedding.length; i++) {
+		for (var i = 0; i < this.embedding.length; i++)
+		{
 			int intBits = Float.floatToIntBits(this.embedding[i]);
 			bytes[i * 4] = (byte) (intBits & 0xFF);
 			bytes[i * 4 + 1] = (byte) ((intBits >> 8) & 0xFF);
@@ -50,9 +58,11 @@ public class NodeEmbedding {
 		return bytes;
 	}
 
-	public static float[] bytesToFloatArray(byte[] bytes) {
+	public static float[] bytesToFloatArray(byte[] bytes)
+	{
 		float[] floats = new float[bytes.length / 4];
-		for (var i = 0; i < floats.length; i++) {
+		for (var i = 0; i < floats.length; i++)
+		{
 			int intBits =
 				(bytes[i * 4] & 0xFF)
 				| ((bytes[i * 4 + 1] & 0xFF) << 8)

@@ -7,14 +7,17 @@ import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class CompleteNodeCommand extends AbstractApiCommand {
-
-	public CompleteNodeCommand(WorkflowyApplication application) {
+public class CompleteNodeCommand
+	extends AbstractApiCommand
+{
+	public CompleteNodeCommand(WorkflowyApplication application)
+	{
 		super(application, "complete-node", "Mark a node as completed in Workflowy");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		MutuallyExclusiveGroup nodeGroup = subparser.addMutuallyExclusiveGroup("node").required(true);
@@ -27,10 +30,12 @@ public class CompleteNodeCommand extends AbstractApiCommand {
 		Namespace namespace,
 		WorkflowyConfiguration configuration,
 		WorkflowyApiClient apiClient
-	) {
+	)
+	{
 		String nodeId = this.resolveNodeId(namespace.getString("id"), namespace.getString("path"), apiClient);
 
-		if (nodeId == null) {
+		if (nodeId == null)
+		{
 			throw new IllegalArgumentException("Could not resolve node");
 		}
 

@@ -1,25 +1,29 @@
 package com.workflowy.dropwizard.application.cli;
 
-public class ErrorResponse {
-
+public class ErrorResponse
+{
 	private final boolean success = false;
 	private final String errorCode;
 	private final String message;
 
-	public ErrorResponse(String errorCode, String message) {
+	public ErrorResponse(String errorCode, String message)
+	{
 		this.errorCode = errorCode;
 		this.message = message;
 	}
 
-	public boolean isSuccess() {
+	public boolean isSuccess()
+	{
 		return this.success;
 	}
 
-	public String getErrorCode() {
+	public String getErrorCode()
+	{
 		return this.errorCode;
 	}
 
-	public String getMessage() {
+	public String getMessage()
+	{
 		return this.message;
 	}
 }

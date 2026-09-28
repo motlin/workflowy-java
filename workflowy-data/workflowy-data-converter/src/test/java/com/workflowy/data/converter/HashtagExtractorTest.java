@@ -7,42 +7,48 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class HashtagExtractorTest {
-
+class HashtagExtractorTest
+{
 	@Test
-	void extractHashtags_withNullInput_returnsEmptyList() {
+	void extractHashtags_withNullInput_returnsEmptyList()
+	{
 		List<String> result = HashtagExtractor.extractHashtags(null);
 		assertTrue(result.isEmpty());
 	}
 
 	@Test
-	void extractHashtags_withEmptyInput_returnsEmptyList() {
+	void extractHashtags_withEmptyInput_returnsEmptyList()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("");
 		assertTrue(result.isEmpty());
 	}
 
 	@Test
-	void extractHashtags_withNoHashtags_returnsEmptyList() {
+	void extractHashtags_withNoHashtags_returnsEmptyList()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("Just a plain text without tags");
 		assertTrue(result.isEmpty());
 	}
 
 	@Test
-	void extractHashtags_withSingleHashtag_returnsHashtag() {
+	void extractHashtags_withSingleHashtag_returnsHashtag()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("Task with #priority");
 		assertEquals(1, result.size());
 		assertEquals("priority", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withSingleMention_returnsMention() {
+	void extractHashtags_withSingleMention_returnsMention()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("Assigned to @john");
 		assertEquals(1, result.size());
 		assertEquals("john", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withMultipleHashtags_returnsAll() {
+	void extractHashtags_withMultipleHashtags_returnsAll()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#task with #priority and #urgent");
 		assertEquals(3, result.size());
 		assertTrue(result.contains("task"));
@@ -51,7 +57,8 @@ class HashtagExtractorTest {
 	}
 
 	@Test
-	void extractHashtags_withMixedHashtagsAndMentions_returnsBoth() {
+	void extractHashtags_withMixedHashtagsAndMentions_returnsBoth()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#task assigned to @john");
 		assertEquals(2, result.size());
 		assertTrue(result.contains("task"));
@@ -59,35 +66,40 @@ class HashtagExtractorTest {
 	}
 
 	@Test
-	void extractHashtags_withDuplicateHashtags_returnsUnique() {
+	void extractHashtags_withDuplicateHashtags_returnsUnique()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#task and another #task");
 		assertEquals(1, result.size());
 		assertEquals("task", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withHtmlTags_stripsHtmlFirst() {
+	void extractHashtags_withHtmlTags_stripsHtmlFirst()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("<b>#priority</b> task");
 		assertEquals(1, result.size());
 		assertEquals("priority", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withDashesInHashtag_includesDashes() {
+	void extractHashtags_withDashesInHashtag_includesDashes()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#high-priority task");
 		assertEquals(1, result.size());
 		assertEquals("high-priority", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withUnderscoresInHashtag_includesUnderscores() {
+	void extractHashtags_withUnderscoresInHashtag_includesUnderscores()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#work_item");
 		assertEquals(1, result.size());
 		assertEquals("work_item", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withMixedCase_lowercasesResult() {
+	void extractHashtags_withMixedCase_lowercasesResult()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#URGENT and #Priority");
 		assertEquals(2, result.size());
 		assertTrue(result.contains("urgent"));
@@ -95,7 +107,8 @@ class HashtagExtractorTest {
 	}
 
 	@Test
-	void extractHashtags_withNumbersInHashtag_includesNumbers() {
+	void extractHashtags_withNumbersInHashtag_includesNumbers()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#phase2 and #q4-review");
 		assertEquals(2, result.size());
 		assertTrue(result.contains("phase2"));
@@ -103,27 +116,31 @@ class HashtagExtractorTest {
 	}
 
 	@Test
-	void extractHashtags_withHashtagAtStart_findsIt() {
+	void extractHashtags_withHashtagAtStart_findsIt()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("#todo finish the report");
 		assertEquals(1, result.size());
 		assertEquals("todo", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withHashtagAtEnd_findsIt() {
+	void extractHashtags_withHashtagAtEnd_findsIt()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("Complete the report #done");
 		assertEquals(1, result.size());
 		assertEquals("done", result.getFirst());
 	}
 
 	@Test
-	void extractHashtags_withHashSymbolAlone_ignoresIt() {
+	void extractHashtags_withHashSymbolAlone_ignoresIt()
+	{
 		List<String> result = HashtagExtractor.extractHashtags("Issue # 123");
 		assertTrue(result.isEmpty());
 	}
 
 	@Test
-	void extractHashtags_withEmailAddress_ignoresIt() {
+	void extractHashtags_withEmailAddress_ignoresIt()
+	{
 		// Email addresses should not be treated as mentions
 		List<String> result = HashtagExtractor.extractHashtags("Contact user@example.com");
 		// The regex will match @example, but that's the current behavior

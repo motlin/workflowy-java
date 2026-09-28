@@ -1,3 +1,6 @@
 package com.workflowy;
 
-public class VirtualRootMappingDatabaseObject extends VirtualRootMappingDatabaseObjectAbstract {}
+public class VirtualRootMappingDatabaseObject
+	extends VirtualRootMappingDatabaseObjectAbstract
+{
+}

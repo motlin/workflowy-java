@@ -1,12 +1,15 @@
 package com.workflowy.embedding.search;
 
-public enum SearchMode {
+public enum SearchMode
+{
 	VECTOR,
 	KEYWORD,
 	HYBRID;
 
-	public static SearchMode fromString(String mode) {
-		return switch (mode.toLowerCase()) {
+	public static SearchMode fromString(String mode)
+	{
+		return switch (mode.toLowerCase())
+		{
 			case "vector" -> VECTOR;
 			case "keyword" -> KEYWORD;
 			case "hybrid" -> HYBRID;

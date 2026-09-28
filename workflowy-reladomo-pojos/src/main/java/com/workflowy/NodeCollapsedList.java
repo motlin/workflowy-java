@@ -4,21 +4,26 @@ import java.util.*;
 
 import com.gs.fw.finder.Operation;
 
-public class NodeCollapsedList extends NodeCollapsedListAbstract {
-
-	public NodeCollapsedList() {
+public class NodeCollapsedList
+	extends NodeCollapsedListAbstract
+{
+	public NodeCollapsedList()
+	{
 		super();
 	}
 
-	public NodeCollapsedList(int initialSize) {
+	public NodeCollapsedList(int initialSize)
+	{
 		super(initialSize);
 	}
 
-	public NodeCollapsedList(Collection c) {
+	public NodeCollapsedList(Collection c)
+	{
 		super(c);
 	}
 
-	public NodeCollapsedList(Operation operation) {
+	public NodeCollapsedList(Operation operation)
+	{
 		super(operation);
 	}
 }

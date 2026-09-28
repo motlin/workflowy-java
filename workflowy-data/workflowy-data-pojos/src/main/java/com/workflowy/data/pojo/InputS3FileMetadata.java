@@ -18,4 +18,6 @@ public record InputS3FileMetadata(
 	@Nullable Integer imageOriginalHeight,
 
 	@Nullable Integer imageOriginalPixels
-) {}
+)
+{
+}

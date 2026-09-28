@@ -8,46 +8,55 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class WorkflowyFileUtils {
-
+public final class WorkflowyFileUtils
+{
 	private static final Pattern FILE_DATE_PATTERN = Pattern.compile("\\.(\\d{4}-\\d{2}-\\d{2})\\.");
 	private static final Pattern FILE_EMAIL_PATTERN = Pattern.compile("^\\((.+?)\\)\\.");
 
-	private WorkflowyFileUtils() {
+	private WorkflowyFileUtils()
+	{
 		throw new AssertionError("Suppress default constructor for noninstantiability");
 	}
 
-	public static String extractUserIdFromFilename(String filename) {
+	public static String extractUserIdFromFilename(String filename)
+	{
 		Matcher matcher = FILE_EMAIL_PATTERN.matcher(filename);
-		if (matcher.find()) {
+		if (matcher.find())
+		{
 			return matcher.group(1);
 		}
 		throw new IllegalArgumentException("Could not extract email from filename: " + filename);
 	}
 
-	public static String extractUserIdFromFile(File file) {
+	public static String extractUserIdFromFile(File file)
+	{
 		return extractUserIdFromFilename(file.getName());
 	}
 
-	public static Instant getFileTimestamp(String filename) {
+	public static Instant getFileTimestamp(String filename)
+	{
 		Matcher matcher = FILE_DATE_PATTERN.matcher(filename);
-		if (matcher.find()) {
+		if (matcher.find())
+		{
 			LocalDate date = LocalDate.parse(matcher.group(1), DateTimeFormatter.ISO_LOCAL_DATE);
 			return date.atStartOfDay().toInstant(ZoneOffset.UTC);
 		}
 		return Instant.MIN;
 	}
 
-	public static Instant getFileTimestamp(File file) {
+	public static Instant getFileTimestamp(File file)
+	{
 		return getFileTimestamp(file.getName());
 	}
 
-	public static boolean isAfterHighWatermark(File file, Instant highWatermark) {
+	public static boolean isAfterHighWatermark(File file, Instant highWatermark)
+	{
 		Instant fileTimestamp = getFileTimestamp(file);
 		return fileTimestamp.isAfter(highWatermark);
 	}
 
-	public static boolean isAfterHighWatermark(String filename, Instant highWatermark) {
+	public static boolean isAfterHighWatermark(String filename, Instant highWatermark)
+	{
 		Instant fileTimestamp = getFileTimestamp(filename);
 		return fileTimestamp.isAfter(highWatermark);
 	}
@@ -62,7 +71,8 @@ public final class WorkflowyFileUtils {
 	 * @param nodeId The full 36-character UUID string (with hyphens)
 	 * @return The 12-character short ID (hex characters only)
 	 */
-	public static String computeShortId(String nodeId) {
+	public static String computeShortId(String nodeId)
+	{
 		String hexOnly = nodeId.replace("-", "");
 		return hexOnly.substring(hexOnly.length() - 12);
 	}

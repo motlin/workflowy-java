@@ -1,3 +1,6 @@
 package com.workflowy;
 
-public class NodeCollapsedDatabaseObject extends NodeCollapsedDatabaseObjectAbstract {}
+public class NodeCollapsedDatabaseObject
+	extends NodeCollapsedDatabaseObjectAbstract
+{
+}

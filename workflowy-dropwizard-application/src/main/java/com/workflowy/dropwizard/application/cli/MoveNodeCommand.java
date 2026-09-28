@@ -8,14 +8,17 @@ import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class MoveNodeCommand extends AbstractApiCommand {
-
-	public MoveNodeCommand(WorkflowyApplication application) {
+public class MoveNodeCommand
+	extends AbstractApiCommand
+{
+	public MoveNodeCommand(WorkflowyApplication application)
+	{
 		super(application, "move-node", "Move a node to a new parent in Workflowy");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		MutuallyExclusiveGroup nodeGroup = subparser.addMutuallyExclusiveGroup("node").required(true);
@@ -38,7 +41,8 @@ public class MoveNodeCommand extends AbstractApiCommand {
 		Namespace namespace,
 		WorkflowyConfiguration configuration,
 		WorkflowyApiClient apiClient
-	) {
+	)
+	{
 		String nodeId = this.resolveNodeId(namespace.getString("node_id"), namespace.getString("node_path"), apiClient);
 
 		String newParentId = this.resolveNodeId(
@@ -47,10 +51,12 @@ public class MoveNodeCommand extends AbstractApiCommand {
 			apiClient
 		);
 
-		if (nodeId == null) {
+		if (nodeId == null)
+		{
 			throw new IllegalArgumentException("Could not resolve source node");
 		}
-		if (newParentId == null) {
+		if (newParentId == null)
+		{
 			throw new IllegalArgumentException("Could not resolve destination parent");
 		}
 
@@ -58,7 +64,8 @@ public class MoveNodeCommand extends AbstractApiCommand {
 
 		System.out.println("Moving node: " + nodeId);
 		System.out.println("  To parent: " + newParentId);
-		if (position != null) {
+		if (position != null)
+		{
 			System.out.println("  Position: " + position);
 		}
 

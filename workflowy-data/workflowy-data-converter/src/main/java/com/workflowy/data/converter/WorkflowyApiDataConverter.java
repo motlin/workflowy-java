@@ -62,8 +62,8 @@ import org.slf4j.LoggerFactory;
  *
  * @see WorkflowyDataConverter for the backup format converter
  */
-public final class WorkflowyApiDataConverter {
-
+public final class WorkflowyApiDataConverter
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowyApiDataConverter.class);
 
 	private static final String DEFAULT_USER_ID = "api-import";
@@ -83,7 +83,8 @@ public final class WorkflowyApiDataConverter {
 		@Nonnull ObjectMapper objectMapper,
 		@Nonnull DataStore dataStore,
 		@Nonnull String userId
-	) {
+	)
+	{
 		this.objectMapper = Objects.requireNonNull(objectMapper);
 		this.dataStore = Objects.requireNonNull(dataStore);
 		this.userId = Objects.requireNonNull(userId);
@@ -100,18 +101,23 @@ public final class WorkflowyApiDataConverter {
 		@Nonnull File apiExportFile,
 		@Nonnull ObjectMapper objectMapper,
 		@Nonnull DataStore dataStore
-	) {
+	)
+	{
 		LOGGER.info("Processing API export file: {}", apiExportFile);
 		var converter = new WorkflowyApiDataConverter(objectMapper, dataStore, DEFAULT_USER_ID);
 
-		try {
+		try
+		{
 			ApiResponse apiResponse = objectMapper.readValue(apiExportFile, ApiResponse.class);
-			if (apiResponse.error() != null) {
+			if (apiResponse.error() != null)
+			{
 				throw new RuntimeException("Workflowy API returned an error: " + apiResponse.error());
 			}
 			List<ApiInputItem> nodes = apiResponse.nodes();
 			converter.processNodes(nodes, Instant.now());
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			throw new RuntimeException("Failed to process API export file: " + apiExportFile, e);
 		}
 	}
@@ -129,21 +135,25 @@ public final class WorkflowyApiDataConverter {
 		@Nonnull ObjectMapper objectMapper,
 		@Nonnull DataStore dataStore,
 		@Nonnull Instant importTime
-	) {
+	)
+	{
 		LOGGER.info("Processing {} API export nodes", nodes.size());
 		var converter = new WorkflowyApiDataConverter(objectMapper, dataStore, DEFAULT_USER_ID);
 		converter.processNodes(nodes, importTime);
 	}
 
-	private void processNodes(List<ApiInputItem> nodes, Instant importTime) {
+	private void processNodes(List<ApiInputItem> nodes, Instant importTime)
+	{
 		LOGGER.info("Pass 1: Creating node content and metadata from {} nodes", nodes.size());
-		for (ApiInputItem node : nodes) {
+		for (ApiInputItem node : nodes)
+		{
 			NodeContent nodeContent = this.createNodeContent(node);
 			NodeMetadata nodeMetadata = this.createNodeMetadata(node);
 			this.nodeContents.put(node.id(), nodeContent);
 			this.nodeMetadatas.put(node.id(), nodeMetadata);
 
-			if (Boolean.TRUE.equals(node.data().isReferencesRoot())) {
+			if (Boolean.TRUE.equals(node.data().isReferencesRoot()))
+			{
 				var referencesRoot = new ReferencesRoot();
 				referencesRoot.setNodeId(node.id());
 				this.referencesRoots.add(referencesRoot);
@@ -162,7 +172,8 @@ public final class WorkflowyApiDataConverter {
 		this.mergeIntoDatabase(importTime);
 	}
 
-	private NodeContent createNodeContent(ApiInputItem node) {
+	private NodeContent createNodeContent(ApiInputItem node)
+	{
 		var nodeContent = new NodeContent();
 		nodeContent.setId(node.id());
 		nodeContent.setParentId(node.parentId());
@@ -171,11 +182,13 @@ public final class WorkflowyApiDataConverter {
 		return nodeContent;
 	}
 
-	private static String emptyToNull(String value) {
+	private static String emptyToNull(String value)
+	{
 		return value == null || value.isEmpty() ? null : value;
 	}
 
-	private NodeMetadata createNodeMetadata(ApiInputItem node) {
+	private NodeMetadata createNodeMetadata(ApiInputItem node)
+	{
 		var nodeMetadata = new NodeMetadata();
 		nodeMetadata.setNodeId(node.id());
 		nodeMetadata.setShortId(WorkflowyFileUtils.computeShortId(node.id()));
@@ -189,7 +202,8 @@ public final class WorkflowyApiDataConverter {
 		nodeMetadata.setLayoutMode(normalizeLayoutMode(node.data().layoutMode()));
 
 		InputAiMetadata ai = node.data().ai();
-		if (ai != null && Boolean.TRUE.equals(ai.inChat())) {
+		if (ai != null && Boolean.TRUE.equals(ai.inChat()))
+		{
 			var aiMetadata = new AiMetadata();
 			aiMetadata.setNodeId(node.id());
 			aiMetadata.setInChat(true);
@@ -199,27 +213,33 @@ public final class WorkflowyApiDataConverter {
 		return nodeMetadata;
 	}
 
-	private void extractTagsFromNodes() {
-		for (NodeContent nodeContent : this.nodeContents.values()) {
+	private void extractTagsFromNodes()
+	{
+		for (NodeContent nodeContent : this.nodeContents.values())
+		{
 			this.extractTagsFromName(nodeContent);
 		}
 	}
 
-	private void extractTagsFromName(NodeContent nodeContent) {
+	private void extractTagsFromName(NodeContent nodeContent)
+	{
 		String name = nodeContent.getName();
-		if (name == null || name.isEmpty()) {
+		if (name == null || name.isEmpty())
+		{
 			return;
 		}
 
 		List<String> extractedTags = HashtagExtractor.extractHashtags(name);
 
-		for (String tagName : extractedTags) {
-			this.tags.computeIfAbsent(tagName, (t) -> {
-					var newTag = new Tag();
-					newTag.setName(t);
-					newTag.setColor(null);
-					return newTag;
-				});
+		for (String tagName : extractedTags)
+		{
+			this.tags.computeIfAbsent(tagName, (t) ->
+			{
+				var newTag = new Tag();
+				newTag.setName(t);
+				newTag.setColor(null);
+				return newTag;
+			});
 
 			var mapping = new NodeTagMapping();
 			mapping.setNodeId(nodeContent.getId());
@@ -228,21 +248,25 @@ public final class WorkflowyApiDataConverter {
 		}
 	}
 
-	private void ensureUserExists() {
+	private void ensureUserExists()
+	{
 		User existingUser = UserFinder.findOne(UserFinder.userId().eq(this.userId));
-		if (existingUser == null) {
+		if (existingUser == null)
+		{
 			LOGGER.info("Creating user: {}", this.userId);
-			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) -> {
-					var user = new User();
-					user.setUserId(this.userId);
-					user.setEmail(this.userId);
-					user.insert();
-					return null;
-				});
+			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) ->
+			{
+				var user = new User();
+				user.setUserId(this.userId);
+				user.setEmail(this.userId);
+				user.insert();
+				return null;
+			});
 		}
 	}
 
-	private void mergeIntoDatabase(Instant importTime) {
+	private void mergeIntoDatabase(Instant importTime)
+	{
 		// Validate that this import won't violate temporal ordering
 		validateImportTime(importTime);
 
@@ -252,82 +276,79 @@ public final class WorkflowyApiDataConverter {
 
 		long time = importTime.toEpochMilli();
 
-		this.dataStore.runInTransaction((transaction) -> {
-				transaction.setSystemTime(time);
+		this.dataStore.runInTransaction((transaction) ->
+		{
+			transaction.setSystemTime(time);
 
-				LOGGER.info("Merging {} tags", this.tags.size());
-				TagList existingTags = TagFinder.findMany(TagFinder.all());
-				var updatedTags = new TagList();
-				updatedTags.addAll(this.tags.values());
-				var tagMergeOptions = new TopLevelMergeOptions<Tag>(TagFinder.getFinderInstance());
-				tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
-				existingTags.merge(updatedTags, tagMergeOptions);
+			LOGGER.info("Merging {} tags", this.tags.size());
+			TagList existingTags = TagFinder.findMany(TagFinder.all());
+			var updatedTags = new TagList();
+			updatedTags.addAll(this.tags.values());
+			var tagMergeOptions = new TopLevelMergeOptions<Tag>(TagFinder.getFinderInstance());
+			tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
+			existingTags.merge(updatedTags, tagMergeOptions);
 
-				LOGGER.info("Merging {} node contents", this.nodeContents.size());
-				NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
-				var updatedContents = new NodeContentList();
-				updatedContents.addAll(this.nodeContents.values());
-				var contentMergeOptions = new TopLevelMergeOptions<NodeContent>(NodeContentFinder.getFinderInstance());
-				contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
-				existingContents.merge(updatedContents, contentMergeOptions);
+			LOGGER.info("Merging {} node contents", this.nodeContents.size());
+			NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
+			var updatedContents = new NodeContentList();
+			updatedContents.addAll(this.nodeContents.values());
+			var contentMergeOptions = new TopLevelMergeOptions<NodeContent>(NodeContentFinder.getFinderInstance());
+			contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
+			existingContents.merge(updatedContents, contentMergeOptions);
 
-				LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
-				NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
-				var updatedMetadatas = new NodeMetadataList();
-				updatedMetadatas.addAll(this.nodeMetadatas.values());
-				var metadataMergeOptions = new TopLevelMergeOptions<NodeMetadata>(
-					NodeMetadataFinder.getFinderInstance()
-				);
-				// Exclude temporal and audit fields
-				metadataMergeOptions.doNotCompare(
-					NodeMetadataFinder.systemFrom(),
-					NodeMetadataFinder.systemTo(),
-					NodeMetadataFinder.createdById(),
-					NodeMetadataFinder.createdOn(),
-					NodeMetadataFinder.lastUpdatedById()
-				);
-				// Exclude fields not provided or incomplete in the API export format
-				metadataMergeOptions.doNotCompare(
-					NodeMetadataFinder.changes(),
-					NodeMetadataFinder.numberedStart(),
-					NodeMetadataFinder.lastModified() // API often returns null, preserve backup values
-				);
-				existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
+			LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
+			NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
+			var updatedMetadatas = new NodeMetadataList();
+			updatedMetadatas.addAll(this.nodeMetadatas.values());
+			var metadataMergeOptions = new TopLevelMergeOptions<NodeMetadata>(NodeMetadataFinder.getFinderInstance());
+			// Exclude temporal and audit fields
+			metadataMergeOptions.doNotCompare(
+				NodeMetadataFinder.systemFrom(),
+				NodeMetadataFinder.systemTo(),
+				NodeMetadataFinder.createdById(),
+				NodeMetadataFinder.createdOn(),
+				NodeMetadataFinder.lastUpdatedById()
+			);
+			// Exclude fields not provided or incomplete in the API export format
+			metadataMergeOptions.doNotCompare(
+				NodeMetadataFinder.changes(),
+				NodeMetadataFinder.numberedStart(),
+				NodeMetadataFinder.lastModified() // API often returns null, preserve backup values
+			);
+			existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
 
-				LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
-				NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
-				var mappingMergeOptions = new TopLevelMergeOptions<NodeTagMapping>(
-					NodeTagMappingFinder.getFinderInstance()
-				);
-				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
-				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
+			LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
+			NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
+			var mappingMergeOptions = new TopLevelMergeOptions<NodeTagMapping>(
+				NodeTagMappingFinder.getFinderInstance()
+			);
+			mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
+			existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
-				LOGGER.info("Merging {} AI metadatas", this.aiMetadatas.size());
-				AiMetadataList existingAiMetadatas = AiMetadataFinder.findMany(AiMetadataFinder.all());
-				var aiMetadataMergeOptions = new TopLevelMergeOptions<AiMetadata>(AiMetadataFinder.getFinderInstance());
-				aiMetadataMergeOptions.doNotCompare(AiMetadataFinder.systemFrom(), AiMetadataFinder.systemTo());
-				existingAiMetadatas.merge(this.aiMetadatas, aiMetadataMergeOptions);
+			LOGGER.info("Merging {} AI metadatas", this.aiMetadatas.size());
+			AiMetadataList existingAiMetadatas = AiMetadataFinder.findMany(AiMetadataFinder.all());
+			var aiMetadataMergeOptions = new TopLevelMergeOptions<AiMetadata>(AiMetadataFinder.getFinderInstance());
+			aiMetadataMergeOptions.doNotCompare(AiMetadataFinder.systemFrom(), AiMetadataFinder.systemTo());
+			existingAiMetadatas.merge(this.aiMetadatas, aiMetadataMergeOptions);
 
-				LOGGER.info("Merging {} references roots", this.referencesRoots.size());
-				ReferencesRootList existingReferencesRoots = ReferencesRootFinder.findMany(ReferencesRootFinder.all());
-				var referencesRootMergeOptions = new TopLevelMergeOptions<ReferencesRoot>(
-					ReferencesRootFinder.getFinderInstance()
-				);
-				referencesRootMergeOptions.doNotCompare(
-					ReferencesRootFinder.systemFrom(),
-					ReferencesRootFinder.systemTo()
-				);
-				existingReferencesRoots.merge(this.referencesRoots, referencesRootMergeOptions);
+			LOGGER.info("Merging {} references roots", this.referencesRoots.size());
+			ReferencesRootList existingReferencesRoots = ReferencesRootFinder.findMany(ReferencesRootFinder.all());
+			var referencesRootMergeOptions = new TopLevelMergeOptions<ReferencesRoot>(
+				ReferencesRootFinder.getFinderInstance()
+			);
+			referencesRootMergeOptions.doNotCompare(ReferencesRootFinder.systemFrom(), ReferencesRootFinder.systemTo());
+			existingReferencesRoots.merge(this.referencesRoots, referencesRootMergeOptions);
 
-				storeApiHighWatermark(importTime);
+			storeApiHighWatermark(importTime);
 
-				return null;
-			});
+			return null;
+		});
 
 		LOGGER.info("Completed API export import");
 	}
 
-	private static Instant getBackupHighWatermark() {
+	private static Instant getBackupHighWatermark()
+	{
 		Operation criteria = BackupImportTimestampFinder.name().eq("workflowy");
 		BackupImportTimestamp timestamp = BackupImportTimestampFinder.findOne(criteria);
 		return Optional.ofNullable(timestamp)
@@ -336,7 +357,8 @@ public final class WorkflowyApiDataConverter {
 			.orElse(Instant.MIN);
 	}
 
-	private static Instant getApiHighWatermark() {
+	private static Instant getApiHighWatermark()
+	{
 		Operation criteria = ApiImportTimestampFinder.name().eq("workflowy");
 		ApiImportTimestamp timestamp = ApiImportTimestampFinder.findOne(criteria);
 		return Optional.ofNullable(timestamp)
@@ -345,33 +367,39 @@ public final class WorkflowyApiDataConverter {
 			.orElse(Instant.MIN);
 	}
 
-	private static void validateImportTime(Instant proposedTime) {
+	private static void validateImportTime(Instant proposedTime)
+	{
 		Instant maxBackupTime = getBackupHighWatermark();
 		Instant maxApiTime = getApiHighWatermark();
 		Instant maxTime = maxBackupTime.isAfter(maxApiTime) ? maxBackupTime : maxApiTime;
 
-		if (proposedTime.isBefore(maxTime)) {
+		if (proposedTime.isBefore(maxTime))
+		{
 			throw new IllegalStateException(
 				"Cannot import API data with time "
-				+ proposedTime
-				+ " which is before existing data at "
-				+ maxTime
-				+ ". Use 'rollback-temporal' command first to roll back to before this date."
+					+ proposedTime
+					+ " which is before existing data at "
+					+ maxTime
+					+ ". Use 'rollback-temporal' command first to roll back to before this date."
 			);
 		}
 	}
 
-	private static void storeApiHighWatermark(@Nonnull Instant instant) {
+	private static void storeApiHighWatermark(@Nonnull Instant instant)
+	{
 		Timestamp watermark = Timestamp.from(instant);
 		Operation criteria = ApiImportTimestampFinder.name().eq("workflowy");
 		ApiImportTimestamp timestamp = ApiImportTimestampFinder.findOne(criteria);
 
-		if (timestamp == null) {
+		if (timestamp == null)
+		{
 			var newTimestamp = new ApiImportTimestamp();
 			newTimestamp.setName("workflowy");
 			newTimestamp.setTimestamp(watermark);
 			newTimestamp.insert();
-		} else {
+		}
+		else
+		{
 			timestamp.setTimestamp(watermark);
 		}
 
@@ -383,8 +411,10 @@ public final class WorkflowyApiDataConverter {
 	 * Backup files store the default layout as "bullets", while API exports use null.
 	 * We normalize "bullets" to null so both sources produce consistent values.
 	 */
-	private static String normalizeLayoutMode(String layoutMode) {
-		if ("bullets".equals(layoutMode)) {
+	private static String normalizeLayoutMode(String layoutMode)
+	{
+		if ("bullets".equals(layoutMode))
+		{
 			return null;
 		}
 		return layoutMode;

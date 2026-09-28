@@ -27,19 +27,23 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider>
-	extends EnvironmentCommand<T> {
-
+public class SearchCommand<
+	T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider
+>
+	extends EnvironmentCommand<T>
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchCommand.class);
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-	public SearchCommand(Application<T> application) {
+	public SearchCommand(Application<T> application)
+	{
 		super(application, "search", "Search nodes using semantic similarity");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser.addArgument("query").type(String.class).required(true).help("Search query text");
@@ -68,7 +72,8 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 
 	@Override
 	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
-		throws Exception {
+		throws Exception
+	{
 		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
 		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
@@ -85,7 +90,8 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 		String modeStr = namespace.getString("mode");
 		String dbPath = namespace.getString("db_path");
 
-		if (dbPath == null) {
+		if (dbPath == null)
+		{
 			dbPath = embeddingConfig.getDatabasePath();
 		}
 
@@ -102,7 +108,8 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 		try (
 			var sqliteConnection = new SqliteVecConnection(dbPath);
 			EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig)
-		) {
+		)
+		{
 			var repository = new EmbeddingRepository(sqliteConnection);
 			var searchEngine = new SearchEngine(engine, repository);
 
@@ -116,7 +123,9 @@ public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfi
 		LOGGER.info("Completing {}.", this.getClass().getSimpleName());
 	}
 
-	private void writeResults(List<SearchResult> results, ObjectMapper objectMapper) throws IOException {
+	private void writeResults(List<SearchResult> results, ObjectMapper objectMapper)
+		throws IOException
+	{
 		String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(results);
 		System.out.println(json);
 	}

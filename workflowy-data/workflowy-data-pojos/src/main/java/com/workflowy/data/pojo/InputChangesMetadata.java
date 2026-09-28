@@ -13,4 +13,6 @@ public record InputChangesMetadata(
 	@JsonProperty("mn") @Nullable Map<String, Object> modifiedBy,
 	/** Completed by - tracks who completed this item. */
 	@JsonProperty("cp") @Nullable Map<String, Object> completedBy
-) {}
+)
+{
+}

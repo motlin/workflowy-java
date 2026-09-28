@@ -32,16 +32,20 @@ public record InputMetadata(
 	@JsonProperty("numbered_start") @Nullable Integer numberedStart,
 
 	@Nullable Boolean restorableUniqueNode
-) {
-	public boolean hasMirror() {
+)
+{
+	public boolean hasMirror()
+	{
 		return this.mirror != null;
 	}
 
-	public boolean hasBacklink() {
+	public boolean hasBacklink()
+	{
 		return this.backlink != null;
 	}
 
-	public boolean hasCalendar() {
+	public boolean hasCalendar()
+	{
 		return this.calendar != null;
 	}
 }

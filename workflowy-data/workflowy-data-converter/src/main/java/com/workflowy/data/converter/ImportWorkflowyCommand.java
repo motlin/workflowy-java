@@ -16,22 +16,26 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extends EnvironmentCommand<T> {
-
+public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration>
+	extends EnvironmentCommand<T>
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(ImportWorkflowyCommand.class);
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-	public ImportWorkflowyCommand(Application<T> application) {
+	public ImportWorkflowyCommand(Application<T> application)
+	{
 		this(application, "import-workflowy", "Import Workflowy backup files into the database.");
 	}
 
-	protected ImportWorkflowyCommand(Application<T> application, String name, String description) {
+	protected ImportWorkflowyCommand(Application<T> application, String name, String description)
+	{
 		super(application, name, description);
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser
@@ -49,7 +53,8 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extend
 
 	@Override
 	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
-		throws Exception {
+		throws Exception
+	{
 		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
 		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
@@ -64,7 +69,8 @@ public class ImportWorkflowyCommand<T extends AbstractKlassConfiguration> extend
 
 		LOGGER.info("backupsPath = {}", backupsPath);
 
-		if (Boolean.TRUE.equals(resetWatermark)) {
+		if (Boolean.TRUE.equals(resetWatermark))
+		{
 			LOGGER.info("Resetting import watermark...");
 			WorkflowyDataConverter.resetWatermark(dataStore);
 		}

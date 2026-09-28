@@ -10,4 +10,6 @@ public record InputCalendarLevelsMetadata(
 	@Nullable Boolean week,
 	@Nullable Boolean month,
 	@Nullable Boolean year
-) {}
+)
+{
+}

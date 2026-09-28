@@ -2,8 +2,8 @@ package com.workflowy.embedding.search;
 
 import javax.annotation.Nullable;
 
-public class SearchResult {
-
+public class SearchResult
+{
 	private final String nodeId;
 	private final double distance;
 
@@ -19,61 +19,74 @@ public class SearchResult {
 	@Nullable
 	private String textContent;
 
-	public SearchResult(String nodeId, double distance) {
+	public SearchResult(String nodeId, double distance)
+	{
 		this.nodeId = nodeId;
 		this.distance = distance;
 	}
 
-	public String getNodeId() {
+	public String getNodeId()
+	{
 		return this.nodeId;
 	}
 
-	public double getDistance() {
+	public double getDistance()
+	{
 		return this.distance;
 	}
 
-	public double getSimilarity() {
+	public double getSimilarity()
+	{
 		return 1.0 - this.distance;
 	}
 
 	@Nullable
-	public String getName() {
+	public String getName()
+	{
 		return this.name;
 	}
 
-	public void setName(@Nullable String name) {
+	public void setName(@Nullable String name)
+	{
 		this.name = name;
 	}
 
 	@Nullable
-	public String getNote() {
+	public String getNote()
+	{
 		return this.note;
 	}
 
-	public void setNote(@Nullable String note) {
+	public void setNote(@Nullable String note)
+	{
 		this.note = note;
 	}
 
 	@Nullable
-	public String getFullPath() {
+	public String getFullPath()
+	{
 		return this.fullPath;
 	}
 
-	public void setFullPath(@Nullable String fullPath) {
+	public void setFullPath(@Nullable String fullPath)
+	{
 		this.fullPath = fullPath;
 	}
 
 	@Nullable
-	public String getTextContent() {
+	public String getTextContent()
+	{
 		return this.textContent;
 	}
 
-	public void setTextContent(@Nullable String textContent) {
+	public void setTextContent(@Nullable String textContent)
+	{
 		this.textContent = textContent;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return (
 			"SearchResult{"
 			+ "nodeId='"

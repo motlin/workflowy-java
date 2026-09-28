@@ -1,3 +1,6 @@
 package com.workflowy;
 
-public class NodeMetadataDatabaseObject extends NodeMetadataDatabaseObjectAbstract {}
+public class NodeMetadataDatabaseObject
+	extends NodeMetadataDatabaseObjectAbstract
+{
+}

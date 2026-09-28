@@ -9,28 +9,32 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-class WorkflowyTimestampConverterTest {
-
+class WorkflowyTimestampConverterTest
+{
 	@Test
-	void workflowyEpochOffset_isJanuary1st2010() {
+	void workflowyEpochOffset_isJanuary1st2010()
+	{
 		Instant epoch = Instant.ofEpochSecond(WorkflowyTimestampConverter.WORKFLOWY_EPOCH_OFFSET);
 		assertEquals(Instant.parse("2010-01-01T00:00:00Z"), epoch);
 	}
 
 	@Test
-	void convertWorkflowyTimestamp_withNull_returnsNull() {
+	void convertWorkflowyTimestamp_withNull_returnsNull()
+	{
 		assertNull(WorkflowyTimestampConverter.convertWorkflowyTimestamp(null));
 	}
 
 	@Test
-	void convertWorkflowyTimestamp_withZero_returnsWorkflowyEpoch() {
+	void convertWorkflowyTimestamp_withZero_returnsWorkflowyEpoch()
+	{
 		Timestamp result = WorkflowyTimestampConverter.convertWorkflowyTimestamp(0L);
 		assertNotNull(result);
 		assertEquals(Instant.parse("2010-01-01T00:00:00Z"), result.toInstant());
 	}
 
 	@Test
-	void convertWorkflowyTimestamp_withPositiveValue_returnsCorrectTimestamp() {
+	void convertWorkflowyTimestamp_withPositiveValue_returnsCorrectTimestamp()
+	{
 		var workflowyTimestamp = 86400L;
 		Timestamp result = WorkflowyTimestampConverter.convertWorkflowyTimestamp(workflowyTimestamp);
 		assertNotNull(result);
@@ -38,7 +42,8 @@ class WorkflowyTimestampConverterTest {
 	}
 
 	@Test
-	void convertWorkflowyTimestamp_withRecentDate_returnsCorrectTimestamp() {
+	void convertWorkflowyTimestamp_withRecentDate_returnsCorrectTimestamp()
+	{
 		long secondsSinceWorkflowyEpoch =
 			Instant.parse("2024-01-15T12:00:00Z").getEpochSecond() - WorkflowyTimestampConverter.WORKFLOWY_EPOCH_OFFSET;
 		Timestamp result = WorkflowyTimestampConverter.convertWorkflowyTimestamp(secondsSinceWorkflowyEpoch);
@@ -47,12 +52,14 @@ class WorkflowyTimestampConverterTest {
 	}
 
 	@Test
-	void workflowyTimestampToInstant_withNull_returnsNull() {
+	void workflowyTimestampToInstant_withNull_returnsNull()
+	{
 		assertNull(WorkflowyTimestampConverter.workflowyTimestampToInstant(null));
 	}
 
 	@Test
-	void workflowyTimestampToInstant_withZero_returnsWorkflowyEpoch() {
+	void workflowyTimestampToInstant_withZero_returnsWorkflowyEpoch()
+	{
 		Instant result = WorkflowyTimestampConverter.workflowyTimestampToInstant(0L);
 		assertNotNull(result);
 		assertEquals(Instant.parse("2010-01-01T00:00:00Z"), result);

@@ -7,11 +7,13 @@ import javax.ws.rs.core.Response.Status;
 import io.liftwizard.reladomo.test.extension.ReladomoTestFile;
 import org.junit.jupiter.api.Test;
 
-class NodeContentResourceTest extends AbstractWorkflowyAppTest {
-
+class NodeContentResourceTest
+	extends AbstractWorkflowyAppTest
+{
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void getNode_withExistingId_returnsNode() {
+	void getNode_withExistingId_returnsNode()
+	{
 		Client client = this.getClient("getNode_withExistingId_returnsNode");
 
 		Response response = client
@@ -26,7 +28,8 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void getNode_withBacklinks_returnsBacklinks() {
+	void getNode_withBacklinks_returnsBacklinks()
+	{
 		Client client = this.getClient("getNode_withBacklinks_returnsBacklinks");
 
 		// Node 2 has a backlink pointing TO Node 3
@@ -42,7 +45,8 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void getNode_withIncomingLinks_returnsIncomingLinks() {
+	void getNode_withIncomingLinks_returnsIncomingLinks()
+	{
 		Client client = this.getClient("getNode_withIncomingLinks_returnsIncomingLinks");
 
 		// Node 3 has an incoming link FROM Node 2
@@ -58,7 +62,8 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void getNode_withNonExistentId_returnsGone() {
+	void getNode_withNonExistentId_returnsGone()
+	{
 		Client client = this.getClient("getNode_withNonExistentId_returnsGone");
 
 		Response response = client
@@ -73,7 +78,8 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void getChildren_withExistingParent_returnsChildren() {
+	void getChildren_withExistingParent_returnsChildren()
+	{
 		Client client = this.getClient("getChildren_withExistingParent_returnsChildren");
 
 		Response response = client
@@ -88,7 +94,8 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void getRootNodes_returnsRootNodes() {
+	void getRootNodes_returnsRootNodes()
+	{
 		Client client = this.getClient("getRootNodes_returnsRootNodes");
 
 		Response response = client
@@ -102,7 +109,8 @@ class NodeContentResourceTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void searchNodes_withMatchingQuery_returnsResults() {
+	void searchNodes_withMatchingQuery_returnsResults()
+	{
 		Client client = this.getClient("searchNodes_withMatchingQuery_returnsResults");
 
 		Response response = client

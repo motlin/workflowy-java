@@ -2,7 +2,8 @@ package com.workflowy.embedding.model;
 
 import java.util.Optional;
 
-public enum EmbeddingModel {
+public enum EmbeddingModel
+{
 	MINILM(
 		"minilm",
 		"sentence-transformers/all-MiniLM-L6-v2",
@@ -69,7 +70,8 @@ public enum EmbeddingModel {
 		ModelType modelType,
 		Optional<String> queryPrefix,
 		Optional<String> passagePrefix
-	) {
+	)
+	{
 		this.key = key;
 		this.modelName = modelName;
 		this.dimensions = dimensions;
@@ -79,52 +81,65 @@ public enum EmbeddingModel {
 		this.passagePrefix = passagePrefix;
 	}
 
-	public String getKey() {
+	public String getKey()
+	{
 		return this.key;
 	}
 
-	public String getModelName() {
+	public String getModelName()
+	{
 		return this.modelName;
 	}
 
-	public int getDimensions() {
+	public int getDimensions()
+	{
 		return this.dimensions;
 	}
 
-	public double getDefaultThreshold() {
+	public double getDefaultThreshold()
+	{
 		return this.defaultThreshold;
 	}
 
-	public ModelType getModelType() {
+	public ModelType getModelType()
+	{
 		return this.modelType;
 	}
 
-	public Optional<String> getQueryPrefix() {
+	public Optional<String> getQueryPrefix()
+	{
 		return this.queryPrefix;
 	}
 
-	public Optional<String> getPassagePrefix() {
+	public Optional<String> getPassagePrefix()
+	{
 		return this.passagePrefix;
 	}
 
-	public boolean isLocal() {
+	public boolean isLocal()
+	{
 		return this.modelType == ModelType.LOCAL;
 	}
 
-	public boolean isOpenAI() {
+	public boolean isOpenAI()
+	{
 		return this.modelType == ModelType.OPENAI;
 	}
 
-	public static EmbeddingModel fromKey(String key) {
-		for (EmbeddingModel model : values()) {
-			if (model.key.equals(key)) {
+	public static EmbeddingModel fromKey(String key)
+	{
+		for (EmbeddingModel model : values())
+		{
+			if (model.key.equals(key))
+			{
 				return model;
 			}
 		}
 		throw new IllegalArgumentException("Unknown embedding model: " + key);
 	}
 
-	public enum ModelType {
+	public enum ModelType
+	{
 		LOCAL,
 		OPENAI,
 	}

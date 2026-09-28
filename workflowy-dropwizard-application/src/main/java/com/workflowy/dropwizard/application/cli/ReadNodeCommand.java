@@ -11,14 +11,17 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class ReadNodeCommand extends AbstractReadOnlyCommand {
-
-	public ReadNodeCommand(WorkflowyApplication application) {
+public class ReadNodeCommand
+	extends AbstractReadOnlyCommand
+{
+	public ReadNodeCommand(WorkflowyApplication application)
+	{
 		super(application, "read-node", "Read a node by ID with optional child depth");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser
@@ -36,7 +39,9 @@ public class ReadNodeCommand extends AbstractReadOnlyCommand {
 	}
 
 	@Override
-	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
+	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
+		throws CommandException
+	{
 		String inputId = namespace.getString("id");
 		int depth = namespace.getInt("depth");
 
@@ -46,7 +51,8 @@ public class ReadNodeCommand extends AbstractReadOnlyCommand {
 		Operation operation = NodeContentFinder.id().eq(fullId);
 		NodeContentList nodes = NodeContentFinder.findMany(operation);
 
-		if (nodes.isEmpty()) {
+		if (nodes.isEmpty())
+		{
 			throw new CommandException("NOT_FOUND", "Node not found: " + fullId);
 		}
 

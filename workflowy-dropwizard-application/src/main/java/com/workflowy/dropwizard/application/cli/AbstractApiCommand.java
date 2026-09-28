@@ -19,13 +19,15 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyConfiguration> {
-
+public abstract class AbstractApiCommand
+	extends EnvironmentCommand<WorkflowyConfiguration>
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiCommand.class);
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-	protected AbstractApiCommand(WorkflowyApplication application, String name, String description) {
+	protected AbstractApiCommand(WorkflowyApplication application, String name, String description)
+	{
 		super(application, name, description);
 	}
 
@@ -34,7 +36,9 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 		@Nonnull Environment environment,
 		Namespace namespace,
 		@Nonnull WorkflowyConfiguration configuration
-	) throws Exception {
+	)
+		throws Exception
+	{
 		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
 		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
@@ -43,9 +47,12 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 
 		String apiKey = this.getApiKey();
 
-		try (var apiClient = new WorkflowyApiClient(apiKey)) {
+		try (var apiClient = new WorkflowyApiClient(apiKey))
+		{
 			this.executeCommand(namespace, configuration, apiClient);
-		} finally {
+		}
+		finally
+		{
 			this.containerLifeCycle.stop();
 		}
 
@@ -56,40 +63,50 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 		Namespace namespace,
 		WorkflowyConfiguration configuration,
 		WorkflowyApiClient apiClient
-	) throws Exception;
+	)
+		throws Exception;
 
-	private String getApiKey() {
+	private String getApiKey()
+	{
 		String apiKey = System.getenv("WORKFLOWY_API_KEY");
-		if (apiKey == null || apiKey.isBlank()) {
+		if (apiKey == null || apiKey.isBlank())
+		{
 			throw new IllegalStateException("WORKFLOWY_API_KEY environment variable is required");
 		}
 		return apiKey;
 	}
 
 	@Nullable
-	protected String resolveNodeId(@Nullable String id, @Nullable String path, WorkflowyApiClient apiClient) {
-		if (id != null) {
+	protected String resolveNodeId(@Nullable String id, @Nullable String path, WorkflowyApiClient apiClient)
+	{
+		if (id != null)
+		{
 			return this.resolveShortOrFullId(id);
 		}
 
-		if (path != null) {
+		if (path != null)
+		{
 			return this.resolvePathToId(path, apiClient);
 		}
 
 		return null;
 	}
 
-	private String resolveShortOrFullId(String shortOrFullId) {
-		if (shortOrFullId.length() == 36) {
+	private String resolveShortOrFullId(String shortOrFullId)
+	{
+		if (shortOrFullId.length() == 36)
+		{
 			return shortOrFullId;
 		}
 
 		NodeContentList matches = NodeContentFinder.findMany(NodeContentFinder.id().startsWith(shortOrFullId));
 
-		if (matches.isEmpty()) {
+		if (matches.isEmpty())
+		{
 			throw new IllegalArgumentException("No node found with ID prefix: " + shortOrFullId);
 		}
-		if (matches.size() > 1) {
+		if (matches.size() > 1)
+		{
 			throw new IllegalArgumentException("Multiple nodes match prefix: " + shortOrFullId);
 		}
 
@@ -97,29 +114,37 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 	}
 
 	@Nullable
-	private String resolvePathToId(String commaSeparatedPath, WorkflowyApiClient apiClient) {
+	private String resolvePathToId(String commaSeparatedPath, WorkflowyApiClient apiClient)
+	{
 		MutableList<String> segments = ArrayAdapter.adapt(commaSeparatedPath.split(",")).collect(String::trim).toList();
 
 		// Try H2 cache first
 		String currentId = null;
-		for (String segment : segments) {
+		for (String segment : segments)
+		{
 			NodeContentList children;
-			if (currentId == null) {
+			if (currentId == null)
+			{
 				children = NodeContentFinder.findMany(NodeContentFinder.parentId().isNull());
-			} else {
+			}
+			else
+			{
 				children = NodeContentFinder.findMany(NodeContentFinder.parentId().eq(currentId));
 			}
 
 			NodeContent match = null;
-			for (var i = 0; i < children.size(); i++) {
+			for (var i = 0; i < children.size(); i++)
+			{
 				NodeContent child = children.get(i);
-				if (segment.equals(child.getName())) {
+				if (segment.equals(child.getName()))
+				{
 					match = child;
 					break;
 				}
 			}
 
-			if (match == null) {
+			if (match == null)
+			{
 				// Fall back to API
 				var apiNode = apiClient.findNodeByPath(segments);
 				return apiNode != null ? apiNode.id() : null;
@@ -131,7 +156,8 @@ public abstract class AbstractApiCommand extends EnvironmentCommand<WorkflowyCon
 		return currentId;
 	}
 
-	protected static String getWorkflowyUrl(String nodeId) {
+	protected static String getWorkflowyUrl(String nodeId)
+	{
 		String hex = nodeId.replace("-", "");
 		String shortId = hex.substring(hex.length() - 12);
 		return "https://workflowy.com/#/" + shortId;

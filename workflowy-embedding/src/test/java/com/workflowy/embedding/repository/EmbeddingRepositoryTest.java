@@ -20,26 +20,33 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class EmbeddingRepositoryTest {
-
+class EmbeddingRepositoryTest
+{
 	private SqliteVecConnection connection;
 	private EmbeddingRepository repository;
 
 	@BeforeEach
-	void setUp() throws Exception {
+	void setUp()
+		throws Exception
+	{
 		this.connection = EmbeddingTestHelper.createTempDatabase();
 		this.repository = new EmbeddingRepository(this.connection);
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
-		if (this.connection != null) {
+	void tearDown()
+		throws Exception
+	{
+		if (this.connection != null)
+		{
 			this.connection.close();
 		}
 	}
 
 	@Test
-	void save_withNewEmbedding_insertsRecord() throws SQLException {
+	void save_withNewEmbedding_insertsRecord()
+		throws SQLException
+	{
 		String nodeId = EmbeddingTestHelper.randomNodeId();
 		NodeEmbedding embedding = EmbeddingTestHelper.createNodeEmbedding(nodeId, EmbeddingModel.MINILM);
 
@@ -50,7 +57,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void saveBatch_withMultipleEmbeddings_insertsAll() throws SQLException {
+	void saveBatch_withMultipleEmbeddings_insertsAll()
+		throws SQLException
+	{
 		String nodeId1 = EmbeddingTestHelper.randomNodeId();
 		String nodeId2 = EmbeddingTestHelper.randomNodeId();
 		String nodeId3 = EmbeddingTestHelper.randomNodeId();
@@ -71,7 +80,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void saveBatch_withEmptyList_succeeds() throws SQLException {
+	void saveBatch_withEmptyList_succeeds()
+		throws SQLException
+	{
 		this.repository.saveBatch(List.of());
 
 		Set<String> existingIds = this.repository.getExistingNodeIds(EmbeddingModel.MINILM);
@@ -79,13 +90,17 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void getExistingNodeIds_withNoEmbeddings_returnsEmptySet() throws SQLException {
+	void getExistingNodeIds_withNoEmbeddings_returnsEmptySet()
+		throws SQLException
+	{
 		Set<String> existingIds = this.repository.getExistingNodeIds(EmbeddingModel.MINILM);
 		assertTrue(existingIds.isEmpty());
 	}
 
 	@Test
-	void getExistingNodeIds_withEmbeddings_returnsNodeIds() throws SQLException {
+	void getExistingNodeIds_withEmbeddings_returnsNodeIds()
+		throws SQLException
+	{
 		String nodeId1 = EmbeddingTestHelper.randomNodeId();
 		String nodeId2 = EmbeddingTestHelper.randomNodeId();
 
@@ -99,7 +114,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void getExistingNodeIds_filtersByModel() throws SQLException {
+	void getExistingNodeIds_filtersByModel()
+		throws SQLException
+	{
 		String nodeId1 = EmbeddingTestHelper.randomNodeId();
 		String nodeId2 = EmbeddingTestHelper.randomNodeId();
 
@@ -117,10 +134,12 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void search_withoutVecExtension_throwsSqlException() {
+	void search_withoutVecExtension_throwsSqlException()
+	{
 		float[] queryEmbedding = EmbeddingTestHelper.createRandomEmbedding(EmbeddingModel.MINILM.getDimensions());
 
-		if (!this.connection.isSqliteVecLoaded()) {
+		if (!this.connection.isSqliteVecLoaded())
+		{
 			assertThrows(SQLException.class, () ->
 				this.repository.search(queryEmbedding, EmbeddingModel.MINILM, 5, null)
 			);
@@ -128,8 +147,11 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void search_withVecExtension_returnsResults() throws SQLException {
-		if (!this.connection.isSqliteVecLoaded()) {
+	void search_withVecExtension_returnsResults()
+		throws SQLException
+	{
+		if (!this.connection.isSqliteVecLoaded())
+		{
 			return;
 		}
 
@@ -150,14 +172,18 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void search_withLimit_respectsLimit() throws SQLException {
-		if (!this.connection.isSqliteVecLoaded()) {
+	void search_withLimit_respectsLimit()
+		throws SQLException
+	{
+		if (!this.connection.isSqliteVecLoaded())
+		{
 			return;
 		}
 
 		float[] baseEmbedding = EmbeddingTestHelper.createRandomEmbedding(EmbeddingModel.MINILM.getDimensions());
 
-		for (var i = 0; i < 10; i++) {
+		for (var i = 0; i < 10; i++)
+		{
 			String nodeId = EmbeddingTestHelper.randomNodeId();
 			float[] similar = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.1f * (i + 1));
 			this.repository.save(EmbeddingTestHelper.createNodeEmbedding(nodeId, EmbeddingModel.MINILM, similar));
@@ -169,7 +195,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void populateFts_insertsContent() throws SQLException {
+	void populateFts_insertsContent()
+		throws SQLException
+	{
 		String nodeId1 = EmbeddingTestHelper.randomNodeId();
 		String nodeId2 = EmbeddingTestHelper.randomNodeId();
 
@@ -185,7 +213,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void populateFts_clearsExistingContent() throws SQLException {
+	void populateFts_clearsExistingContent()
+		throws SQLException
+	{
 		String nodeId1 = EmbeddingTestHelper.randomNodeId();
 		String nodeId2 = EmbeddingTestHelper.randomNodeId();
 
@@ -206,7 +236,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void searchKeyword_withNoResults_returnsEmptyList() throws SQLException {
+	void searchKeyword_withNoResults_returnsEmptyList()
+		throws SQLException
+	{
 		Map<String, String> contents = new LinkedHashMap<>();
 		contents.put(EmbeddingTestHelper.randomNodeId(), "Some content about programming");
 		this.repository.populateFts(contents);
@@ -216,9 +248,12 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void searchKeyword_respectsLimit() throws SQLException {
+	void searchKeyword_respectsLimit()
+		throws SQLException
+	{
 		Map<String, String> contents = new LinkedHashMap<>();
-		for (var i = 0; i < 10; i++) {
+		for (var i = 0; i < 10; i++)
+		{
 			contents.put(EmbeddingTestHelper.randomNodeId(), "Document about testing software quality " + i);
 		}
 		this.repository.populateFts(contents);
@@ -228,7 +263,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void searchKeyword_ranksResults() throws SQLException {
+	void searchKeyword_ranksResults()
+		throws SQLException
+	{
 		String exactId = EmbeddingTestHelper.randomNodeId();
 		String partialId = EmbeddingTestHelper.randomNodeId();
 
@@ -243,27 +280,34 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void searchKeyword_distanceIsBetweenZeroAndOne() throws SQLException {
+	void searchKeyword_distanceIsBetweenZeroAndOne()
+		throws SQLException
+	{
 		Map<String, String> contents = new LinkedHashMap<>();
 		contents.put(EmbeddingTestHelper.randomNodeId(), "Testing distance normalization values");
 		this.repository.populateFts(contents);
 
 		List<SearchResult> results = this.repository.searchKeyword("testing", 10);
 		assertFalse(results.isEmpty());
-		for (SearchResult result : results) {
+		for (SearchResult result : results)
+		{
 			assertTrue(result.getDistance() >= 0.0);
 			assertTrue(result.getDistance() < 1.0);
 		}
 	}
 
 	@Test
-	void getContentHash_withNoHash_returnsNull() throws SQLException {
+	void getContentHash_withNoHash_returnsNull()
+		throws SQLException
+	{
 		String hash = this.repository.getContentHash("nonexistent", "minilm");
 		assertNull(hash);
 	}
 
 	@Test
-	void saveAndGetContentHash_roundTrips() throws SQLException {
+	void saveAndGetContentHash_roundTrips()
+		throws SQLException
+	{
 		String nodeId = EmbeddingTestHelper.randomNodeId();
 		this.repository.saveContentHash(nodeId, "minilm", "abc123");
 
@@ -272,7 +316,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void saveContentHash_updatesExisting() throws SQLException {
+	void saveContentHash_updatesExisting()
+		throws SQLException
+	{
 		String nodeId = EmbeddingTestHelper.randomNodeId();
 		this.repository.saveContentHash(nodeId, "minilm", "hash1");
 		this.repository.saveContentHash(nodeId, "minilm", "hash2");
@@ -282,7 +328,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void getContentHash_filtersByModel() throws SQLException {
+	void getContentHash_filtersByModel()
+		throws SQLException
+	{
 		String nodeId = EmbeddingTestHelper.randomNodeId();
 		this.repository.saveContentHash(nodeId, "minilm", "hash-minilm");
 		this.repository.saveContentHash(nodeId, "mpnet", "hash-mpnet");
@@ -292,7 +340,9 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void searchKeyword_usesPorterStemming() throws SQLException {
+	void searchKeyword_usesPorterStemming()
+		throws SQLException
+	{
 		String nodeId = EmbeddingTestHelper.randomNodeId();
 		Map<String, String> contents = new LinkedHashMap<>();
 		contents.put(nodeId, "The programmers were programming their programs");
@@ -304,8 +354,11 @@ class EmbeddingRepositoryTest {
 	}
 
 	@Test
-	void search_withThreshold_filtersResults() throws SQLException {
-		if (!this.connection.isSqliteVecLoaded()) {
+	void search_withThreshold_filtersResults()
+		throws SQLException
+	{
+		if (!this.connection.isSqliteVecLoaded())
+		{
 			return;
 		}
 
@@ -324,7 +377,8 @@ class EmbeddingRepositoryTest {
 		List<SearchResult> results = this.repository.search(baseEmbedding, EmbeddingModel.MINILM, 10, 0.2);
 
 		assertFalse(results.isEmpty());
-		for (SearchResult result : results) {
+		for (SearchResult result : results)
+		{
 			assertTrue(result.getDistance() < 0.2);
 		}
 	}

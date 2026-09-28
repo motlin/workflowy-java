@@ -36,22 +36,26 @@ import org.slf4j.LoggerFactory;
  * will find the 3rd-to-last backup file and roll back to just before its timestamp,
  * so that file and all subsequent files will be re-imported on the next import run.
  */
-public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration> extends EnvironmentCommand<T> {
-
+public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration>
+	extends EnvironmentCommand<T>
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(RollbackWorkflowyCommand.class);
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-	public RollbackWorkflowyCommand(Application<T> application) {
+	public RollbackWorkflowyCommand(Application<T> application)
+	{
 		this(application, "rollback-backups", "Roll back the database to before a specified number of backup imports.");
 	}
 
-	protected RollbackWorkflowyCommand(Application<T> application, String name, String description) {
+	protected RollbackWorkflowyCommand(Application<T> application, String name, String description)
+	{
 		super(application, name, description);
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser
@@ -66,13 +70,14 @@ public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration> exte
 			.required(true)
 			.help(
 				"Number of backup files to roll back. The database will be rolled back to just before "
-				+ "the Nth-to-last backup file's timestamp."
+					+ "the Nth-to-last backup file's timestamp."
 			);
 	}
 
 	@Override
 	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
-		throws Exception {
+		throws Exception
+	{
 		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
 		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
@@ -90,7 +95,8 @@ public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration> exte
 
 		Instant rollbackTarget = this.calculateRollbackTarget(backupsPath, count);
 
-		if (rollbackTarget == null) {
+		if (rollbackTarget == null)
+		{
 			LOGGER.error(
 				"Unable to calculate rollback target. Check that the backups directory contains enough files."
 			);
@@ -120,22 +126,26 @@ public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration> exte
 	 * @param count number of backups to roll back
 	 * @return the timestamp to roll back to, or null if calculation fails
 	 */
-	private Instant calculateRollbackTarget(Path backupsPath, int count) {
+	private Instant calculateRollbackTarget(Path backupsPath, int count)
+	{
 		ImmutableList<File> backupFiles = this.getBackupFiles(backupsPath);
 
-		if (backupFiles.isEmpty()) {
+		if (backupFiles.isEmpty())
+		{
 			LOGGER.error("No backup files found in: {}", backupsPath);
 			return null;
 		}
 
 		LOGGER.info("Found {} backup files", backupFiles.size());
 
-		if (count < 1) {
+		if (count < 1)
+		{
 			LOGGER.error("Count must be at least 1, got: {}", count);
 			return null;
 		}
 
-		if (count > backupFiles.size()) {
+		if (count > backupFiles.size())
+		{
 			LOGGER.error(
 				"Cannot roll back {} backups when only {} files exist. Rolling back all.",
 				count,
@@ -158,16 +168,20 @@ public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration> exte
 		return rollbackTarget;
 	}
 
-	private ImmutableList<File> getBackupFiles(Path backupsPath) {
+	private ImmutableList<File> getBackupFiles(Path backupsPath)
+	{
 		File directory = backupsPath.toFile();
-		if (!directory.exists()) {
+		if (!directory.exists())
+		{
 			throw new IllegalArgumentException("Backup directory does not exist: " + backupsPath);
 		}
-		if (!directory.isDirectory()) {
+		if (!directory.isDirectory())
+		{
 			throw new IllegalArgumentException("Backup path is not a directory: " + backupsPath);
 		}
 		File[] files = directory.listFiles((pathname) -> pathname.getName().endsWith(".workflowy.backup"));
-		if (files == null) {
+		if (files == null)
+		{
 			throw new IllegalArgumentException("Unable to list files in: " + backupsPath);
 		}
 		return ArrayAdapter.adapt(files).toSortedListBy(File::getName).toImmutable();

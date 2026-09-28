@@ -66,8 +66,8 @@ import org.eclipse.collections.impl.utility.MapIterate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class WorkflowyDataConverter {
-
+public final class WorkflowyDataConverter
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(WorkflowyDataConverter.class);
 
 	private final ObjectMapper objectMapper;
@@ -91,7 +91,8 @@ public final class WorkflowyDataConverter {
 		@Nonnull ObjectMapper objectMapper,
 		@Nonnull DataStore dataStore,
 		@Nonnull File backupFile
-	) {
+	)
+	{
 		this.objectMapper = Objects.requireNonNull(objectMapper);
 		this.dataStore = Objects.requireNonNull(dataStore);
 		this.backupFile = Objects.requireNonNull(backupFile);
@@ -102,7 +103,8 @@ public final class WorkflowyDataConverter {
 		@Nonnull Path backupsPath,
 		@Nonnull ObjectMapper objectMapper,
 		@Nonnull DataStore dataStore
-	) {
+	)
+	{
 		Instant highWatermark = WorkflowyDataConverter.getBackupHighWatermark();
 
 		ImmutableList<File> filesToProcess = WorkflowyDataConverter.getBackupFiles(backupsPath).selectWith(
@@ -110,7 +112,8 @@ public final class WorkflowyDataConverter {
 			highWatermark
 		);
 
-		if (filesToProcess.isEmpty()) {
+		if (filesToProcess.isEmpty())
+		{
 			LOGGER.info("No files to process after highWatermark {}", highWatermark);
 			return;
 		}
@@ -124,18 +127,29 @@ public final class WorkflowyDataConverter {
 			.forEach(WorkflowyDataConverter::processBackupFile);
 	}
 
-	private void processBackupFile() {
-		try {
+	private void processBackupFile()
+	{
+		try
+		{
 			this.processBackupFileOrThrow();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			throw new RuntimeException("Failed to process backup file: " + this.backupFile, e);
 		}
 	}
 
-	private void processBackupFileOrThrow() throws IOException {
+	private void processBackupFileOrThrow()
+		throws IOException
+	{
 		LOGGER.info("Processing backup file: {}", this.backupFile);
 
-		List<InputItem> rootItems = this.objectMapper.readValue(this.backupFile, new TypeReference<>() {});
+		List<InputItem> rootItems = this.objectMapper.readValue(
+			this.backupFile,
+			new TypeReference<>()
+			{
+			}
+		);
 
 		Instant backupInstant = WorkflowyFileUtils.getFileTimestamp(this.backupFile);
 
@@ -167,23 +181,27 @@ public final class WorkflowyDataConverter {
 		this.mergeIntoDatabase(backupInstant);
 	}
 
-	private void processNodesPass1(List<InputItem> inputItems, String parentId, int startPriority) {
+	private void processNodesPass1(List<InputItem> inputItems, String parentId, int startPriority)
+	{
 		// Use multiples of 100 for priority to match API format (0, 100, 200, ...)
 		int priority = startPriority;
-		for (InputItem inputItem : inputItems) {
+		for (InputItem inputItem : inputItems)
+		{
 			NodeContent nodeContent = this.createNodeContent(inputItem, parentId);
 			NodeMetadata nodeMetadata = this.createNodeMetadata(inputItem, priority);
 			this.nodeContents.put(inputItem.id(), nodeContent);
 			this.nodeMetadatas.put(inputItem.id(), nodeMetadata);
 			priority += 100;
 
-			if (inputItem.hasChildren()) {
+			if (inputItem.hasChildren())
+			{
 				this.processNodesPass1(inputItem.children(), inputItem.id(), 0);
 			}
 		}
 	}
 
-	private NodeContent createNodeContent(InputItem inputItem, String parentId) {
+	private NodeContent createNodeContent(InputItem inputItem, String parentId)
+	{
 		var nodeContent = new NodeContent();
 		nodeContent.setId(inputItem.id());
 		nodeContent.setParentId(parentId);
@@ -192,7 +210,8 @@ public final class WorkflowyDataConverter {
 		return nodeContent;
 	}
 
-	private NodeMetadata createNodeMetadata(InputItem inputItem, int priority) {
+	private NodeMetadata createNodeMetadata(InputItem inputItem, int priority)
+	{
 		var nodeMetadata = new NodeMetadata();
 		nodeMetadata.setNodeId(inputItem.id());
 		nodeMetadata.setShortId(WorkflowyFileUtils.computeShortId(inputItem.id()));
@@ -208,53 +227,66 @@ public final class WorkflowyDataConverter {
 		nodeMetadata.setLastUpdatedById(this.userId);
 
 		InputMetadata metadata = inputItem.metadata();
-		if (metadata != null) {
+		if (metadata != null)
+		{
 			nodeMetadata.setLayoutMode(normalizeLayoutMode(metadata.layoutMode()));
 
 			InputAiMetadata ai = metadata.ai();
-			if (ai != null && Boolean.TRUE.equals(ai.inChat())) {
+			if (ai != null && Boolean.TRUE.equals(ai.inChat()))
+			{
 				var aiMetadata = new AiMetadata();
 				aiMetadata.setNodeId(inputItem.id());
 				aiMetadata.setInChat(true);
 				this.aiMetadatas.add(aiMetadata);
 			}
 
-			if (metadata.changes() != null) {
-				try {
+			if (metadata.changes() != null)
+			{
+				try
+				{
 					nodeMetadata.setChanges(this.objectMapper.writeValueAsString(metadata.changes()));
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 					LOGGER.warn("Failed to serialize changes for node {}: {}", inputItem.id(), e.getMessage());
 				}
 			}
 
-			if (metadata.numberedStart() != null) {
+			if (metadata.numberedStart() != null)
+			{
 				nodeMetadata.setNumberedStart(metadata.numberedStart());
 			}
 		}
 		return nodeMetadata;
 	}
 
-	private void extractTagsFromNodes() {
-		for (NodeContent nodeContent : this.nodeContents.values()) {
+	private void extractTagsFromNodes()
+	{
+		for (NodeContent nodeContent : this.nodeContents.values())
+		{
 			this.extractTagsFromName(nodeContent);
 		}
 	}
 
-	private void extractTagsFromName(NodeContent nodeContent) {
+	private void extractTagsFromName(NodeContent nodeContent)
+	{
 		String name = nodeContent.getName();
-		if (name == null || name.isEmpty()) {
+		if (name == null || name.isEmpty())
+		{
 			return;
 		}
 
 		List<String> extractedTags = HashtagExtractor.extractHashtags(name);
 
-		for (String tagName : extractedTags) {
-			this.tags.computeIfAbsent(tagName, (t) -> {
-					var newTag = new Tag();
-					newTag.setName(t);
-					newTag.setColor(null);
-					return newTag;
-				});
+		for (String tagName : extractedTags)
+		{
+			this.tags.computeIfAbsent(tagName, (t) ->
+			{
+				var newTag = new Tag();
+				newTag.setName(t);
+				newTag.setColor(null);
+				return newTag;
+			});
 
 			var mapping = new NodeTagMapping();
 			mapping.setNodeId(nodeContent.getId());
@@ -263,51 +295,64 @@ public final class WorkflowyDataConverter {
 		}
 	}
 
-	private void processMetadata(List<InputItem> inputItems) {
-		for (InputItem inputItem : inputItems) {
+	private void processMetadata(List<InputItem> inputItems)
+	{
+		for (InputItem inputItem : inputItems)
+		{
 			this.processInputItemMetadata(inputItem);
-			if (inputItem.hasChildren()) {
+			if (inputItem.hasChildren())
+			{
 				this.processMetadata(inputItem.children());
 			}
 		}
 	}
 
-	private void processInputItemMetadata(InputItem inputItem) {
+	private void processInputItemMetadata(InputItem inputItem)
+	{
 		InputMetadata metadata = inputItem.metadata();
-		if (metadata == null) {
+		if (metadata == null)
+		{
 			return;
 		}
 
-		if (metadata.hasMirror()) {
+		if (metadata.hasMirror())
+		{
 			this.processMirrorMetadata(inputItem.id(), metadata.mirror());
 		}
 
-		if (metadata.hasBacklink()) {
+		if (metadata.hasBacklink())
+		{
 			this.processBacklinkMetadata(metadata.backlink());
 		}
 
-		if (metadata.hasCalendar()) {
+		if (metadata.hasCalendar())
+		{
 			this.processCalendarMetadata(inputItem.id(), metadata.calendar());
 		}
 
-		if (metadata.s3File() != null) {
+		if (metadata.s3File() != null)
+		{
 			this.processS3FileMetadata(inputItem.id(), metadata.s3File());
 		}
 
-		if (Boolean.TRUE.equals(metadata.isReferencesRoot())) {
+		if (Boolean.TRUE.equals(metadata.isReferencesRoot()))
+		{
 			var referencesRoot = new ReferencesRoot();
 			referencesRoot.setNodeId(inputItem.id());
 			this.referencesRoots.add(referencesRoot);
 		}
 
-		if (MapIterate.notEmpty(metadata.virtualRootIds())) {
+		if (MapIterate.notEmpty(metadata.virtualRootIds()))
+		{
 			this.processVirtualRootIds(inputItem.id(), metadata.virtualRootIds());
 		}
 	}
 
-	private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta) {
+	private void processMirrorMetadata(String nodeId, InputMirrorMetadata mirrorMeta)
+	{
 		// Variant 1: { originalId: "...", isMirrorRoot: true } — this node is a mirror of originalId
-		if (mirrorMeta.originalId() != null) {
+		if (mirrorMeta.originalId() != null)
+		{
 			var mirror = new Mirror();
 			mirror.setOriginalId(mirrorMeta.originalId());
 			mirror.setMirrorId(nodeId);
@@ -315,7 +360,8 @@ public final class WorkflowyDataConverter {
 		}
 
 		// Variant 2: { mirrorRootIds: { "id1": true, ... } } — each key is an original this node mirrors
-		for (String sourceId : mirrorMeta.getMirrorSourceIds()) {
+		for (String sourceId : mirrorMeta.getMirrorSourceIds())
+		{
 			var mirror = new Mirror();
 			mirror.setOriginalId(sourceId);
 			mirror.setMirrorId(nodeId);
@@ -323,7 +369,8 @@ public final class WorkflowyDataConverter {
 		}
 
 		// Variant 3: { backlinkMirrorRootIds: { "id1": true, ... } } — reversed: this node is the original
-		for (String backlinkId : mirrorMeta.getBacklinkMirrorIds()) {
+		for (String backlinkId : mirrorMeta.getBacklinkMirrorIds())
+		{
 			var mirror = new Mirror();
 			mirror.setOriginalId(nodeId);
 			mirror.setMirrorId(backlinkId);
@@ -331,20 +378,25 @@ public final class WorkflowyDataConverter {
 		}
 	}
 
-	private MirrorList deduplicateMirrors() {
+	private MirrorList deduplicateMirrors()
+	{
 		Set<String> seen = new LinkedHashSet<>();
 		var result = new MirrorList();
-		for (Mirror mirror : this.mirrors) {
+		for (Mirror mirror : this.mirrors)
+		{
 			String key = mirror.getOriginalId() + "|" + mirror.getMirrorId();
-			if (seen.add(key)) {
+			if (seen.add(key))
+			{
 				result.add(mirror);
 			}
 		}
 		return result;
 	}
 
-	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta) {
-		if (backlinkMeta.sourceId() != null && backlinkMeta.targetId() != null) {
+	private void processBacklinkMetadata(InputBacklinkMetadata backlinkMeta)
+	{
+		if (backlinkMeta.sourceId() != null && backlinkMeta.targetId() != null)
+		{
 			var backlink = new Backlink();
 			backlink.setSourceId(backlinkMeta.sourceId());
 			backlink.setTargetId(backlinkMeta.targetId());
@@ -352,38 +404,48 @@ public final class WorkflowyDataConverter {
 		}
 	}
 
-	private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta) {
+	private void processCalendarMetadata(String nodeId, InputCalendarMetadata calendarMeta)
+	{
 		var nodeCalendar = new NodeCalendar();
 		nodeCalendar.setId(UUID.randomUUID().toString());
 		nodeCalendar.setNodeId(nodeId);
-		if (calendarMeta.isRoot() != null) {
+		if (calendarMeta.isRoot() != null)
+		{
 			nodeCalendar.setRoot(calendarMeta.isRoot());
 		}
 		nodeCalendar.setLevel(calendarMeta.level());
-		if (calendarMeta.dateId() != null) {
+		if (calendarMeta.dateId() != null)
+		{
 			nodeCalendar.setDateId(calendarMeta.dateId());
 		}
-		if (calendarMeta.timestamp() != null) {
+		if (calendarMeta.timestamp() != null)
+		{
 			nodeCalendar.setTimestamp(calendarMeta.timestamp());
 		}
 		nodeCalendar.setValue(calendarMeta.value());
-		if (calendarMeta.foundDates() != null) {
+		if (calendarMeta.foundDates() != null)
+		{
 			nodeCalendar.setFoundDates(calendarMeta.foundDates());
 		}
-		if (calendarMeta.levels() != null) {
+		if (calendarMeta.levels() != null)
+		{
 			var levels = new NodeCalendarLevels();
 			levels.setCalendarId(nodeCalendar.getId());
 			var inputLevels = calendarMeta.levels();
-			if (inputLevels.day() != null) {
+			if (inputLevels.day() != null)
+			{
 				levels.setDay(inputLevels.day());
 			}
-			if (inputLevels.week() != null) {
+			if (inputLevels.week() != null)
+			{
 				levels.setWeek(inputLevels.week());
 			}
-			if (inputLevels.month() != null) {
+			if (inputLevels.month() != null)
+			{
 				levels.setMonth(inputLevels.month());
 			}
-			if (inputLevels.year() != null) {
+			if (inputLevels.year() != null)
+			{
 				levels.setYear(inputLevels.year());
 			}
 			nodeCalendar.setLevels(levels);
@@ -391,7 +453,8 @@ public final class WorkflowyDataConverter {
 		this.nodeCalendars.add(nodeCalendar);
 	}
 
-	private void processS3FileMetadata(String nodeId, InputS3FileMetadata s3FileMeta) {
+	private void processS3FileMetadata(String nodeId, InputS3FileMetadata s3FileMeta)
+	{
 		var nodeS3File = new NodeS3File();
 		nodeS3File.setId(UUID.randomUUID().toString());
 		nodeS3File.setNodeId(nodeId);
@@ -399,23 +462,29 @@ public final class WorkflowyDataConverter {
 		nodeS3File.setFileName(s3FileMeta.fileName());
 		nodeS3File.setFileType(s3FileMeta.fileType());
 		nodeS3File.setObjectFolder(s3FileMeta.objectFolder());
-		if (s3FileMeta.isAnimatedGIF() != null) {
+		if (s3FileMeta.isAnimatedGIF() != null)
+		{
 			nodeS3File.setAnimatedGIF(s3FileMeta.isAnimatedGIF());
 		}
-		if (s3FileMeta.imageOriginalWidth() != null) {
+		if (s3FileMeta.imageOriginalWidth() != null)
+		{
 			nodeS3File.setImageOriginalWidth(s3FileMeta.imageOriginalWidth());
 		}
-		if (s3FileMeta.imageOriginalHeight() != null) {
+		if (s3FileMeta.imageOriginalHeight() != null)
+		{
 			nodeS3File.setImageOriginalHeight(s3FileMeta.imageOriginalHeight());
 		}
-		if (s3FileMeta.imageOriginalPixels() != null) {
+		if (s3FileMeta.imageOriginalPixels() != null)
+		{
 			nodeS3File.setImageOriginalPixels(s3FileMeta.imageOriginalPixels());
 		}
 		this.nodeS3Files.add(nodeS3File);
 	}
 
-	private void processVirtualRootIds(String nodeId, Map<String, Boolean> virtualRootIds) {
-		for (String virtualRootId : virtualRootIds.keySet()) {
+	private void processVirtualRootIds(String nodeId, Map<String, Boolean> virtualRootIds)
+	{
+		for (String virtualRootId : virtualRootIds.keySet())
+		{
 			var mapping = new VirtualRootMapping();
 			mapping.setNodeId(nodeId);
 			mapping.setVirtualRootId(virtualRootId);
@@ -423,21 +492,25 @@ public final class WorkflowyDataConverter {
 		}
 	}
 
-	private void ensureUserExists() {
+	private void ensureUserExists()
+	{
 		User existingUser = UserFinder.findOne(UserFinder.userId().eq(this.userId));
-		if (existingUser == null) {
+		if (existingUser == null)
+		{
 			LOGGER.info("Creating user: {}", this.userId);
-			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) -> {
-					var user = new User();
-					user.setUserId(this.userId);
-					user.setEmail(this.userId);
-					user.insert();
-					return null;
-				});
+			MithraManagerProvider.getMithraManager().executeTransactionalCommand((tx) ->
+			{
+				var user = new User();
+				user.setUserId(this.userId);
+				user.setEmail(this.userId);
+				user.insert();
+				return null;
+			});
 		}
 	}
 
-	private void mergeIntoDatabase(Instant backupFileDate) {
+	private void mergeIntoDatabase(Instant backupFileDate)
+	{
 		// Use actual wall-clock time for SYSTEM_TIME, not the backfilled backup date
 		Instant importTime = Instant.now();
 
@@ -450,150 +523,149 @@ public final class WorkflowyDataConverter {
 
 		long time = importTime.toEpochMilli();
 
-		this.dataStore.runInTransaction((transaction) -> {
-				transaction.setSystemTime(time);
+		this.dataStore.runInTransaction((transaction) ->
+		{
+			transaction.setSystemTime(time);
 
-				LOGGER.info("Merging {} tags", this.tags.size());
-				TagList existingTags = TagFinder.findMany(TagFinder.all());
-				var updatedTags = new TagList();
-				updatedTags.addAll(this.tags.values());
-				var tagMergeOptions = new TopLevelMergeOptions<Tag>(TagFinder.getFinderInstance());
-				tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
-				existingTags.merge(updatedTags, tagMergeOptions);
+			LOGGER.info("Merging {} tags", this.tags.size());
+			TagList existingTags = TagFinder.findMany(TagFinder.all());
+			var updatedTags = new TagList();
+			updatedTags.addAll(this.tags.values());
+			var tagMergeOptions = new TopLevelMergeOptions<Tag>(TagFinder.getFinderInstance());
+			tagMergeOptions.doNotCompare(TagFinder.systemFrom(), TagFinder.systemTo());
+			existingTags.merge(updatedTags, tagMergeOptions);
 
-				LOGGER.info("Merging {} node contents", this.nodeContents.size());
-				NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
-				var updatedContents = new NodeContentList();
-				updatedContents.addAll(this.nodeContents.values());
-				var contentMergeOptions = new TopLevelMergeOptions<NodeContent>(NodeContentFinder.getFinderInstance());
-				contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
-				existingContents.merge(updatedContents, contentMergeOptions);
+			LOGGER.info("Merging {} node contents", this.nodeContents.size());
+			NodeContentList existingContents = NodeContentFinder.findMany(NodeContentFinder.all());
+			var updatedContents = new NodeContentList();
+			updatedContents.addAll(this.nodeContents.values());
+			var contentMergeOptions = new TopLevelMergeOptions<NodeContent>(NodeContentFinder.getFinderInstance());
+			contentMergeOptions.doNotCompare(NodeContentFinder.systemFrom(), NodeContentFinder.systemTo());
+			existingContents.merge(updatedContents, contentMergeOptions);
 
-				LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
-				NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
+			LOGGER.info("Merging {} node metadatas", this.nodeMetadatas.size());
+			NodeMetadataList existingMetadatas = NodeMetadataFinder.findMany(NodeMetadataFinder.all());
 
-				// Apply order detection to minimize priority-related updates.
-				// This preserves existing priorities when sibling order hasn't changed.
-				Map<String, Integer> priorityUpdates = this.calculatePrioritiesWithOrderDetection(existingMetadatas);
-				LOGGER.info(
-					"Order detection: {} nodes need priority updates out of {}",
-					priorityUpdates.size(),
-					this.nodeMetadatas.size()
-				);
+			// Apply order detection to minimize priority-related updates.
+			// This preserves existing priorities when sibling order hasn't changed.
+			Map<String, Integer> priorityUpdates = this.calculatePrioritiesWithOrderDetection(existingMetadatas);
+			LOGGER.info(
+				"Order detection: {} nodes need priority updates out of {}",
+				priorityUpdates.size(),
+				this.nodeMetadatas.size()
+			);
 
-				// Build map of existing priorities for preservation
-				MutableMap<String, Integer> existingPriorities = Maps.mutable.empty();
-				for (NodeMetadata meta : existingMetadatas) {
-					existingPriorities.put(meta.getNodeId(), meta.getPriority());
+			// Build map of existing priorities for preservation
+			MutableMap<String, Integer> existingPriorities = Maps.mutable.empty();
+			for (NodeMetadata meta : existingMetadatas)
+			{
+				existingPriorities.put(meta.getNodeId(), meta.getPriority());
+			}
+
+			// Apply priorities: use calculated updates, or preserve existing
+			for (NodeMetadata meta : this.nodeMetadatas.values())
+			{
+				String nodeId = meta.getNodeId();
+				if (priorityUpdates.containsKey(nodeId))
+				{
+					// Order changed or new node - use calculated priority
+					meta.setPriority(priorityUpdates.get(nodeId));
 				}
-
-				// Apply priorities: use calculated updates, or preserve existing
-				for (NodeMetadata meta : this.nodeMetadatas.values()) {
-					String nodeId = meta.getNodeId();
-					if (priorityUpdates.containsKey(nodeId)) {
-						// Order changed or new node - use calculated priority
-						meta.setPriority(priorityUpdates.get(nodeId));
-					} else if (existingPriorities.containsKey(nodeId)) {
-						// Order unchanged - preserve existing priority
-						meta.setPriority(existingPriorities.get(nodeId));
-					}
-					// New nodes not in priorityUpdates keep their initial priority (shouldn't happen)
+				else if (existingPriorities.containsKey(nodeId))
+				{
+					// Order unchanged - preserve existing priority
+					meta.setPriority(existingPriorities.get(nodeId));
 				}
+				// New nodes not in priorityUpdates keep their initial priority (shouldn't happen)
+			}
 
-				var updatedMetadatas = new NodeMetadataList();
-				updatedMetadatas.addAll(this.nodeMetadatas.values());
-				var metadataMergeOptions = new TopLevelMergeOptions<NodeMetadata>(
-					NodeMetadataFinder.getFinderInstance()
-				);
-				// Exclude temporal and audit fields
-				metadataMergeOptions.doNotCompare(
-					NodeMetadataFinder.systemFrom(),
-					NodeMetadataFinder.systemTo(),
-					NodeMetadataFinder.createdById(),
-					NodeMetadataFinder.createdOn(),
-					NodeMetadataFinder.lastUpdatedById()
-				);
-				// Exclude priority - backup derives it from tree position, not real priority.
-				// API import has the real priorities and should update them.
-				metadataMergeOptions.doNotCompare(NodeMetadataFinder.priority());
-				// Exclude fields not compared in TypeScript backup import.
-				// Only compare: completed, completedAt, layoutMode
-				metadataMergeOptions.doNotCompare(
-					NodeMetadataFinder.changes(),
-					NodeMetadataFinder.numberedStart(),
-					NodeMetadataFinder.lastModified() // Exclude timestamp-only changes
-				);
-				existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
+			var updatedMetadatas = new NodeMetadataList();
+			updatedMetadatas.addAll(this.nodeMetadatas.values());
+			var metadataMergeOptions = new TopLevelMergeOptions<NodeMetadata>(NodeMetadataFinder.getFinderInstance());
+			// Exclude temporal and audit fields
+			metadataMergeOptions.doNotCompare(
+				NodeMetadataFinder.systemFrom(),
+				NodeMetadataFinder.systemTo(),
+				NodeMetadataFinder.createdById(),
+				NodeMetadataFinder.createdOn(),
+				NodeMetadataFinder.lastUpdatedById()
+			);
+			// Exclude priority - backup derives it from tree position, not real priority.
+			// API import has the real priorities and should update them.
+			metadataMergeOptions.doNotCompare(NodeMetadataFinder.priority());
+			// Exclude fields not compared in TypeScript backup import.
+			// Only compare: completed, completedAt, layoutMode
+			metadataMergeOptions.doNotCompare(
+				NodeMetadataFinder.changes(),
+				NodeMetadataFinder.numberedStart(),
+				NodeMetadataFinder.lastModified() // Exclude timestamp-only changes
+			);
+			existingMetadatas.merge(updatedMetadatas, metadataMergeOptions);
 
-				LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
-				NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
-				var mappingMergeOptions = new TopLevelMergeOptions<NodeTagMapping>(
-					NodeTagMappingFinder.getFinderInstance()
-				);
-				mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
-				existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
+			LOGGER.info("Merging {} node-tag mappings", this.nodeTagMappings.size());
+			NodeTagMappingList existingMappings = NodeTagMappingFinder.findMany(NodeTagMappingFinder.all());
+			var mappingMergeOptions = new TopLevelMergeOptions<NodeTagMapping>(
+				NodeTagMappingFinder.getFinderInstance()
+			);
+			mappingMergeOptions.doNotCompare(NodeTagMappingFinder.systemFrom(), NodeTagMappingFinder.systemTo());
+			existingMappings.merge(this.nodeTagMappings, mappingMergeOptions);
 
-				MirrorList deduplicatedMirrors = this.deduplicateMirrors();
-				LOGGER.info("Merging {} mirrors ({} before dedup)", deduplicatedMirrors.size(), this.mirrors.size());
-				MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
-				var mirrorMergeOptions = new TopLevelMergeOptions<Mirror>(MirrorFinder.getFinderInstance());
-				mirrorMergeOptions.doNotCompare(MirrorFinder.systemFrom(), MirrorFinder.systemTo());
-				existingMirrors.merge(deduplicatedMirrors, mirrorMergeOptions);
+			MirrorList deduplicatedMirrors = this.deduplicateMirrors();
+			LOGGER.info("Merging {} mirrors ({} before dedup)", deduplicatedMirrors.size(), this.mirrors.size());
+			MirrorList existingMirrors = MirrorFinder.findMany(MirrorFinder.all());
+			var mirrorMergeOptions = new TopLevelMergeOptions<Mirror>(MirrorFinder.getFinderInstance());
+			mirrorMergeOptions.doNotCompare(MirrorFinder.systemFrom(), MirrorFinder.systemTo());
+			existingMirrors.merge(deduplicatedMirrors, mirrorMergeOptions);
 
-				LOGGER.info("Merging {} backlinks", this.backlinks.size());
-				BacklinkList existingBacklinks = BacklinkFinder.findMany(BacklinkFinder.all());
-				var backlinkMergeOptions = new TopLevelMergeOptions<Backlink>(BacklinkFinder.getFinderInstance());
-				backlinkMergeOptions.doNotCompare(BacklinkFinder.systemFrom(), BacklinkFinder.systemTo());
-				existingBacklinks.merge(this.backlinks, backlinkMergeOptions);
+			LOGGER.info("Merging {} backlinks", this.backlinks.size());
+			BacklinkList existingBacklinks = BacklinkFinder.findMany(BacklinkFinder.all());
+			var backlinkMergeOptions = new TopLevelMergeOptions<Backlink>(BacklinkFinder.getFinderInstance());
+			backlinkMergeOptions.doNotCompare(BacklinkFinder.systemFrom(), BacklinkFinder.systemTo());
+			existingBacklinks.merge(this.backlinks, backlinkMergeOptions);
 
-				LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
-				NodeCalendarList existingCalendars = NodeCalendarFinder.findMany(NodeCalendarFinder.all());
-				var calendarMergeOptions = new TopLevelMergeOptions<NodeCalendar>(
-					NodeCalendarFinder.getFinderInstance()
-				);
-				calendarMergeOptions.doNotCompare(NodeCalendarFinder.systemFrom(), NodeCalendarFinder.systemTo());
-				existingCalendars.merge(this.nodeCalendars, calendarMergeOptions);
+			LOGGER.info("Merging {} node calendars", this.nodeCalendars.size());
+			NodeCalendarList existingCalendars = NodeCalendarFinder.findMany(NodeCalendarFinder.all());
+			var calendarMergeOptions = new TopLevelMergeOptions<NodeCalendar>(NodeCalendarFinder.getFinderInstance());
+			calendarMergeOptions.doNotCompare(NodeCalendarFinder.systemFrom(), NodeCalendarFinder.systemTo());
+			existingCalendars.merge(this.nodeCalendars, calendarMergeOptions);
 
-				LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
-				NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());
-				var s3FileMergeOptions = new TopLevelMergeOptions<NodeS3File>(NodeS3FileFinder.getFinderInstance());
-				s3FileMergeOptions.doNotCompare(NodeS3FileFinder.systemFrom(), NodeS3FileFinder.systemTo());
-				existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
+			LOGGER.info("Merging {} node S3 files", this.nodeS3Files.size());
+			NodeS3FileList existingS3Files = NodeS3FileFinder.findMany(NodeS3FileFinder.all());
+			var s3FileMergeOptions = new TopLevelMergeOptions<NodeS3File>(NodeS3FileFinder.getFinderInstance());
+			s3FileMergeOptions.doNotCompare(NodeS3FileFinder.systemFrom(), NodeS3FileFinder.systemTo());
+			existingS3Files.merge(this.nodeS3Files, s3FileMergeOptions);
 
-				LOGGER.info("Merging {} references roots", this.referencesRoots.size());
-				ReferencesRootList existingReferencesRoots = ReferencesRootFinder.findMany(ReferencesRootFinder.all());
-				var referencesRootMergeOptions = new TopLevelMergeOptions<ReferencesRoot>(
-					ReferencesRootFinder.getFinderInstance()
-				);
-				referencesRootMergeOptions.doNotCompare(
-					ReferencesRootFinder.systemFrom(),
-					ReferencesRootFinder.systemTo()
-				);
-				existingReferencesRoots.merge(this.referencesRoots, referencesRootMergeOptions);
+			LOGGER.info("Merging {} references roots", this.referencesRoots.size());
+			ReferencesRootList existingReferencesRoots = ReferencesRootFinder.findMany(ReferencesRootFinder.all());
+			var referencesRootMergeOptions = new TopLevelMergeOptions<ReferencesRoot>(
+				ReferencesRootFinder.getFinderInstance()
+			);
+			referencesRootMergeOptions.doNotCompare(ReferencesRootFinder.systemFrom(), ReferencesRootFinder.systemTo());
+			existingReferencesRoots.merge(this.referencesRoots, referencesRootMergeOptions);
 
-				LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
-				VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(
-					VirtualRootMappingFinder.all()
-				);
-				var virtualRootMergeOptions = new TopLevelMergeOptions<VirtualRootMapping>(
-					VirtualRootMappingFinder.getFinderInstance()
-				);
-				virtualRootMergeOptions.doNotCompare(
-					VirtualRootMappingFinder.systemFrom(),
-					VirtualRootMappingFinder.systemTo()
-				);
-				existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
+			LOGGER.info("Merging {} virtual root mappings", this.virtualRootMappings.size());
+			VirtualRootMappingList existingVirtualRoots = VirtualRootMappingFinder.findMany(
+				VirtualRootMappingFinder.all()
+			);
+			var virtualRootMergeOptions = new TopLevelMergeOptions<VirtualRootMapping>(
+				VirtualRootMappingFinder.getFinderInstance()
+			);
+			virtualRootMergeOptions.doNotCompare(
+				VirtualRootMappingFinder.systemFrom(),
+				VirtualRootMappingFinder.systemTo()
+			);
+			existingVirtualRoots.merge(this.virtualRootMappings, virtualRootMergeOptions);
 
-				LOGGER.info("Merging {} AI metadatas", this.aiMetadatas.size());
-				AiMetadataList existingAiMetadatas = AiMetadataFinder.findMany(AiMetadataFinder.all());
-				var aiMetadataMergeOptions = new TopLevelMergeOptions<AiMetadata>(AiMetadataFinder.getFinderInstance());
-				aiMetadataMergeOptions.doNotCompare(AiMetadataFinder.systemFrom(), AiMetadataFinder.systemTo());
-				existingAiMetadatas.merge(this.aiMetadatas, aiMetadataMergeOptions);
+			LOGGER.info("Merging {} AI metadatas", this.aiMetadatas.size());
+			AiMetadataList existingAiMetadatas = AiMetadataFinder.findMany(AiMetadataFinder.all());
+			var aiMetadataMergeOptions = new TopLevelMergeOptions<AiMetadata>(AiMetadataFinder.getFinderInstance());
+			aiMetadataMergeOptions.doNotCompare(AiMetadataFinder.systemFrom(), AiMetadataFinder.systemTo());
+			existingAiMetadatas.merge(this.aiMetadatas, aiMetadataMergeOptions);
 
-				WorkflowyDataConverter.storeBackupHighWatermark(backupFileDate);
+			WorkflowyDataConverter.storeBackupHighWatermark(backupFileDate);
 
-				return null;
-			});
+			return null;
+		});
 
 		LOGGER.info("Completed merge for backup file: {}", this.backupFile.getName());
 	}
@@ -602,8 +674,10 @@ public final class WorkflowyDataConverter {
 	 * Holds information about a sibling node for order detection.
 	 * backupIndex is the position in the backup file (0, 1, 2, ...).
 	 */
-	private record SiblingInfo(String nodeId, int backupIndex, Integer existingPriority) {
-		boolean isNew() {
+	private record SiblingInfo(String nodeId, int backupIndex, Integer existingPriority)
+	{
+		boolean isNew()
+		{
 			return this.existingPriority == null;
 		}
 	}
@@ -616,17 +690,20 @@ public final class WorkflowyDataConverter {
 	 * their priority values. If siblings A, B, C exist in the DB and the backup
 	 * shows them in the same order, their existing priorities are preserved.
 	 */
-	private Map<String, Integer> calculatePrioritiesWithOrderDetection(NodeMetadataList existingMetadatas) {
+	private Map<String, Integer> calculatePrioritiesWithOrderDetection(NodeMetadataList existingMetadatas)
+	{
 		// Build map of existing priorities
 		MutableMap<String, Integer> existingPriorities = Maps.mutable.empty();
-		for (NodeMetadata meta : existingMetadatas) {
+		for (NodeMetadata meta : existingMetadatas)
+		{
 			existingPriorities.put(meta.getNodeId(), meta.getPriority());
 		}
 
 		// Group nodes by parent using nodeContents (which has parentId)
 		Map<String, List<SiblingInfo>> siblingsByParent = new LinkedHashMap<>();
 		var backupIndex = 0;
-		for (var entry : this.nodeContents.entrySet()) {
+		for (var entry : this.nodeContents.entrySet())
+		{
 			String nodeId = entry.getKey();
 			NodeContent content = entry.getValue();
 			String parentId = content.getParentId();
@@ -640,7 +717,8 @@ public final class WorkflowyDataConverter {
 
 		// For each sibling group, detect if order changed
 		Map<String, Integer> priorityUpdates = new LinkedHashMap<>();
-		for (Map.Entry<String, List<SiblingInfo>> group : siblingsByParent.entrySet()) {
+		for (Map.Entry<String, List<SiblingInfo>> group : siblingsByParent.entrySet())
+		{
 			List<SiblingInfo> siblings = group.getValue();
 
 			// Check if any siblings are new
@@ -663,10 +741,12 @@ public final class WorkflowyDataConverter {
 
 			boolean orderChanged = !backupOrder.equals(dbOrder);
 
-			if (orderChanged || hasNewNodes) {
+			if (orderChanged || hasNewNodes)
+			{
 				// Recalculate all priorities for this group
 				var priority = 0;
-				for (SiblingInfo sibling : siblings) {
+				for (SiblingInfo sibling : siblings)
+				{
 					priorityUpdates.put(sibling.nodeId(), priority);
 					priority += 100;
 				}
@@ -678,7 +758,8 @@ public final class WorkflowyDataConverter {
 		return priorityUpdates;
 	}
 
-	private static Instant getBackupHighWatermark() {
+	private static Instant getBackupHighWatermark()
+	{
 		Operation workflowyCriteria = BackupImportTimestampFinder.name().eq("workflowy");
 		BackupImportTimestamp workflowyTimestamp = BackupImportTimestampFinder.findOne(workflowyCriteria);
 
@@ -691,7 +772,8 @@ public final class WorkflowyDataConverter {
 		return highWatermark;
 	}
 
-	private static Instant getApiHighWatermark() {
+	private static Instant getApiHighWatermark()
+	{
 		Operation criteria = ApiImportTimestampFinder.name().eq("workflowy");
 		ApiImportTimestamp timestamp = ApiImportTimestampFinder.findOne(criteria);
 		return Optional.ofNullable(timestamp)
@@ -700,35 +782,41 @@ public final class WorkflowyDataConverter {
 			.orElse(Instant.MIN);
 	}
 
-	private static void validateImportTime(Instant proposedTime, Instant backupFileDate) {
+	private static void validateImportTime(Instant proposedTime, Instant backupFileDate)
+	{
 		Instant maxBackupTime = getBackupHighWatermark();
 		Instant maxApiTime = getApiHighWatermark();
 		Instant maxTime = maxBackupTime.isAfter(maxApiTime) ? maxBackupTime : maxApiTime;
 
-		if (proposedTime.isBefore(maxTime)) {
+		if (proposedTime.isBefore(maxTime))
+		{
 			throw new IllegalStateException(
 				"Cannot import backup with date "
-				+ backupFileDate
-				+ " which would create SYSTEM_FROM "
-				+ proposedTime
-				+ " before existing data at "
-				+ maxTime
-				+ ". Use 'rollback-temporal' command first to roll back to before this date."
+					+ backupFileDate
+					+ " which would create SYSTEM_FROM "
+					+ proposedTime
+					+ " before existing data at "
+					+ maxTime
+					+ ". Use 'rollback-temporal' command first to roll back to before this date."
 			);
 		}
 	}
 
-	private static void storeBackupHighWatermark(@Nonnull Instant instant) {
+	private static void storeBackupHighWatermark(@Nonnull Instant instant)
+	{
 		Timestamp highWatermark = Timestamp.from(instant);
 		Operation workflowyCriteria = BackupImportTimestampFinder.name().eq("workflowy");
 		BackupImportTimestamp workflowyTimestamp = BackupImportTimestampFinder.findOne(workflowyCriteria);
 
-		if (workflowyTimestamp == null) {
+		if (workflowyTimestamp == null)
+		{
 			var newTimestamp = new BackupImportTimestamp();
 			newTimestamp.setName("workflowy");
 			newTimestamp.setTimestamp(highWatermark);
 			newTimestamp.insert();
-		} else {
+		}
+		else
+		{
 			workflowyTimestamp.setTimestamp(highWatermark);
 		}
 
@@ -739,27 +827,35 @@ public final class WorkflowyDataConverter {
 	 * Resets the import watermark to allow re-processing all backup files.
 	 * Use this to recover from temporal corruption or to force a full re-import.
 	 */
-	public static void resetWatermark(@Nonnull DataStore dataStore) {
-		dataStore.runInTransaction((transaction) -> {
+	public static void resetWatermark(@Nonnull DataStore dataStore)
+	{
+		dataStore.runInTransaction((transaction) ->
+		{
 			Operation workflowyCriteria = BackupImportTimestampFinder.name().eq("workflowy");
 			BackupImportTimestamp workflowyTimestamp = BackupImportTimestampFinder.findOne(workflowyCriteria);
 
-			if (workflowyTimestamp != null) {
+			if (workflowyTimestamp != null)
+			{
 				LOGGER.info("Deleting backup watermark with timestamp: {}", workflowyTimestamp.getTimestamp());
 				workflowyTimestamp.delete();
-			} else {
+			}
+			else
+			{
 				LOGGER.info("No backup watermark found to reset");
 			}
 			return null;
 		});
 	}
 
-	private static ImmutableList<File> getBackupFiles(Path backupsPath) {
+	private static ImmutableList<File> getBackupFiles(Path backupsPath)
+	{
 		File directory = backupsPath.toFile();
-		if (!directory.exists()) {
+		if (!directory.exists())
+		{
 			throw new IllegalArgumentException("Backup directory does not exist: " + backupsPath);
 		}
-		if (!directory.isDirectory()) {
+		if (!directory.isDirectory())
+		{
 			throw new IllegalArgumentException("Backup path is not a directory: " + backupsPath);
 		}
 		File[] files = directory.listFiles((pathname) -> pathname.getName().endsWith(".workflowy.backup"));
@@ -772,8 +868,10 @@ public final class WorkflowyDataConverter {
 	 * Backup files store the default layout as "bullets", while API exports use null.
 	 * We normalize "bullets" to null so both sources produce consistent values.
 	 */
-	private static String normalizeLayoutMode(String layoutMode) {
-		if ("bullets".equals(layoutMode)) {
+	private static String normalizeLayoutMode(String layoutMode)
+	{
+		if ("bullets".equals(layoutMode))
+		{
 			return null;
 		}
 		return layoutMode;

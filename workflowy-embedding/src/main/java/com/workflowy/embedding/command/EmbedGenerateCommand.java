@@ -23,19 +23,23 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider>
-	extends EnvironmentCommand<T> {
-
+public class EmbedGenerateCommand<
+	T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider
+>
+	extends EnvironmentCommand<T>
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmbedGenerateCommand.class);
 
 	private final ContainerLifeCycle containerLifeCycle = new ContainerLifeCycle();
 
-	public EmbedGenerateCommand(Application<T> application) {
+	public EmbedGenerateCommand(Application<T> application)
+	{
 		super(application, "embed-generate", "Generate embeddings for all nodes");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser
@@ -61,7 +65,8 @@ public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & Embeddi
 
 	@Override
 	protected void run(@Nonnull Environment environment, Namespace namespace, @Nonnull T configuration)
-		throws Exception {
+		throws Exception
+	{
 		LOGGER.info("Running {}.", this.getClass().getSimpleName());
 
 		environment.lifecycle().getManagedObjects().forEach(this.containerLifeCycle::addBean);
@@ -75,7 +80,8 @@ public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & Embeddi
 		boolean force = namespace.getBoolean("force");
 		String dbPath = namespace.getString("db_path");
 
-		if (dbPath == null) {
+		if (dbPath == null)
+		{
 			dbPath = embeddingConfig.getDatabasePath();
 		}
 
@@ -89,7 +95,8 @@ public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & Embeddi
 		try (
 			var sqliteConnection = new SqliteVecConnection(dbPath);
 			EmbeddingEngine engine = EmbeddingEngineFactory.create(model, embeddingConfig)
-		) {
+		)
+		{
 			var repository = new EmbeddingRepository(sqliteConnection);
 			var generator = new EmbeddingGenerator(engine, repository, batchSize, force);
 

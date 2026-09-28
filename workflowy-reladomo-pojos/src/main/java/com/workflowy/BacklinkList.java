@@ -4,21 +4,26 @@ import java.util.*;
 
 import com.gs.fw.finder.Operation;
 
-public class BacklinkList extends BacklinkListAbstract {
-
-	public BacklinkList() {
+public class BacklinkList
+	extends BacklinkListAbstract
+{
+	public BacklinkList()
+	{
 		super();
 	}
 
-	public BacklinkList(int initialSize) {
+	public BacklinkList(int initialSize)
+	{
 		super(initialSize);
 	}
 
-	public BacklinkList(Collection c) {
+	public BacklinkList(Collection c)
+	{
 		super(c);
 	}
 
-	public BacklinkList(Operation operation) {
+	public BacklinkList(Operation operation)
+	{
 		super(operation);
 	}
 }

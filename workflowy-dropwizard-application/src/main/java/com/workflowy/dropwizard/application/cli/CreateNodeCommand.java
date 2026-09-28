@@ -9,14 +9,17 @@ import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class CreateNodeCommand extends AbstractApiCommand {
-
-	public CreateNodeCommand(WorkflowyApplication application) {
+public class CreateNodeCommand
+	extends AbstractApiCommand
+{
+	public CreateNodeCommand(WorkflowyApplication application)
+	{
 		super(application, "create-node", "Create a new node in Workflowy");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser.addArgument("--name", "-n").type(String.class).required(true).help("Name of the new node");
@@ -42,7 +45,8 @@ public class CreateNodeCommand extends AbstractApiCommand {
 		Namespace namespace,
 		WorkflowyConfiguration configuration,
 		WorkflowyApiClient apiClient
-	) {
+	)
+	{
 		String name = namespace.getString("name");
 		String parentId = this.resolveNodeId(
 			namespace.getString("parent_id"),
@@ -50,7 +54,8 @@ public class CreateNodeCommand extends AbstractApiCommand {
 			apiClient
 		);
 
-		if (parentId == null) {
+		if (parentId == null)
+		{
 			throw new IllegalArgumentException("Could not resolve parent node");
 		}
 

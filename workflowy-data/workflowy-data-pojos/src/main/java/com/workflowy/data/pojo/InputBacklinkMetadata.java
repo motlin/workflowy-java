@@ -6,4 +6,6 @@ public record InputBacklinkMetadata(
 	@JsonProperty("sourceID") String sourceId,
 
 	@JsonProperty("targetID") String targetId
-) {}
+)
+{
+}

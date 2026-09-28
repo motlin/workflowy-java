@@ -1,3 +1,6 @@
 package com.workflowy;
 
-public class BackupImportTimestampDatabaseObject extends BackupImportTimestampDatabaseObjectAbstract {}
+public class BackupImportTimestampDatabaseObject
+	extends BackupImportTimestampDatabaseObjectAbstract
+{
+}

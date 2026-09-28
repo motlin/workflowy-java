@@ -7,10 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class EmbeddingModelTest {
-
+class EmbeddingModelTest
+{
 	@Test
-	void minilm_hasCorrectProperties() {
+	void minilm_hasCorrectProperties()
+	{
 		EmbeddingModel model = EmbeddingModel.MINILM;
 		assertEquals("minilm", model.getKey());
 		assertEquals("sentence-transformers/all-MiniLM-L6-v2", model.getModelName());
@@ -21,7 +22,8 @@ class EmbeddingModelTest {
 	}
 
 	@Test
-	void mpnet_hasCorrectProperties() {
+	void mpnet_hasCorrectProperties()
+	{
 		EmbeddingModel model = EmbeddingModel.MPNET;
 		assertEquals("mpnet", model.getKey());
 		assertEquals("sentence-transformers/all-mpnet-base-v2", model.getModelName());
@@ -32,7 +34,8 @@ class EmbeddingModelTest {
 	}
 
 	@Test
-	void bge_hasCorrectProperties() {
+	void bge_hasCorrectProperties()
+	{
 		EmbeddingModel model = EmbeddingModel.BGE;
 		assertEquals("bge", model.getKey());
 		assertEquals("BAAI/bge-large-en-v1.5", model.getModelName());
@@ -45,7 +48,8 @@ class EmbeddingModelTest {
 	}
 
 	@Test
-	void openaiSmall_hasCorrectProperties() {
+	void openaiSmall_hasCorrectProperties()
+	{
 		EmbeddingModel model = EmbeddingModel.OPENAI_SMALL;
 		assertEquals("openai-small", model.getKey());
 		assertEquals("text-embedding-3-small", model.getModelName());
@@ -56,7 +60,8 @@ class EmbeddingModelTest {
 	}
 
 	@Test
-	void openaiLarge_hasCorrectProperties() {
+	void openaiLarge_hasCorrectProperties()
+	{
 		EmbeddingModel model = EmbeddingModel.OPENAI_LARGE;
 		assertEquals("openai-large", model.getKey());
 		assertEquals("text-embedding-3-large", model.getModelName());
@@ -67,7 +72,8 @@ class EmbeddingModelTest {
 	}
 
 	@Test
-	void fromKey_withValidKey_returnsModel() {
+	void fromKey_withValidKey_returnsModel()
+	{
 		assertEquals(EmbeddingModel.MINILM, EmbeddingModel.fromKey("minilm"));
 		assertEquals(EmbeddingModel.MPNET, EmbeddingModel.fromKey("mpnet"));
 		assertEquals(EmbeddingModel.BGE, EmbeddingModel.fromKey("bge"));
@@ -76,18 +82,21 @@ class EmbeddingModelTest {
 	}
 
 	@Test
-	void fromKey_withInvalidKey_throwsException() {
+	void fromKey_withInvalidKey_throwsException()
+	{
 		assertThrows(IllegalArgumentException.class, () -> EmbeddingModel.fromKey("invalid"));
 	}
 
 	@Test
-	void localModels_haveNoQueryPrefixByDefault() {
+	void localModels_haveNoQueryPrefixByDefault()
+	{
 		assertFalse(EmbeddingModel.MINILM.getQueryPrefix().isPresent());
 		assertFalse(EmbeddingModel.MPNET.getQueryPrefix().isPresent());
 	}
 
 	@Test
-	void bge_hasQueryPrefixForSearchOptimization() {
+	void bge_hasQueryPrefixForSearchOptimization()
+	{
 		assertTrue(EmbeddingModel.BGE.getQueryPrefix().isPresent());
 		assertEquals(
 			"Represent this sentence for searching relevant passages: ",
@@ -96,15 +105,19 @@ class EmbeddingModelTest {
 	}
 
 	@Test
-	void allModels_haveDimensionsGreaterThanZero() {
-		for (EmbeddingModel model : EmbeddingModel.values()) {
+	void allModels_haveDimensionsGreaterThanZero()
+	{
+		for (EmbeddingModel model : EmbeddingModel.values())
+		{
 			assertTrue(model.getDimensions() > 0, "Model " + model.getKey() + " should have positive dimensions");
 		}
 	}
 
 	@Test
-	void allModels_haveDefaultThresholdBetweenZeroAndOne() {
-		for (EmbeddingModel model : EmbeddingModel.values()) {
+	void allModels_haveDefaultThresholdBetweenZeroAndOne()
+	{
+		for (EmbeddingModel model : EmbeddingModel.values())
+		{
 			assertTrue(
 				model.getDefaultThreshold() > 0 && model.getDefaultThreshold() <= 1,
 				"Model " + model.getKey() + " should have threshold between 0 and 1"

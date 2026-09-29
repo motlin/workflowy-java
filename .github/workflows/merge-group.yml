@@ -13,7 +13,7 @@ permissions:
 
 env:
   # TODO: Update this to match your project's Maven group ID with slashes
-  GROUP_ID: "com/example"
+  GROUP_ID: "workflowy"
 
 jobs:
   pre-commit:
@@ -25,7 +25,9 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.x"
-      - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204 # v4.2.2
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
 
   maven-test:
@@ -44,7 +46,9 @@ jobs:
 
       - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
 
-      - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204 # v4.2.2
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - run: just test
 
@@ -57,7 +61,6 @@ jobs:
     permissions:
       contents: read
       checks: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -74,7 +77,6 @@ jobs:
     permissions:
       contents: read
       checks: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -91,7 +93,6 @@ jobs:
     permissions:
       contents: read
       checks: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -103,10 +104,26 @@ jobs:
           fail_on_error: true
           filter_mode: nofilter
 
+  reviewdog-shellcheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: reviewdog/action-shellcheck@0a90156c6e0553996a217f0a9e09be6b0f6bee4c # v1.34.0
+        with:
+          reporter: github-pr-check
+          filter_mode: nofilter
+
   all-checks:
     name: All checks
     if: ${{ !cancelled() }}
-    needs: [pre-commit, maven-test, reviewdog-markdownlint, reviewdog-yamllint, reviewdog-actionlint]
+    needs:
+      [pre-commit, maven-test, reviewdog-markdownlint, reviewdog-yamllint, reviewdog-actionlint, reviewdog-shellcheck]
     runs-on: ubuntu-latest
     steps:
       - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # release/v1

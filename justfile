@@ -13,6 +13,7 @@ default:
 workflowy_backups_path := env('WORKFLOWY_BACKUPS_PATH', '')
 
 # Full data pipeline: download backups, import data
+[arg("DAYS", long="days", help="Number of days of backups to import")]
 [group('data')]
 workflowy DAYS="10000": download-backups (import-data DAYS)
 
@@ -27,6 +28,8 @@ download-backups:
 workflowy_api_key := env('WORKFLOWY_API_KEY', '')
 
 # Import Workflowy backup data into the database, then fetch latest from API
+[arg("MVN", long="mvn", help="Maven binary to use")]
+[arg("DAYS", long="days", help="Number of days of backups to import")]
 [group('data')]
 import-data DAYS="10000" MVN=default_mvn:
     #!/usr/bin/env bash
@@ -58,6 +61,8 @@ import-data DAYS="10000" MVN=default_mvn:
         -Dexec.args="embed-generate workflowy-dropwizard-application/config.json5"
 
 # Roll back to before the Nth-to-last backup import
+[arg("MVN", long="mvn", help="Maven binary to use")]
+[arg("COUNT", long="count", help="Number of backup imports to roll back")]
 [group('data')]
 rollback-backups COUNT MVN=default_mvn:
     #!/usr/bin/env bash
@@ -91,6 +96,7 @@ verify: mvn
 precommit: verify
 
 # Demo CLI commands (shows JSON output from all 4 commands)
+[arg("MVN", long="mvn", help="Maven binary to use")]
 [group('cli')]
 demo MVN=default_mvn:
     #!/usr/bin/env bash
@@ -148,6 +154,8 @@ cli +ARGS:
         -Dexec.args="{{ ARGS }} workflowy-dropwizard-application/config.json5" --quiet
 
 # Roll back to keep data up to a specific backup date (deletes all data after)
+[arg("MVN", long="mvn", help="Maven binary to use")]
+[arg("BACKUP_DATE", long="backup-date", help="Backup date to keep data up to (YYYY-MM-DD)")]
 [group('data')]
 rollback-to-backup BACKUP_DATE MVN=default_mvn:
     #!/usr/bin/env bash

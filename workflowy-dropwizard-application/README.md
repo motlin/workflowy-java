@@ -5,10 +5,10 @@
 1. Run `mvn clean install` to build your application
 2. Start application with
 
-   ```shell
-   java -jar target/workflowy-dropwizard-application-0.1.0-SNAPSHOT.jar \
-       server config.json5
-   ```
+    ```shell
+    java -jar target/workflowy-dropwizard-application-0.1.0-SNAPSHOT.jar \
+        server config.json5
+    ```
 
 3. To check that your application is running enter url `http://localhost:8080`
 

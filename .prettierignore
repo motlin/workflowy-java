@@ -1,18 +1,2 @@
-# Ignore everything by default
-**/*
-
-# Only format these file types
-!**/*.yml
-!**/*.yaml
-!**/*.md
-!**/*.html
-!**/*.css
-
-# But still ignore these directories
-node_modules
-dist
-build
-.llm
-target
-.m2
-.github/workflows
+# Minified CSS must stay minified.
+*-min.css

@@ -1,141 +1,114 @@
 # Jobs that run on merge_group, meaning they must pass before changes land. They also run on pull_request.
 
 on:
-    pull_request:
-    merge_group:
+  pull_request:
+  merge_group:
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
-    contents: read
+  contents: read
 
 env:
-    # TODO: Update this to match your project's Maven group ID with slashes
-    GROUP_ID: "com/example"
+  # TODO: Update this to match your project's Maven group ID with slashes
+  GROUP_ID: "com/example"
 
 jobs:
-    pre-commit:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
-            - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
-              with:
-                  python-version: "3.x"
-            - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204  # v4.2.2
-            - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+      - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204 # v4.2.2
+      - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
 
-    maven-test:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
+  maven-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-              with:
-                  key: maven-${{ hashFiles('**/pom.xml') }}
-                  path: ~/.m2/repository
-                  restore-keys: |
-                      maven-
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          path: ~/.m2/repository
+          restore-keys: |
+            maven-
 
-            - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9  # v2.3.0
+      - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
 
-            - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204  # v4.2.2
+      - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204 # v4.2.2
 
-            - run: just test
+      - run: just test
 
-            # Remove any jars we may have created before actions/cache caches .m2
-            - name: "Clean Maven cache"
-              run: rm -rf ~/.m2/repository/${{ env.GROUP_ID }}
+      # Remove any jars we may have created before actions/cache caches .m2
+      - name: "Clean Maven cache"
+        run: rm -rf ~/.m2/repository/${{ env.GROUP_ID }}
 
-    prettier:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  ref: ${{ github.event.pull_request.head.sha }}
-                  persist-credentials: false
+  reviewdog-markdownlint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-            - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204  # v4.2.2
+      - uses: reviewdog/action-markdownlint@a223028b797326efe9d3c9b55e24d740480c3352 # v0.31.2
+        with:
+          reporter: github-pr-check
+          fail_on_error: true
+          filter_mode: nofilter
 
-            - name: "Prettier Format Check"
-              run: prettier --check .
+  reviewdog-yamllint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-    biome:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  ref: ${{ github.event.pull_request.head.sha }}
-                  persist-credentials: false
+      - uses: reviewdog/action-yamllint@5dd4640db975e4cac6f4e775a401695bafc28068 # v1.25.1
+        with:
+          reporter: github-pr-check
+          fail_on_error: true
+          filter_mode: nofilter
 
-            - uses: jdx/mise-action@f10502fc09dadecfefb962fff68ce77213930204  # v4.2.2
+  reviewdog-actionlint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-            - name: "Biome Format Check"
-              run: npx @biomejs/biome ci
+      - uses: reviewdog/action-actionlint@1758727be30241166609dad4c97588b6ad411f32 # v1.79.1
+        with:
+          reporter: github-pr-check
+          fail_on_error: true
+          filter_mode: nofilter
 
-    reviewdog-markdownlint:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            checks: write
-            pull-requests: write
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
-
-            - uses: reviewdog/action-markdownlint@a223028b797326efe9d3c9b55e24d740480c3352  # v0.31.2
-              with:
-                  reporter: github-pr-check
-                  fail_on_error: true
-                  filter_mode: nofilter
-
-    reviewdog-yamllint:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            checks: write
-            pull-requests: write
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
-
-            - uses: reviewdog/action-yamllint@5dd4640db975e4cac6f4e775a401695bafc28068  # v1.25.1
-              with:
-                  reporter: github-pr-check
-                  fail_on_error: true
-                  filter_mode: nofilter
-
-    reviewdog-actionlint:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            checks: write
-            pull-requests: write
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
-
-            - uses: reviewdog/action-actionlint@1758727be30241166609dad4c97588b6ad411f32  # v1.79.1
-              with:
-                  reporter: github-pr-check
-                  fail_on_error: true
-                  filter_mode: nofilter
-
-    all-checks:
-        name: All checks
-        if: ${{ !cancelled() }}
-        needs:
-            [pre-commit, maven-test, prettier, biome, reviewdog-markdownlint, reviewdog-yamllint, reviewdog-actionlint]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35  # release/v1
-              with:
-                  jobs: ${{ toJSON(needs) }}
+  all-checks:
+    name: All checks
+    if: ${{ !cancelled() }}
+    needs: [pre-commit, maven-test, reviewdog-markdownlint, reviewdog-yamllint, reviewdog-actionlint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}

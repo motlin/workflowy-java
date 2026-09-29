@@ -84,8 +84,11 @@ markdownlint:
     markdownlint --config .markdownlint.jsonc  --fix .
 
 # Run all formatting tools for pre-commit
-precommit: mvn
-    uv tool run pre-commit run --all-files
+verify: mvn
+    pre-commit run --all-files
+
+# Deprecated alias for `verify`
+precommit: verify
 
 # Demo CLI commands (shows JSON output from all 4 commands)
 [group('cli')]

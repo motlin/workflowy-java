@@ -1,4 +1,4 @@
-group_id_with_slashes := "com/workflowy"
+group_id_with_slashes := "workflowy"
 
 import ".just/console.just"
 import ".just/maven.just"

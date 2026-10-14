@@ -4,21 +4,26 @@ import java.util.*;
 
 import com.gs.fw.finder.Operation;
 
-public class NodeCalendarList extends NodeCalendarListAbstract {
-
-	public NodeCalendarList() {
+public class NodeCalendarList
+	extends NodeCalendarListAbstract
+{
+	public NodeCalendarList()
+	{
 		super();
 	}
 
-	public NodeCalendarList(int initialSize) {
+	public NodeCalendarList(int initialSize)
+	{
 		super(initialSize);
 	}
 
-	public NodeCalendarList(Collection c) {
+	public NodeCalendarList(Collection c)
+	{
 		super(c);
 	}
 
-	public NodeCalendarList(Operation operation) {
+	public NodeCalendarList(Operation operation)
+	{
 		super(operation);
 	}
 }

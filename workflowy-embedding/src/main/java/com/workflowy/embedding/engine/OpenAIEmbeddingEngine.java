@@ -18,8 +18,9 @@ import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpenAIEmbeddingEngine implements EmbeddingEngine {
-
+public class OpenAIEmbeddingEngine
+	implements EmbeddingEngine
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenAIEmbeddingEngine.class);
 
 	private static final String OPENAI_EMBEDDINGS_URL = "https://api.openai.com/v1/embeddings";
@@ -29,11 +30,14 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 	private final HttpClient httpClient;
 	private final ObjectMapper objectMapper;
 
-	public OpenAIEmbeddingEngine(EmbeddingModel model, String apiKey) {
-		if (!model.isOpenAI()) {
+	public OpenAIEmbeddingEngine(EmbeddingModel model, String apiKey)
+	{
+		if (!model.isOpenAI())
+		{
 			throw new IllegalArgumentException("Model must be an OpenAI model: " + model);
 		}
-		if (apiKey == null || apiKey.isBlank()) {
+		if (apiKey == null || apiKey.isBlank())
+		{
 			throw new IllegalArgumentException("OpenAI API key is required");
 		}
 
@@ -44,10 +48,12 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 	}
 
 	@Override
-	public float[] generateEmbedding(String text, boolean isQuery) {
+	public float[] generateEmbedding(String text, boolean isQuery)
+	{
 		String prefixedText = this.applyPrefix(text, isQuery);
 
-		try {
+		try
+		{
 			ObjectNode requestBody = this.objectMapper.createObjectNode();
 			requestBody.put("input", prefixedText);
 			requestBody.put("model", this.model.getModelName());
@@ -62,7 +68,8 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 
 			HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-			if (response.statusCode() != 200) {
+			if (response.statusCode() != 200)
+			{
 				throw new RuntimeException("OpenAI API error: " + response.statusCode() + " " + response.body());
 			}
 
@@ -70,27 +77,33 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 			JsonNode embeddingArray = responseJson.get("data").get(0).get("embedding");
 
 			float[] embedding = new float[embeddingArray.size()];
-			for (var i = 0; i < embeddingArray.size(); i++) {
+			for (var i = 0; i < embeddingArray.size(); i++)
+			{
 				embedding[i] = (float) embeddingArray.get(i).asDouble();
 			}
 
 			return embedding;
-		} catch (IOException | InterruptedException e) {
+		}
+		catch (IOException | InterruptedException e)
+		{
 			throw new RuntimeException("Failed to generate embedding", e);
 		}
 	}
 
 	@Override
-	public List<float[]> generateEmbeddings(List<String> texts, boolean isQuery) {
+	public List<float[]> generateEmbeddings(List<String> texts, boolean isQuery)
+	{
 		List<String> prefixedTexts = texts
 			.stream()
 			.map((text) -> this.applyPrefix(text, isQuery))
 			.toList();
 
-		try {
+		try
+		{
 			ObjectNode requestBody = this.objectMapper.createObjectNode();
 			ArrayNode inputArray = requestBody.putArray("input");
-			for (String text : prefixedTexts) {
+			for (String text : prefixedTexts)
+			{
 				inputArray.add(text);
 			}
 			requestBody.put("model", this.model.getModelName());
@@ -105,7 +118,8 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 
 			HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-			if (response.statusCode() != 200) {
+			if (response.statusCode() != 200)
+			{
 				throw new RuntimeException("OpenAI API error: " + response.statusCode() + " " + response.body());
 			}
 
@@ -113,31 +127,39 @@ public class OpenAIEmbeddingEngine implements EmbeddingEngine {
 			JsonNode dataArray = responseJson.get("data");
 
 			MutableList<float[]> embeddings = Lists.mutable.empty();
-			for (JsonNode item : dataArray) {
+			for (JsonNode item : dataArray)
+			{
 				JsonNode embeddingArray = item.get("embedding");
 				float[] embedding = new float[embeddingArray.size()];
-				for (var i = 0; i < embeddingArray.size(); i++) {
+				for (var i = 0; i < embeddingArray.size(); i++)
+				{
 					embedding[i] = (float) embeddingArray.get(i).asDouble();
 				}
 				embeddings.add(embedding);
 			}
 
 			return embeddings;
-		} catch (IOException | InterruptedException e) {
+		}
+		catch (IOException | InterruptedException e)
+		{
 			throw new RuntimeException("Failed to generate embeddings", e);
 		}
 	}
 
-	private String applyPrefix(String text, boolean isQuery) {
+	private String applyPrefix(String text, boolean isQuery)
+	{
 		String prefix = isQuery ? this.model.getQueryPrefix().orElse("") : this.model.getPassagePrefix().orElse("");
 		return prefix + text;
 	}
 
 	@Override
-	public EmbeddingModel getModel() {
+	public EmbeddingModel getModel()
+	{
 		return this.model;
 	}
 
 	@Override
-	public void close() {}
+	public void close()
+	{
+	}
 }

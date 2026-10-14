@@ -25,4 +25,6 @@ public record ApiInputItem(
 	@Nullable Long completedAt,
 
 	@Nullable ApiInputData data
-) {}
+)
+{
+}

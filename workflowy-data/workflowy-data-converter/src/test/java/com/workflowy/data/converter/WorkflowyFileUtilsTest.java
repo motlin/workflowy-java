@@ -11,81 +11,93 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class WorkflowyFileUtilsTest {
-
+class WorkflowyFileUtilsTest
+{
 	@Test
-	void extractUserIdFromFilename_withValidFilename_extractsEmail() {
+	void extractUserIdFromFilename_withValidFilename_extractsEmail()
+	{
 		var filename = "(user@example.com).2024-01-15.workflowy.backup";
 		assertEquals("user@example.com", WorkflowyFileUtils.extractUserIdFromFilename(filename));
 	}
 
 	@Test
-	void extractUserIdFromFilename_withComplexEmail_extractsEmail() {
+	void extractUserIdFromFilename_withComplexEmail_extractsEmail()
+	{
 		var filename = "(john.doe+test@subdomain.example.co.uk).2024-01-15.workflowy.backup";
 		assertEquals("john.doe+test@subdomain.example.co.uk", WorkflowyFileUtils.extractUserIdFromFilename(filename));
 	}
 
 	@Test
-	void extractUserIdFromFilename_withInvalidFilename_throwsException() {
+	void extractUserIdFromFilename_withInvalidFilename_throwsException()
+	{
 		var filename = "invalid-filename.backup";
 		assertThrows(IllegalArgumentException.class, () -> WorkflowyFileUtils.extractUserIdFromFilename(filename));
 	}
 
 	@Test
-	void extractUserIdFromFilename_withMissingParentheses_throwsException() {
+	void extractUserIdFromFilename_withMissingParentheses_throwsException()
+	{
 		var filename = "user@example.com.2024-01-15.workflowy.backup";
 		assertThrows(IllegalArgumentException.class, () -> WorkflowyFileUtils.extractUserIdFromFilename(filename));
 	}
 
 	@Test
-	void getFileTimestamp_withValidDatePattern_returnsInstant() {
+	void getFileTimestamp_withValidDatePattern_returnsInstant()
+	{
 		var filename = "(user@example.com).2024-03-15.workflowy.backup";
 		Instant expected = LocalDate.of(2024, 3, 15).atStartOfDay().toInstant(ZoneOffset.UTC);
 		assertEquals(expected, WorkflowyFileUtils.getFileTimestamp(filename));
 	}
 
 	@Test
-	void getFileTimestamp_withNoDate_returnsMinInstant() {
+	void getFileTimestamp_withNoDate_returnsMinInstant()
+	{
 		var filename = "(user@example.com).workflowy.backup";
 		assertEquals(Instant.MIN, WorkflowyFileUtils.getFileTimestamp(filename));
 	}
 
 	@Test
-	void getFileTimestamp_withLeapYearDate_returnsCorrectInstant() {
+	void getFileTimestamp_withLeapYearDate_returnsCorrectInstant()
+	{
 		var filename = "(user@example.com).2024-02-29.workflowy.backup";
 		Instant expected = LocalDate.of(2024, 2, 29).atStartOfDay().toInstant(ZoneOffset.UTC);
 		assertEquals(expected, WorkflowyFileUtils.getFileTimestamp(filename));
 	}
 
 	@Test
-	void isAfterHighWatermark_withNewerFile_returnsTrue() {
+	void isAfterHighWatermark_withNewerFile_returnsTrue()
+	{
 		var filename = "(user@example.com).2024-03-15.workflowy.backup";
 		Instant highWatermark = LocalDate.of(2024, 3, 10).atStartOfDay().toInstant(ZoneOffset.UTC);
 		assertTrue(WorkflowyFileUtils.isAfterHighWatermark(filename, highWatermark));
 	}
 
 	@Test
-	void isAfterHighWatermark_withOlderFile_returnsFalse() {
+	void isAfterHighWatermark_withOlderFile_returnsFalse()
+	{
 		var filename = "(user@example.com).2024-03-05.workflowy.backup";
 		Instant highWatermark = LocalDate.of(2024, 3, 10).atStartOfDay().toInstant(ZoneOffset.UTC);
 		assertFalse(WorkflowyFileUtils.isAfterHighWatermark(filename, highWatermark));
 	}
 
 	@Test
-	void isAfterHighWatermark_withSameDayFile_returnsFalse() {
+	void isAfterHighWatermark_withSameDayFile_returnsFalse()
+	{
 		var filename = "(user@example.com).2024-03-10.workflowy.backup";
 		Instant highWatermark = LocalDate.of(2024, 3, 10).atStartOfDay().toInstant(ZoneOffset.UTC);
 		assertFalse(WorkflowyFileUtils.isAfterHighWatermark(filename, highWatermark));
 	}
 
 	@Test
-	void isAfterHighWatermark_withMinHighWatermark_returnsTrue() {
+	void isAfterHighWatermark_withMinHighWatermark_returnsTrue()
+	{
 		var filename = "(user@example.com).2024-03-15.workflowy.backup";
 		assertTrue(WorkflowyFileUtils.isAfterHighWatermark(filename, Instant.MIN));
 	}
 
 	@Test
-	void isAfterHighWatermark_withNoDateAndMinHighWatermark_returnsFalse() {
+	void isAfterHighWatermark_withNoDateAndMinHighWatermark_returnsFalse()
+	{
 		var filename = "(user@example.com).workflowy.backup";
 		assertFalse(WorkflowyFileUtils.isAfterHighWatermark(filename, Instant.MIN));
 	}

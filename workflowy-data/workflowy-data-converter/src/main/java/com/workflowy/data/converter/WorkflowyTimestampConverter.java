@@ -3,16 +3,19 @@ package com.workflowy.data.converter;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-public final class WorkflowyTimestampConverter {
-
+public final class WorkflowyTimestampConverter
+{
 	public static final long WORKFLOWY_EPOCH_OFFSET = 1262304000L;
 
-	private WorkflowyTimestampConverter() {
+	private WorkflowyTimestampConverter()
+	{
 		throw new AssertionError("Suppress default constructor for noninstantiability");
 	}
 
-	public static Timestamp convertWorkflowyTimestamp(Long workflowyTimestamp) {
-		if (workflowyTimestamp == null) {
+	public static Timestamp convertWorkflowyTimestamp(Long workflowyTimestamp)
+	{
+		if (workflowyTimestamp == null)
+		{
 			return null;
 		}
 		long epochSeconds = workflowyTimestamp + WORKFLOWY_EPOCH_OFFSET;
@@ -26,8 +29,10 @@ public final class WorkflowyTimestampConverter {
 	 * @param unixTimestamp Seconds since Unix epoch, or null
 	 * @return Corresponding Timestamp, or null if input is null
 	 */
-	public static Timestamp convertUnixTimestamp(Long unixTimestamp) {
-		if (unixTimestamp == null) {
+	public static Timestamp convertUnixTimestamp(Long unixTimestamp)
+	{
+		if (unixTimestamp == null)
+		{
 			return null;
 		}
 		return Timestamp.from(Instant.ofEpochSecond(unixTimestamp));
@@ -40,15 +45,19 @@ public final class WorkflowyTimestampConverter {
 	 * @param unixTimestamp Seconds since Unix epoch, or null
 	 * @return Corresponding Instant, or null if input is null
 	 */
-	public static Instant unixTimestampToInstant(Long unixTimestamp) {
-		if (unixTimestamp == null) {
+	public static Instant unixTimestampToInstant(Long unixTimestamp)
+	{
+		if (unixTimestamp == null)
+		{
 			return null;
 		}
 		return Instant.ofEpochSecond(unixTimestamp);
 	}
 
-	public static Instant workflowyTimestampToInstant(Long workflowyTimestamp) {
-		if (workflowyTimestamp == null) {
+	public static Instant workflowyTimestampToInstant(Long workflowyTimestamp)
+	{
+		if (workflowyTimestamp == null)
+		{
 			return null;
 		}
 		long epochSeconds = workflowyTimestamp + WORKFLOWY_EPOCH_OFFSET;

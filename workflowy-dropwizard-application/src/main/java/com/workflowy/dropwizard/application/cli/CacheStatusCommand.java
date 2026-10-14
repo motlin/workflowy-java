@@ -11,14 +11,18 @@ import com.workflowy.dropwizard.application.WorkflowyApplication;
 import com.workflowy.dropwizard.application.WorkflowyConfiguration;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-public class CacheStatusCommand extends AbstractReadOnlyCommand {
-
-	public CacheStatusCommand(WorkflowyApplication application) {
+public class CacheStatusCommand
+	extends AbstractReadOnlyCommand
+{
+	public CacheStatusCommand(WorkflowyApplication application)
+	{
 		super(application, "cache-status", "Display cache and database statistics");
 	}
 
 	@Override
-	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
+	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
+		throws CommandException
+	{
 		var status = new CacheStatusDto();
 		status.setQueryTime(Instant.now());
 		status.setDatabaseType("H2");

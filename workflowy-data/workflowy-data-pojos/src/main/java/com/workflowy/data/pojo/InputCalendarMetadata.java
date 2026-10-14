@@ -18,4 +18,6 @@ public record InputCalendarMetadata(
 	@Nullable Long timestamp,
 
 	@JsonProperty("found_dates") @Nullable Boolean foundDates
-) {}
+)
+{
+}

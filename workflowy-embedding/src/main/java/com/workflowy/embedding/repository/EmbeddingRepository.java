@@ -21,81 +21,85 @@ import org.eclipse.collections.api.set.MutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmbeddingRepository {
-
+public class EmbeddingRepository
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddingRepository.class);
 
 	private static final String FAR_FUTURE_DATE = "9999-12-31 23:59:59";
 	private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	private static final String INSERT_SQL = """
-		INSERT INTO node_embeddings (node_id, model, embedding, system_from, system_to)
-		VALUES (?, ?, ?, ?, ?)
-		""";
+	INSERT INTO node_embeddings (node_id, model, embedding, system_from, system_to)
+	VALUES (?, ?, ?, ?, ?)
+	""";
 
 	private static final String UPDATE_SYSTEM_TO_SQL = """
-		UPDATE node_embeddings
-		SET system_to = ?
-		WHERE node_id = ? AND model = ? AND system_to = ?
-		""";
+	UPDATE node_embeddings
+	SET system_to = ?
+	WHERE node_id = ? AND model = ? AND system_to = ?
+	""";
 
 	private static final String GET_EXISTING_IDS_SQL = """
-		SELECT node_id FROM node_embeddings
-		WHERE model = ? AND system_to = ?
-		""";
+	SELECT node_id FROM node_embeddings
+	WHERE model = ? AND system_to = ?
+	""";
 
 	private static final String SEARCH_SQL = """
-		SELECT node_id, embedding,
-		       vec_distance_cosine(embedding, ?) as distance
-		FROM node_embeddings
-		WHERE model = ? AND system_to = ?
-		ORDER BY distance ASC
-		LIMIT ?
-		""";
+	SELECT node_id, embedding,
+	       vec_distance_cosine(embedding, ?) as distance
+	FROM node_embeddings
+	WHERE model = ? AND system_to = ?
+	ORDER BY distance ASC
+	LIMIT ?
+	""";
 
 	private static final String SEARCH_WITH_THRESHOLD_SQL = """
-		SELECT node_id, embedding,
-		       vec_distance_cosine(embedding, ?) as distance
-		FROM node_embeddings
-		WHERE model = ? AND system_to = ?
-		AND vec_distance_cosine(embedding, ?) < ?
-		ORDER BY distance ASC
-		LIMIT ?
-		""";
+	SELECT node_id, embedding,
+	       vec_distance_cosine(embedding, ?) as distance
+	FROM node_embeddings
+	WHERE model = ? AND system_to = ?
+	AND vec_distance_cosine(embedding, ?) < ?
+	ORDER BY distance ASC
+	LIMIT ?
+	""";
 
 	private static final String FTS_DELETE_ALL_SQL = "DELETE FROM node_fts";
 
 	private static final String FTS_INSERT_SQL = "INSERT INTO node_fts(node_id, content) VALUES(?, ?)";
 
 	private static final String FTS_SEARCH_SQL = """
-		SELECT node_id, rank as score
-		FROM node_fts
-		WHERE node_fts MATCH ?
-		ORDER BY rank
-		LIMIT ?
-		""";
+	SELECT node_id, rank as score
+	FROM node_fts
+	WHERE node_fts MATCH ?
+	ORDER BY rank
+	LIMIT ?
+	""";
 
 	private static final String GET_CONTENT_HASH_SQL = """
-		SELECT content_hash FROM node_content_hash
-		WHERE node_id = ? AND model = ?
-		""";
+	SELECT content_hash FROM node_content_hash
+	WHERE node_id = ? AND model = ?
+	""";
 
 	private static final String UPSERT_CONTENT_HASH_SQL = """
-		INSERT OR REPLACE INTO node_content_hash (node_id, model, content_hash)
-		VALUES (?, ?, ?)
-		""";
+	INSERT OR REPLACE INTO node_content_hash (node_id, model, content_hash)
+	VALUES (?, ?, ?)
+	""";
 
 	private final SqliteVecConnection sqliteVecConnection;
 
-	public EmbeddingRepository(SqliteVecConnection sqliteVecConnection) {
+	public EmbeddingRepository(SqliteVecConnection sqliteVecConnection)
+	{
 		this.sqliteVecConnection = sqliteVecConnection;
 	}
 
-	public void save(NodeEmbedding embedding) throws SQLException {
+	public void save(NodeEmbedding embedding)
+		throws SQLException
+	{
 		Connection conn = this.sqliteVecConnection.getConnection();
 		String now = DATETIME_FORMATTER.format(Instant.now().atZone(ZoneOffset.UTC));
 
-		try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_SYSTEM_TO_SQL)) {
+		try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_SYSTEM_TO_SQL))
+		{
 			updateStmt.setString(1, now);
 			updateStmt.setString(2, embedding.getNodeId());
 			updateStmt.setString(3, embedding.getModel());
@@ -103,7 +107,8 @@ public class EmbeddingRepository {
 			updateStmt.executeUpdate();
 		}
 
-		try (PreparedStatement insertStmt = conn.prepareStatement(INSERT_SQL)) {
+		try (PreparedStatement insertStmt = conn.prepareStatement(INSERT_SQL))
+		{
 			insertStmt.setString(1, embedding.getNodeId());
 			insertStmt.setString(2, embedding.getModel());
 			insertStmt.setBytes(3, embedding.getEmbeddingAsBytes());
@@ -113,14 +118,19 @@ public class EmbeddingRepository {
 		}
 	}
 
-	public void saveBatch(List<NodeEmbedding> embeddings) throws SQLException {
+	public void saveBatch(List<NodeEmbedding> embeddings)
+		throws SQLException
+	{
 		Connection conn = this.sqliteVecConnection.getConnection();
 		String now = DATETIME_FORMATTER.format(Instant.now().atZone(ZoneOffset.UTC));
 
 		conn.setAutoCommit(false);
-		try {
-			try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_SYSTEM_TO_SQL)) {
-				for (NodeEmbedding embedding : embeddings) {
+		try
+		{
+			try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_SYSTEM_TO_SQL))
+			{
+				for (NodeEmbedding embedding : embeddings)
+				{
 					updateStmt.setString(1, now);
 					updateStmt.setString(2, embedding.getNodeId());
 					updateStmt.setString(3, embedding.getModel());
@@ -130,8 +140,10 @@ public class EmbeddingRepository {
 				updateStmt.executeBatch();
 			}
 
-			try (PreparedStatement insertStmt = conn.prepareStatement(INSERT_SQL)) {
-				for (NodeEmbedding embedding : embeddings) {
+			try (PreparedStatement insertStmt = conn.prepareStatement(INSERT_SQL))
+			{
+				for (NodeEmbedding embedding : embeddings)
+				{
 					insertStmt.setString(1, embedding.getNodeId());
 					insertStmt.setString(2, embedding.getModel());
 					insertStmt.setBytes(3, embedding.getEmbeddingAsBytes());
@@ -143,24 +155,33 @@ public class EmbeddingRepository {
 			}
 
 			conn.commit();
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			conn.rollback();
 			throw e;
-		} finally {
+		}
+		finally
+		{
 			conn.setAutoCommit(true);
 		}
 	}
 
-	public Set<String> getExistingNodeIds(EmbeddingModel model) throws SQLException {
+	public Set<String> getExistingNodeIds(EmbeddingModel model)
+		throws SQLException
+	{
 		MutableSet<String> existingIds = Sets.mutable.empty();
 		Connection conn = this.sqliteVecConnection.getConnection();
 
-		try (PreparedStatement stmt = conn.prepareStatement(GET_EXISTING_IDS_SQL)) {
+		try (PreparedStatement stmt = conn.prepareStatement(GET_EXISTING_IDS_SQL))
+		{
 			stmt.setString(1, model.getKey());
 			stmt.setString(2, FAR_FUTURE_DATE);
 
-			try (ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
+			try (ResultSet rs = stmt.executeQuery())
+			{
+				while (rs.next())
+				{
 					existingIds.add(rs.getString("node_id"));
 				}
 			}
@@ -170,8 +191,10 @@ public class EmbeddingRepository {
 	}
 
 	public List<SearchResult> search(float[] queryEmbedding, EmbeddingModel model, int limit, Double threshold)
-		throws SQLException {
-		if (!this.sqliteVecConnection.isSqliteVecLoaded()) {
+		throws SQLException
+	{
+		if (!this.sqliteVecConnection.isSqliteVecLoaded())
+		{
 			throw new SQLException("sqlite-vec extension not loaded. Vector search is not available.");
 		}
 
@@ -182,21 +205,25 @@ public class EmbeddingRepository {
 
 		String sql = threshold != null ? SEARCH_WITH_THRESHOLD_SQL : SEARCH_SQL;
 
-		try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+		try (PreparedStatement stmt = conn.prepareStatement(sql))
+		{
 			var paramIndex = 1;
 			stmt.setBytes(paramIndex++, queryBytes);
 			stmt.setString(paramIndex++, model.getKey());
 			stmt.setString(paramIndex++, FAR_FUTURE_DATE);
 
-			if (threshold != null) {
+			if (threshold != null)
+			{
 				stmt.setBytes(paramIndex++, queryBytes);
 				stmt.setDouble(paramIndex++, threshold);
 			}
 
 			stmt.setInt(paramIndex, limit);
 
-			try (ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
+			try (ResultSet rs = stmt.executeQuery())
+			{
+				while (rs.next())
+				{
 					String nodeId = rs.getString("node_id");
 					double distance = rs.getDouble("distance");
 
@@ -209,17 +236,23 @@ public class EmbeddingRepository {
 		return results;
 	}
 
-	public void populateFts(Map<String, String> nodeContents) throws SQLException {
+	public void populateFts(Map<String, String> nodeContents)
+		throws SQLException
+	{
 		Connection conn = this.sqliteVecConnection.getConnection();
 
 		conn.setAutoCommit(false);
-		try {
-			try (PreparedStatement deleteStmt = conn.prepareStatement(FTS_DELETE_ALL_SQL)) {
+		try
+		{
+			try (PreparedStatement deleteStmt = conn.prepareStatement(FTS_DELETE_ALL_SQL))
+			{
 				deleteStmt.executeUpdate();
 			}
 
-			try (PreparedStatement insertStmt = conn.prepareStatement(FTS_INSERT_SQL)) {
-				for (var entry : nodeContents.entrySet()) {
+			try (PreparedStatement insertStmt = conn.prepareStatement(FTS_INSERT_SQL))
+			{
+				for (var entry : nodeContents.entrySet())
+				{
 					insertStmt.setString(1, entry.getKey());
 					insertStmt.setString(2, entry.getValue());
 					insertStmt.addBatch();
@@ -228,23 +261,32 @@ public class EmbeddingRepository {
 			}
 
 			conn.commit();
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			conn.rollback();
 			throw e;
-		} finally {
+		}
+		finally
+		{
 			conn.setAutoCommit(true);
 		}
 	}
 
-	public String getContentHash(String nodeId, String model) throws SQLException {
+	public String getContentHash(String nodeId, String model)
+		throws SQLException
+	{
 		Connection conn = this.sqliteVecConnection.getConnection();
 
-		try (PreparedStatement stmt = conn.prepareStatement(GET_CONTENT_HASH_SQL)) {
+		try (PreparedStatement stmt = conn.prepareStatement(GET_CONTENT_HASH_SQL))
+		{
 			stmt.setString(1, nodeId);
 			stmt.setString(2, model);
 
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
+			try (ResultSet rs = stmt.executeQuery())
+			{
+				if (rs.next())
+				{
 					return rs.getString("content_hash");
 				}
 			}
@@ -253,10 +295,13 @@ public class EmbeddingRepository {
 		return null;
 	}
 
-	public void saveContentHash(String nodeId, String model, String contentHash) throws SQLException {
+	public void saveContentHash(String nodeId, String model, String contentHash)
+		throws SQLException
+	{
 		Connection conn = this.sqliteVecConnection.getConnection();
 
-		try (PreparedStatement stmt = conn.prepareStatement(UPSERT_CONTENT_HASH_SQL)) {
+		try (PreparedStatement stmt = conn.prepareStatement(UPSERT_CONTENT_HASH_SQL))
+		{
 			stmt.setString(1, nodeId);
 			stmt.setString(2, model);
 			stmt.setString(3, contentHash);
@@ -264,16 +309,21 @@ public class EmbeddingRepository {
 		}
 	}
 
-	public List<SearchResult> searchKeyword(String query, int limit) throws SQLException {
+	public List<SearchResult> searchKeyword(String query, int limit)
+		throws SQLException
+	{
 		MutableList<SearchResult> results = Lists.mutable.empty();
 		Connection conn = this.sqliteVecConnection.getConnection();
 
-		try (PreparedStatement stmt = conn.prepareStatement(FTS_SEARCH_SQL)) {
+		try (PreparedStatement stmt = conn.prepareStatement(FTS_SEARCH_SQL))
+		{
 			stmt.setString(1, query);
 			stmt.setInt(2, limit);
 
-			try (ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
+			try (ResultSet rs = stmt.executeQuery())
+			{
+				while (rs.next())
+				{
 					String nodeId = rs.getString("node_id");
 					double score = rs.getDouble("score");
 					double distance = Math.abs(score) / (1.0 + Math.abs(score));
@@ -285,9 +335,11 @@ public class EmbeddingRepository {
 		return results;
 	}
 
-	private static byte[] floatArrayToBytes(float[] floats) {
+	private static byte[] floatArrayToBytes(float[] floats)
+	{
 		byte[] bytes = new byte[floats.length * 4];
-		for (var i = 0; i < floats.length; i++) {
+		for (var i = 0; i < floats.length; i++)
+		{
 			int intBits = Float.floatToIntBits(floats[i]);
 			bytes[i * 4] = (byte) (intBits & 0xFF);
 			bytes[i * 4 + 1] = (byte) ((intBits >> 8) & 0xFF);

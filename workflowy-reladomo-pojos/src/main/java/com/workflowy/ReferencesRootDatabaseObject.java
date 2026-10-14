@@ -1,3 +1,6 @@
 package com.workflowy;
 
-public class ReferencesRootDatabaseObject extends ReferencesRootDatabaseObjectAbstract {}
+public class ReferencesRootDatabaseObject
+	extends ReferencesRootDatabaseObjectAbstract
+{
+}

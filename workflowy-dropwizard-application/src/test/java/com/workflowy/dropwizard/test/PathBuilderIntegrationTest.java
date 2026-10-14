@@ -6,13 +6,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
-
+class PathBuilderIntegrationTest
+	extends AbstractWorkflowyAppTest
+{
 	private final PathBuilder pathBuilder = new PathBuilder();
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildFullPath_forRootNode_returnsNodeName() {
+	void buildFullPath_forRootNode_returnsNodeName()
+	{
 		String path = this.pathBuilder.buildFullPath("00000000-0000-0000-0000-000000000001");
 
 		assertEquals("Root Node", path);
@@ -20,7 +22,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildFullPath_forChildNode_returnsParentAndChildPath() {
+	void buildFullPath_forChildNode_returnsParentAndChildPath()
+	{
 		String path = this.pathBuilder.buildFullPath("00000000-0000-0000-0000-000000000002");
 
 		assertEquals("Root Node > Child 1", path);
@@ -28,7 +31,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildFullPath_forGrandchildNode_returnsFullPath() {
+	void buildFullPath_forGrandchildNode_returnsFullPath()
+	{
 		String path = this.pathBuilder.buildFullPath("00000000-0000-0000-0000-000000000004");
 
 		assertEquals("Root Node > Child 1 > Grandchild 1", path);
@@ -36,7 +40,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildFullPath_forNonExistentNode_returnsEmptyString() {
+	void buildFullPath_forNonExistentNode_returnsEmptyString()
+	{
 		String path = this.pathBuilder.buildFullPath("00000000-0000-0000-0000-nonexistent");
 
 		assertEquals("", path);
@@ -44,7 +49,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildTextContent_forNodeWithNote_returnsNameAndNote() {
+	void buildTextContent_forNodeWithNote_returnsNameAndNote()
+	{
 		String content = this.pathBuilder.buildTextContent("00000000-0000-0000-0000-000000000001");
 
 		assertEquals("Root Node\n\nThis is the root", content);
@@ -52,7 +58,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildTextContent_forNodeWithoutNote_returnsNameOnly() {
+	void buildTextContent_forNodeWithoutNote_returnsNameOnly()
+	{
 		String content = this.pathBuilder.buildTextContent("00000000-0000-0000-0000-000000000003");
 
 		assertEquals("Child 2", content);
@@ -60,7 +67,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildTextContent_forNonExistentNode_returnsEmptyString() {
+	void buildTextContent_forNonExistentNode_returnsEmptyString()
+	{
 		String content = this.pathBuilder.buildTextContent("00000000-0000-0000-0000-nonexistent");
 
 		assertEquals("", content);
@@ -68,7 +76,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildEmbeddingText_forChildWithNote_returnsPathAndContent() {
+	void buildEmbeddingText_forChildWithNote_returnsPathAndContent()
+	{
 		String embeddingText = this.pathBuilder.buildEmbeddingText("00000000-0000-0000-0000-000000000002");
 
 		assertEquals(
@@ -79,7 +88,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildEmbeddingText_forRootWithNote_returnsNodeAndContent() {
+	void buildEmbeddingText_forRootWithNote_returnsNodeAndContent()
+	{
 		String embeddingText = this.pathBuilder.buildEmbeddingText("00000000-0000-0000-0000-000000000001");
 
 		assertEquals(
@@ -90,7 +100,8 @@ class PathBuilderIntegrationTest extends AbstractWorkflowyAppTest {
 
 	@Test
 	@ReladomoTestFile("test-data/basic-hierarchy.txt")
-	void buildEmbeddingText_forNonExistentNode_returnsEmptyString() {
+	void buildEmbeddingText_forNonExistentNode_returnsEmptyString()
+	{
 		String embeddingText = this.pathBuilder.buildEmbeddingText("00000000-0000-0000-0000-nonexistent");
 
 		assertEquals("", embeddingText);

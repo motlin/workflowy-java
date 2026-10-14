@@ -25,19 +25,24 @@ import io.liftwizard.servlet.logging.logstash.encoder.StructuredArgumentsLogstas
 import io.liftwizard.servlet.logging.mdc.StructuredArgumentsMDCLogger;
 import io.liftwizard.servlet.logging.typesafe.StructuredArguments;
 
-public class WorkflowyApplication extends AbstractWorkflowyApplication {
-
-	public static void main(String[] args) throws Exception {
+public class WorkflowyApplication
+	extends AbstractWorkflowyApplication
+{
+	public static void main(String[] args)
+		throws Exception
+	{
 		new WorkflowyApplication().run(args);
 	}
 
 	@Override
-	public void initialize(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap) {
+	public void initialize(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap)
+	{
 		super.initialize(bootstrap);
 	}
 
 	@Override
-	protected void initializeCommands(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap) {
+	protected void initializeCommands(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap)
+	{
 		super.initializeCommands(bootstrap);
 		bootstrap.addCommand(new WorkflowyImportCommand(this));
 		bootstrap.addCommand(new WorkflowyImportApiCommand(this));
@@ -57,13 +62,15 @@ public class WorkflowyApplication extends AbstractWorkflowyApplication {
 	}
 
 	@Override
-	protected void initializeBundles(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap) {
+	protected void initializeBundles(@Nonnull Bootstrap<WorkflowyConfiguration> bootstrap)
+	{
 		super.initializeBundles(bootstrap);
 
 		var mdcLogger = new StructuredArgumentsMDCLogger(bootstrap.getObjectMapper());
 		var logstashLogger = new StructuredArgumentsLogstashEncoderLogger();
 
-		Consumer<StructuredArguments> structuredLogger = (structuredArguments) -> {
+		Consumer<StructuredArguments> structuredLogger = (structuredArguments) ->
+		{
 			mdcLogger.accept(structuredArguments);
 			logstashLogger.accept(structuredArguments);
 		};
@@ -73,9 +80,11 @@ public class WorkflowyApplication extends AbstractWorkflowyApplication {
 		bootstrap.addBundle(new KlassGraphQLBundle<>());
 
 		bootstrap.addBundle(
-			new MigrationsBundle<>() {
+			new MigrationsBundle<>()
+			{
 				@Override
-				public DataSourceFactory getDataSourceFactory(WorkflowyConfiguration configuration) {
+				public DataSourceFactory getDataSourceFactory(WorkflowyConfiguration configuration)
+				{
 					return configuration.getNamedDataSourcesFactory().getNamedDataSourceFactoryByName("h2-tcp");
 				}
 			}
@@ -83,7 +92,8 @@ public class WorkflowyApplication extends AbstractWorkflowyApplication {
 	}
 
 	@Override
-	protected void registerJacksonModules(@Nonnull Environment environment) {
+	protected void registerJacksonModules(@Nonnull Environment environment)
+	{
 		super.registerJacksonModules(environment);
 
 		environment.getObjectMapper().registerModule(new KlassMetaModelJacksonModule());

@@ -13,4 +13,6 @@ public record CreateNodeRequest(
 	@Nullable String note,
 	@Nullable String layoutMode,
 	@Nullable String position
-) {}
+)
+{
+}

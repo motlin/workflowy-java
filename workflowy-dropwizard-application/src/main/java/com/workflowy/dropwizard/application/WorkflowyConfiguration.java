@@ -14,8 +14,8 @@ import io.liftwizard.servlet.config.singlepage.SinglePageRedirectFilterFactoryPr
 
 public class WorkflowyConfiguration
 	extends AbstractKlassConfiguration
-	implements GraphQLFactoryProvider, SinglePageRedirectFilterFactoryProvider, EmbeddingConfigurationProvider {
-
+	implements GraphQLFactoryProvider, SinglePageRedirectFilterFactoryProvider, EmbeddingConfigurationProvider
+{
 	@Nonnull
 	private @Valid GraphQLFactory graphQL = new GraphQLFactory();
 
@@ -27,35 +27,41 @@ public class WorkflowyConfiguration
 	@Override
 	@Nonnull
 	@JsonProperty("graphQL")
-	public GraphQLFactory getGraphQLFactory() {
+	public GraphQLFactory getGraphQLFactory()
+	{
 		return this.graphQL;
 	}
 
 	@JsonProperty("graphQL")
-	public void setGraphQLFactory(@Nonnull GraphQLFactory factory) {
+	public void setGraphQLFactory(@Nonnull GraphQLFactory factory)
+	{
 		this.graphQL = factory;
 	}
 
 	@Override
 	@JsonProperty("singlePageRedirectFilter")
-	public SinglePageRedirectFilterFactory getSinglePageRedirectFilterFactory() {
+	public SinglePageRedirectFilterFactory getSinglePageRedirectFilterFactory()
+	{
 		return this.singlePageRedirectFilterFactory;
 	}
 
 	@JsonProperty("singlePageRedirectFilter")
-	public void setSinglePageRedirectFilterFactory(SinglePageRedirectFilterFactory singlePageRedirectFilterFactory) {
+	public void setSinglePageRedirectFilterFactory(SinglePageRedirectFilterFactory singlePageRedirectFilterFactory)
+	{
 		this.singlePageRedirectFilterFactory = singlePageRedirectFilterFactory;
 	}
 
 	@Override
 	@Nonnull
 	@JsonProperty("embedding")
-	public EmbeddingConfiguration getEmbeddingConfiguration() {
+	public EmbeddingConfiguration getEmbeddingConfiguration()
+	{
 		return this.embedding;
 	}
 
 	@JsonProperty("embedding")
-	public void setEmbeddingConfiguration(@Nonnull EmbeddingConfiguration embedding) {
+	public void setEmbeddingConfiguration(@Nonnull EmbeddingConfiguration embedding)
+	{
 		this.embedding = embedding;
 	}
 }

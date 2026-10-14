@@ -11,14 +11,17 @@ import com.workflowy.dto.NodeContentDTO;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class ListByIdCommand extends AbstractReadOnlyCommand {
-
-	public ListByIdCommand(WorkflowyApplication application) {
+public class ListByIdCommand
+	extends AbstractReadOnlyCommand
+{
+	public ListByIdCommand(WorkflowyApplication application)
+	{
 		super(application, "list-by-id", "List children of a parent node by ID");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser
@@ -29,14 +32,19 @@ public class ListByIdCommand extends AbstractReadOnlyCommand {
 	}
 
 	@Override
-	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
+	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
+		throws CommandException
+	{
 		String parentId = namespace.getString("parent_id");
 
 		Operation operation;
-		if (parentId == null) {
+		if (parentId == null)
+		{
 			// List root nodes (parentId is null)
 			operation = NodeContentFinder.parentId().isNull();
-		} else {
+		}
+		else
+		{
 			String fullParentId = this.resolveNodeId(parentId);
 			operation = NodeContentFinder.parentId().eq(fullParentId);
 		}

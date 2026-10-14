@@ -23,8 +23,8 @@ import org.eclipse.collections.api.list.MutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmbeddingGenerator {
-
+public class EmbeddingGenerator
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddingGenerator.class);
 
 	private static final Instant FAR_FUTURE = Instant.parse("9999-12-31T23:59:59Z");
@@ -35,7 +35,8 @@ public class EmbeddingGenerator {
 	private final int batchSize;
 	private final boolean force;
 
-	public EmbeddingGenerator(EmbeddingEngine engine, EmbeddingRepository repository, int batchSize, boolean force) {
+	public EmbeddingGenerator(EmbeddingEngine engine, EmbeddingRepository repository, int batchSize, boolean force)
+	{
 		this.engine = engine;
 		this.repository = repository;
 		this.pathBuilder = new PathBuilder();
@@ -43,7 +44,8 @@ public class EmbeddingGenerator {
 		this.force = force;
 	}
 
-	public GenerationResult generate(Consumer<ProgressUpdate> progressCallback) {
+	public GenerationResult generate(Consumer<ProgressUpdate> progressCallback)
+	{
 		EmbeddingModel model = this.engine.getModel();
 
 		NodeContentList allNodes = NodeContentFinder.findMany(NodeContentFinder.all());
@@ -51,9 +53,11 @@ public class EmbeddingGenerator {
 		MutableList<NodeContent> nonLeafNodes = Lists.mutable.empty();
 		Map<String, String> embeddingTexts = new LinkedHashMap<>();
 
-		for (var i = 0; i < allNodes.size(); i++) {
+		for (var i = 0; i < allNodes.size(); i++)
+		{
 			NodeContent node = allNodes.get(i);
-			if (this.pathBuilder.hasChildren(node.getId())) {
+			if (this.pathBuilder.hasChildren(node.getId()))
+			{
 				nonLeafNodes.add(node);
 				embeddingTexts.put(node.getId(), this.pathBuilder.buildEmbeddingText(node.getId()));
 			}
@@ -66,30 +70,39 @@ public class EmbeddingGenerator {
 
 		MutableList<NodeContent> batch = Lists.mutable.withInitialCapacity(this.batchSize);
 
-		for (var i = 0; i < nonLeafNodes.size(); i++) {
+		for (var i = 0; i < nonLeafNodes.size(); i++)
+		{
 			NodeContent node = nonLeafNodes.get(i);
 
-			if (!this.force) {
+			if (!this.force)
+			{
 				String contentHash = hashContent(embeddingTexts.get(node.getId()));
-				try {
+				try
+				{
 					String existingHash = this.repository.getContentHash(node.getId(), model.getKey());
-					if (contentHash.equals(existingHash)) {
+					if (contentHash.equals(existingHash))
+					{
 						skippedCount++;
 						continue;
 					}
-				} catch (SQLException e) {
+				}
+				catch (SQLException e)
+				{
 					LOGGER.warn("Failed to check content hash for {}", node.getId(), e);
 				}
 			}
 
 			batch.add(node);
 
-			if (batch.size() >= this.batchSize || i == nonLeafNodes.size() - 1) {
-				try {
+			if (batch.size() >= this.batchSize || i == nonLeafNodes.size() - 1)
+			{
+				try
+				{
 					this.processBatch(batch, model, embeddingTexts);
 					processedCount += batch.size();
 
-					if (progressCallback != null) {
+					if (progressCallback != null)
+					{
 						progressCallback.accept(
 							new ProgressUpdate(
 								processedCount + skippedCount,
@@ -100,7 +113,9 @@ public class EmbeddingGenerator {
 							)
 						);
 					}
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 					LOGGER.error("Error processing batch", e);
 					errorCount += batch.size();
 				}
@@ -109,11 +124,14 @@ public class EmbeddingGenerator {
 			}
 		}
 
-		try {
+		try
+		{
 			LOGGER.info("Populating FTS5 index with {} non-leaf nodes...", embeddingTexts.size());
 			this.repository.populateFts(embeddingTexts);
 			LOGGER.info("FTS5 index populated successfully.");
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			LOGGER.error("Failed to populate FTS5 index", e);
 		}
 
@@ -121,7 +139,8 @@ public class EmbeddingGenerator {
 	}
 
 	private void processBatch(List<NodeContent> nodes, EmbeddingModel model, Map<String, String> embeddingTexts)
-		throws SQLException {
+		throws SQLException
+	{
 		List<String> texts = nodes
 			.stream()
 			.map((node) -> embeddingTexts.get(node.getId()))
@@ -130,7 +149,8 @@ public class EmbeddingGenerator {
 		List<float[]> embeddings = this.engine.generateEmbeddings(texts, false);
 
 		MutableList<NodeEmbedding> nodeEmbeddings = Lists.mutable.empty();
-		for (var i = 0; i < nodes.size(); i++) {
+		for (var i = 0; i < nodes.size(); i++)
+		{
 			NodeContent node = nodes.get(i);
 			float[] embedding = embeddings.get(i);
 
@@ -140,28 +160,37 @@ public class EmbeddingGenerator {
 
 		this.repository.saveBatch(nodeEmbeddings);
 
-		for (var i = 0; i < nodes.size(); i++) {
+		for (var i = 0; i < nodes.size(); i++)
+		{
 			NodeContent node = nodes.get(i);
 			String hash = hashContent(texts.get(i));
 			this.repository.saveContentHash(node.getId(), model.getKey(), hash);
 		}
 	}
 
-	static String hashContent(String content) {
-		try {
+	static String hashContent(String content)
+	{
+		try
+		{
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
 			return HexFormat.of().formatHex(hash);
-		} catch (NoSuchAlgorithmException e) {
+		}
+		catch (NoSuchAlgorithmException e)
+		{
 			throw new RuntimeException("SHA-256 not available", e);
 		}
 	}
 
-	public record ProgressUpdate(int current, int total, int processed, int skipped, int errors) {
-		public int percentage() {
+	public record ProgressUpdate(int current, int total, int processed, int skipped, int errors)
+	{
+		public int percentage()
+		{
 			return this.total > 0 ? (this.current * 100) / this.total : 0;
 		}
 	}
 
-	public record GenerationResult(int totalNodes, int processedCount, int skippedCount, int errorCount) {}
+	public record GenerationResult(int totalNodes, int processedCount, int skippedCount, int errorCount)
+	{
+	}
 }

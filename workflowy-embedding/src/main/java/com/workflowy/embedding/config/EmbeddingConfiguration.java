@@ -5,8 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EmbeddingConfiguration {
-
+public class EmbeddingConfiguration
+{
 	@Nullable
 	private String openaiApiKey;
 
@@ -21,45 +21,53 @@ public class EmbeddingConfiguration {
 
 	@JsonProperty("openaiApiKey")
 	@Nullable
-	public String getOpenaiApiKey() {
+	public String getOpenaiApiKey()
+	{
 		return this.openaiApiKey;
 	}
 
 	@JsonProperty("openaiApiKey")
-	public void setOpenaiApiKey(@Nullable String openaiApiKey) {
+	public void setOpenaiApiKey(@Nullable String openaiApiKey)
+	{
 		this.openaiApiKey = openaiApiKey;
 	}
 
 	@JsonProperty("defaultModel")
 	@NotNull
-	public String getDefaultModel() {
+	public String getDefaultModel()
+	{
 		return this.defaultModel;
 	}
 
 	@JsonProperty("defaultModel")
-	public void setDefaultModel(@NotNull String defaultModel) {
+	public void setDefaultModel(@NotNull String defaultModel)
+	{
 		this.defaultModel = defaultModel;
 	}
 
 	@JsonProperty("databasePath")
 	@NotNull
-	public String getDatabasePath() {
+	public String getDatabasePath()
+	{
 		return this.databasePath;
 	}
 
 	@JsonProperty("databasePath")
-	public void setDatabasePath(@NotNull String databasePath) {
+	public void setDatabasePath(@NotNull String databasePath)
+	{
 		this.databasePath = databasePath;
 	}
 
 	@JsonProperty("modelCachePath")
 	@NotNull
-	public String getModelCachePath() {
+	public String getModelCachePath()
+	{
 		return this.modelCachePath;
 	}
 
 	@JsonProperty("modelCachePath")
-	public void setModelCachePath(@NotNull String modelCachePath) {
+	public void setModelCachePath(@NotNull String modelCachePath)
+	{
 		this.modelCachePath = modelCachePath;
 	}
 }

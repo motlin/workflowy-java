@@ -7,24 +7,30 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import org.fusesource.jansi.Ansi;
 
-public final class JsonSyntaxHighlighter {
-
-	private JsonSyntaxHighlighter() {
+public final class JsonSyntaxHighlighter
+{
+	private JsonSyntaxHighlighter()
+	{
 		throw new AssertionError("Suppress default constructor for noninstantiability");
 	}
 
-	public static String highlight(String json) throws IOException {
+	public static String highlight(String json)
+		throws IOException
+	{
 		var result = new StringBuilder();
 		var factory = new JsonFactory();
 
-		try (JsonParser parser = factory.createParser(json)) {
+		try (JsonParser parser = factory.createParser(json))
+		{
 			var jsonIndex = 0;
 			JsonToken token;
 
-			while ((token = parser.nextToken()) != null) {
+			while ((token = parser.nextToken()) != null)
+			{
 				long tokenStart = parser.currentTokenLocation().getCharOffset();
 
-				if (tokenStart > jsonIndex) {
+				if (tokenStart > jsonIndex)
+				{
 					result.append(json, jsonIndex, (int) tokenStart);
 				}
 
@@ -35,7 +41,8 @@ public final class JsonSyntaxHighlighter {
 				jsonIndex = (int) tokenStart + getTokenLength(token, tokenText, json, (int) tokenStart);
 			}
 
-			if (jsonIndex < json.length()) {
+			if (jsonIndex < json.length())
+			{
 				result.append(json.substring(jsonIndex));
 			}
 		}
@@ -43,10 +50,12 @@ public final class JsonSyntaxHighlighter {
 		return result.toString();
 	}
 
-	private static String colorizeToken(JsonToken token, String text) {
+	private static String colorizeToken(JsonToken token, String text)
+	{
 		Ansi ansi = Ansi.ansi();
 
-		switch (token) {
+		switch (token)
+		{
 			case FIELD_NAME:
 				// jq uses bold blue for field names
 				return ansi.bold().fgBlue().a('"').a(text).a('"').reset().toString();
@@ -73,8 +82,10 @@ public final class JsonSyntaxHighlighter {
 		}
 	}
 
-	private static int getTokenLength(JsonToken token, String tokenText, String json, int start) {
-		switch (token) {
+	private static int getTokenLength(JsonToken token, String tokenText, String json, int start)
+	{
+		switch (token)
+		{
 			case FIELD_NAME:
 			case VALUE_STRING:
 				return tokenText.length() + 2;

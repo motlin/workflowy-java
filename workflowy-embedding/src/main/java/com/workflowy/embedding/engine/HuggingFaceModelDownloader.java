@@ -12,24 +12,28 @@ import com.workflowy.embedding.model.EmbeddingModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HuggingFaceModelDownloader {
-
+public final class HuggingFaceModelDownloader
+{
 	private static final Logger LOGGER = LoggerFactory.getLogger(HuggingFaceModelDownloader.class);
 
 	private static final String HUGGINGFACE_BASE_URL = "https://huggingface.co";
 	private static final String MODEL_FILENAME = "model.onnx";
 	private static final String TOKENIZER_FILENAME = "tokenizer.json";
 
-	private HuggingFaceModelDownloader() {
+	private HuggingFaceModelDownloader()
+	{
 		throw new AssertionError("Suppress default constructor for noninstantiability");
 	}
 
-	public static Path ensureModelDownloaded(EmbeddingModel model, String cachePath) throws IOException {
+	public static Path ensureModelDownloaded(EmbeddingModel model, String cachePath)
+		throws IOException
+	{
 		Path modelDir = Path.of(cachePath, model.getKey());
 		Path modelFile = modelDir.resolve(MODEL_FILENAME);
 		Path tokenizerFile = modelDir.resolve(TOKENIZER_FILENAME);
 
-		if (Files.exists(modelFile) && Files.exists(tokenizerFile)) {
+		if (Files.exists(modelFile) && Files.exists(tokenizerFile))
+		{
 			LOGGER.info("Model {} already downloaded at {}", model.getKey(), modelDir);
 			return modelDir;
 		}
@@ -38,14 +42,16 @@ public final class HuggingFaceModelDownloader {
 
 		String modelName = model.getModelName();
 
-		if (!Files.exists(modelFile)) {
+		if (!Files.exists(modelFile))
+		{
 			String modelUrl = buildModelUrl(modelName);
 			LOGGER.info("Downloading ONNX model from {}", modelUrl);
 			downloadFile(modelUrl, modelFile);
 			LOGGER.info("Downloaded model to {}", modelFile);
 		}
 
-		if (!Files.exists(tokenizerFile)) {
+		if (!Files.exists(tokenizerFile))
+		{
 			String tokenizerUrl = buildTokenizerUrl(modelName);
 			LOGGER.info("Downloading tokenizer from {}", tokenizerUrl);
 			downloadFile(tokenizerUrl, tokenizerFile);
@@ -55,15 +61,19 @@ public final class HuggingFaceModelDownloader {
 		return modelDir;
 	}
 
-	private static String buildModelUrl(String modelName) {
+	private static String buildModelUrl(String modelName)
+	{
 		return HUGGINGFACE_BASE_URL + "/" + modelName + "/resolve/main/onnx/" + MODEL_FILENAME;
 	}
 
-	private static String buildTokenizerUrl(String modelName) {
+	private static String buildTokenizerUrl(String modelName)
+	{
 		return HUGGINGFACE_BASE_URL + "/" + modelName + "/resolve/main/" + TOKENIZER_FILENAME;
 	}
 
-	private static void downloadFile(String urlString, Path destination) throws IOException {
+	private static void downloadFile(String urlString, Path destination)
+		throws IOException
+	{
 		URI uri = URI.create(urlString);
 		var connection = (HttpURLConnection) uri.toURL().openConnection();
 		connection.setRequestProperty("User-Agent", "workflowy-java/1.0");
@@ -76,7 +86,8 @@ public final class HuggingFaceModelDownloader {
 			|| responseCode == HttpURLConnection.HTTP_MOVED_PERM
 			|| responseCode == 307
 			|| responseCode == 308
-		) {
+		)
+		{
 			String newUrl = connection.getHeaderField("Location");
 			LOGGER.debug("Following redirect to {}", newUrl);
 			connection.disconnect();
@@ -84,7 +95,8 @@ public final class HuggingFaceModelDownloader {
 			return;
 		}
 
-		if (responseCode != HttpURLConnection.HTTP_OK) {
+		if (responseCode != HttpURLConnection.HTTP_OK)
+		{
 			connection.disconnect();
 			throw new IOException("Failed to download " + urlString + ": HTTP " + responseCode);
 		}
@@ -92,18 +104,23 @@ public final class HuggingFaceModelDownloader {
 		long contentLength = connection.getContentLengthLong();
 		LOGGER.info("Downloading {} bytes...", contentLength > 0 ? contentLength : "unknown");
 
-		try (InputStream in = connection.getInputStream()) {
+		try (InputStream in = connection.getInputStream())
+		{
 			Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
-		} finally {
+		}
+		finally
+		{
 			connection.disconnect();
 		}
 	}
 
-	public static Path getModelPath(EmbeddingModel model, String cachePath) {
+	public static Path getModelPath(EmbeddingModel model, String cachePath)
+	{
 		return Path.of(cachePath, model.getKey());
 	}
 
-	public static boolean isModelDownloaded(EmbeddingModel model, String cachePath) {
+	public static boolean isModelDownloaded(EmbeddingModel model, String cachePath)
+	{
 		Path modelDir = getModelPath(model, cachePath);
 		Path modelFile = modelDir.resolve(MODEL_FILENAME);
 		Path tokenizerFile = modelDir.resolve(TOKENIZER_FILENAME);

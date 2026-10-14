@@ -6,35 +6,40 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class SearchResultTest {
-
+class SearchResultTest
+{
 	@Test
-	void constructor_setsNodeIdAndDistance() {
+	void constructor_setsNodeIdAndDistance()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		assertEquals("node-123", result.getNodeId());
 		assertEquals(0.3, result.getDistance());
 	}
 
 	@Test
-	void getSimilarity_isOneMinusDistance() {
+	void getSimilarity_isOneMinusDistance()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		assertEquals(0.7, result.getSimilarity(), 0.0001);
 	}
 
 	@Test
-	void getSimilarity_withZeroDistance_returnsOne() {
+	void getSimilarity_withZeroDistance_returnsOne()
+	{
 		var result = new SearchResult("node-123", 0.0);
 		assertEquals(1.0, result.getSimilarity());
 	}
 
 	@Test
-	void getSimilarity_withOneDistance_returnsZero() {
+	void getSimilarity_withOneDistance_returnsZero()
+	{
 		var result = new SearchResult("node-123", 1.0);
 		assertEquals(0.0, result.getSimilarity());
 	}
 
 	@Test
-	void enrichmentFields_areNullByDefault() {
+	void enrichmentFields_areNullByDefault()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		assertNull(result.getName());
 		assertNull(result.getNote());
@@ -43,35 +48,40 @@ class SearchResultTest {
 	}
 
 	@Test
-	void setName_updatesName() {
+	void setName_updatesName()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		result.setName("Test Node");
 		assertEquals("Test Node", result.getName());
 	}
 
 	@Test
-	void setNote_updatesNote() {
+	void setNote_updatesNote()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		result.setNote("This is a note");
 		assertEquals("This is a note", result.getNote());
 	}
 
 	@Test
-	void setFullPath_updatesFullPath() {
+	void setFullPath_updatesFullPath()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		result.setFullPath("Root > Parent > Child");
 		assertEquals("Root > Parent > Child", result.getFullPath());
 	}
 
 	@Test
-	void setTextContent_updatesTextContent() {
+	void setTextContent_updatesTextContent()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		result.setTextContent("Combined text content");
 		assertEquals("Combined text content", result.getTextContent());
 	}
 
 	@Test
-	void toString_includesKeyFields() {
+	void toString_includesKeyFields()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		result.setName("Test Node");
 		result.setFullPath("Root > Parent > Child");
@@ -84,7 +94,8 @@ class SearchResultTest {
 	}
 
 	@Test
-	void toString_handlesNullValues() {
+	void toString_handlesNullValues()
+	{
 		var result = new SearchResult("node-123", 0.3);
 		String str = result.toString();
 		assertTrue(str.contains("node-123"));

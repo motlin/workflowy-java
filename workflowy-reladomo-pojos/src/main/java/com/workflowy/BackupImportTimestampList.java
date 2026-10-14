@@ -4,21 +4,26 @@ import java.util.*;
 
 import com.gs.fw.finder.Operation;
 
-public class BackupImportTimestampList extends BackupImportTimestampListAbstract {
-
-	public BackupImportTimestampList() {
+public class BackupImportTimestampList
+	extends BackupImportTimestampListAbstract
+{
+	public BackupImportTimestampList()
+	{
 		super();
 	}
 
-	public BackupImportTimestampList(int initialSize) {
+	public BackupImportTimestampList(int initialSize)
+	{
 		super(initialSize);
 	}
 
-	public BackupImportTimestampList(Collection c) {
+	public BackupImportTimestampList(Collection c)
+	{
 		super(c);
 	}
 
-	public BackupImportTimestampList(Operation operation) {
+	public BackupImportTimestampList(Operation operation)
+	{
 		super(operation);
 	}
 }

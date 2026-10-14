@@ -8,4 +8,6 @@ public record ApiInputData(
 	@Nullable InputAiMetadata ai,
 
 	@Nullable Boolean isReferencesRoot
-) {}
+)
+{
+}

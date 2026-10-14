@@ -4,21 +4,26 @@ import java.util.*;
 
 import com.gs.fw.finder.Operation;
 
-public class NodeMetadataList extends NodeMetadataListAbstract {
-
-	public NodeMetadataList() {
+public class NodeMetadataList
+	extends NodeMetadataListAbstract
+{
+	public NodeMetadataList()
+	{
 		super();
 	}
 
-	public NodeMetadataList(int initialSize) {
+	public NodeMetadataList(int initialSize)
+	{
 		super(initialSize);
 	}
 
-	public NodeMetadataList(Collection c) {
+	public NodeMetadataList(Collection c)
+	{
 		super(c);
 	}
 
-	public NodeMetadataList(Operation operation) {
+	public NodeMetadataList(Operation operation)
+	{
 		super(operation);
 	}
 }

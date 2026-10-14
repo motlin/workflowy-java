@@ -1,3 +1,6 @@
 package com.workflowy;
 
-public class AiMetadataDatabaseObject extends AiMetadataDatabaseObjectAbstract {}
+public class AiMetadataDatabaseObject
+	extends AiMetadataDatabaseObjectAbstract
+{
+}

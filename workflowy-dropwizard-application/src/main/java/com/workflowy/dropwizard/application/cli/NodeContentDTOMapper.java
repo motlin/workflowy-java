@@ -14,13 +14,15 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.utility.Iterate;
 
-public final class NodeContentDTOMapper {
-
-	private NodeContentDTOMapper() {
+public final class NodeContentDTOMapper
+{
+	private NodeContentDTOMapper()
+	{
 		throw new AssertionError("Utility class");
 	}
 
-	public static NodeContentDTO toDTO(NodeContent content, int depth) {
+	public static NodeContentDTO toDTO(NodeContent content, int depth)
+	{
 		var dto = new NodeContentDTO();
 		dto.setId(content.getId());
 		dto.setName(content.getName());
@@ -34,15 +36,18 @@ public final class NodeContentDTOMapper {
 		dto.setMetadata(toMetadataDTO(metadata));
 
 		// Recursively map children if depth > 0
-		if (depth > 0) {
+		if (depth > 0)
+		{
 			dto.setChildren(mapChildren(content.getChildren(), depth - 1));
 		}
 		return dto;
 	}
 
-	public static List<NodeContentDTO> toDTOList(NodeContentList nodes, int depth) {
+	public static List<NodeContentDTO> toDTOList(NodeContentList nodes, int depth)
+	{
 		MutableList<NodeContentDTO> result = Lists.mutable.empty();
-		for (NodeContent node : nodes) {
+		for (NodeContent node : nodes)
+		{
 			result.add(toDTO(node, depth));
 		}
 		// Sort by priority
@@ -56,14 +61,17 @@ public final class NodeContentDTOMapper {
 		return result;
 	}
 
-	private static List<NodeContentDTO> mapChildren(NodeContentList children, int remainingDepth) {
-		if (Iterate.isEmpty(children)) {
+	private static List<NodeContentDTO> mapChildren(NodeContentList children, int remainingDepth)
+	{
+		if (Iterate.isEmpty(children))
+		{
 			return Lists.mutable.empty();
 		}
 		return toDTOList(children, remainingDepth);
 	}
 
-	private static NodeMetadataDTO toMetadataDTO(NodeMetadata metadata) {
+	private static NodeMetadataDTO toMetadataDTO(NodeMetadata metadata)
+	{
 		var dto = new NodeMetadataDTO();
 		dto.setPriority(metadata.getPriority());
 		dto.setCompleted(metadata.isCompleted());
@@ -77,38 +85,46 @@ public final class NodeContentDTOMapper {
 		return dto;
 	}
 
-	public static void applyDeepFetch(NodeContentList nodes, int depth) {
+	public static void applyDeepFetch(NodeContentList nodes, int depth)
+	{
 		// Always deep fetch metadata
 		nodes.deepFetch(NodeContentFinder.metadata());
 
-		if (depth >= 1) {
+		if (depth >= 1)
+		{
 			nodes.deepFetch(NodeContentFinder.children());
 			nodes.deepFetch(NodeContentFinder.children().metadata());
 		}
-		if (depth >= 2) {
+		if (depth >= 2)
+		{
 			nodes.deepFetch(NodeContentFinder.children().children());
 			nodes.deepFetch(NodeContentFinder.children().children().metadata());
 		}
-		if (depth >= 3) {
+		if (depth >= 3)
+		{
 			nodes.deepFetch(NodeContentFinder.children().children().children());
 			nodes.deepFetch(NodeContentFinder.children().children().children().metadata());
 		}
-		if (depth >= 4) {
+		if (depth >= 4)
+		{
 			nodes.deepFetch(NodeContentFinder.children().children().children().children());
 			nodes.deepFetch(NodeContentFinder.children().children().children().children().metadata());
 		}
-		if (depth >= 5) {
+		if (depth >= 5)
+		{
 			nodes.deepFetch(NodeContentFinder.children().children().children().children().children());
 			nodes.deepFetch(NodeContentFinder.children().children().children().children().children().metadata());
 		}
 		// Continue for deeper levels as needed (up to 10)
-		if (depth >= 6) {
+		if (depth >= 6)
+		{
 			nodes.deepFetch(NodeContentFinder.children().children().children().children().children().children());
 			nodes.deepFetch(
 				NodeContentFinder.children().children().children().children().children().children().metadata()
 			);
 		}
-		if (depth >= 7) {
+		if (depth >= 7)
+		{
 			nodes.deepFetch(
 				NodeContentFinder.children().children().children().children().children().children().children()
 			);
@@ -123,7 +139,8 @@ public final class NodeContentDTOMapper {
 					.metadata()
 			);
 		}
-		if (depth >= 8) {
+		if (depth >= 8)
+		{
 			nodes.deepFetch(
 				NodeContentFinder.children()
 					.children()
@@ -146,7 +163,8 @@ public final class NodeContentDTOMapper {
 					.metadata()
 			);
 		}
-		if (depth >= 9) {
+		if (depth >= 9)
+		{
 			nodes.deepFetch(
 				NodeContentFinder.children()
 					.children()
@@ -171,7 +189,8 @@ public final class NodeContentDTOMapper {
 					.metadata()
 			);
 		}
-		if (depth >= 10) {
+		if (depth >= 10)
+		{
 			nodes.deepFetch(
 				NodeContentFinder.children()
 					.children()

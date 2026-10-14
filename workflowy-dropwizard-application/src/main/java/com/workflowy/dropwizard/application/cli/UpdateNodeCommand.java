@@ -10,14 +10,17 @@ import net.sourceforge.argparse4j.inf.MutuallyExclusiveGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class UpdateNodeCommand extends AbstractApiCommand {
-
-	public UpdateNodeCommand(WorkflowyApplication application) {
+public class UpdateNodeCommand
+	extends AbstractApiCommand
+{
+	public UpdateNodeCommand(WorkflowyApplication application)
+	{
 		super(application, "update-node", "Update an existing node in Workflowy");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		MutuallyExclusiveGroup nodeGroup = subparser.addMutuallyExclusiveGroup("node").required(true);
@@ -39,13 +42,15 @@ public class UpdateNodeCommand extends AbstractApiCommand {
 		Namespace namespace,
 		WorkflowyConfiguration configuration,
 		WorkflowyApiClient apiClient
-	) {
+	)
+	{
 		String name = namespace.getString("name");
 		String note = namespace.getString("note");
 		boolean clearNote = namespace.getBoolean("clear_note");
 		String layoutMode = namespace.getString("layout_mode");
 
-		if (name == null && note == null && !clearNote && layoutMode == null) {
+		if (name == null && note == null && !clearNote && layoutMode == null)
+		{
 			throw new IllegalArgumentException(
 				"At least one of --name, --note, --clear-note, or --layout-mode is required"
 			);
@@ -53,7 +58,8 @@ public class UpdateNodeCommand extends AbstractApiCommand {
 
 		String nodeId = this.resolveNodeId(namespace.getString("id"), namespace.getString("path"), apiClient);
 
-		if (nodeId == null) {
+		if (nodeId == null)
+		{
 			throw new IllegalArgumentException("Could not resolve node");
 		}
 

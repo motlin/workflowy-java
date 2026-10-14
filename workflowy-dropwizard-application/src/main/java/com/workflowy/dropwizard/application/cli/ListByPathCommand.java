@@ -12,14 +12,17 @@ import com.workflowy.dto.NodeContentDTO;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class ListByPathCommand extends AbstractReadOnlyCommand {
-
-	public ListByPathCommand(WorkflowyApplication application) {
+public class ListByPathCommand
+	extends AbstractReadOnlyCommand
+{
+	public ListByPathCommand(WorkflowyApplication application)
+	{
 		super(application, "list-by-path", "Navigate to a path and list children");
 	}
 
 	@Override
-	public void configure(Subparser subparser) {
+	public void configure(Subparser subparser)
+	{
 		super.configure(subparser);
 
 		subparser
@@ -36,7 +39,9 @@ public class ListByPathCommand extends AbstractReadOnlyCommand {
 	}
 
 	@Override
-	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration) throws CommandException {
+	protected Object executeCommand(Namespace namespace, WorkflowyConfiguration configuration)
+		throws CommandException
+	{
 		String rootId = namespace.getString("root_id");
 		String pathString = namespace.getString("path");
 
@@ -46,13 +51,17 @@ public class ListByPathCommand extends AbstractReadOnlyCommand {
 		String currentParentId = rootId != null ? this.resolveNodeId(rootId) : null;
 
 		// Navigate down the path
-		for (String pathPart : pathParts) {
+		for (String pathPart : pathParts)
+		{
 			String targetName = pathPart.trim();
 
 			Operation operation;
-			if (currentParentId == null) {
+			if (currentParentId == null)
+			{
 				operation = NodeContentFinder.parentId().isNull().and(NodeContentFinder.name().eq(targetName));
-			} else {
+			}
+			else
+			{
 				operation = NodeContentFinder.parentId()
 					.eq(currentParentId)
 					.and(NodeContentFinder.name().eq(targetName));
@@ -60,14 +69,15 @@ public class ListByPathCommand extends AbstractReadOnlyCommand {
 
 			NodeContent matchingNode = NodeContentFinder.findOne(operation);
 
-			if (matchingNode == null) {
+			if (matchingNode == null)
+			{
 				throw new CommandException(
 					"PATH_NOT_FOUND",
 					"Path segment not found: "
-					+ targetName
-					+ " (at parent: "
-					+ (currentParentId != null ? currentParentId : "root")
-					+ ")"
+						+ targetName
+						+ " (at parent: "
+						+ (currentParentId != null ? currentParentId : "root")
+						+ ")"
 				);
 			}
 

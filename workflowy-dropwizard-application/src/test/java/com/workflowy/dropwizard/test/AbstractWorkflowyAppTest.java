@@ -13,8 +13,9 @@ import io.liftwizard.junit.extension.app.LiftwizardAppExtension;
 import io.liftwizard.junit.extension.match.file.FileMatchExtension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public abstract class AbstractWorkflowyAppTest extends AbstractDropwizardAppTest {
-
+public abstract class AbstractWorkflowyAppTest
+	extends AbstractDropwizardAppTest
+{
 	protected static final Instant START_TIME = Instant.parse("2000-12-31T23:59:59Z");
 
 	@RegisterExtension
@@ -22,7 +23,8 @@ public abstract class AbstractWorkflowyAppTest extends AbstractDropwizardAppTest
 
 	@Nonnull
 	@Override
-	protected LiftwizardAppExtension<?> getDropwizardAppExtension() {
+	protected LiftwizardAppExtension<?> getDropwizardAppExtension()
+	{
 		return new LiftwizardAppExtension<>(
 			WorkflowyApplication.class,
 			ResourceHelpers.resourceFilePath("config-test.json5"),
@@ -30,11 +32,13 @@ public abstract class AbstractWorkflowyAppTest extends AbstractDropwizardAppTest
 		);
 	}
 
-	protected Instant getClockTime() {
+	protected Instant getClockTime()
+	{
 		return START_TIME.plus(this.advanceClockNDays(), ChronoUnit.DAYS);
 	}
 
-	protected int advanceClockNDays() {
+	protected int advanceClockNDays()
+	{
 		return 0;
 	}
 }

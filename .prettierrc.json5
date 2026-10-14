@@ -43,6 +43,9 @@
 	// Options: "start" | "end"
 	experimentalOperatorPosition: "start",
 
+	// prettier-java-next-line: Import groups in Spotless's importOrder format
+	importOrder: "java,javax,,#java|#javax,#",
+
 	overrides: [
 		{
 			files: [".yamllint.yaml", "**/*.yaml", "**/*.yml"],

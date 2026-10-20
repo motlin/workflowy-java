@@ -32,6 +32,7 @@
         <module>workflowy-reladomo-pojos</module>
         <module>workflowy-reladomo-runtime-configuration</module>
         <module>workflowy-services</module>
+        <module>workflowy-swagger</module>
         <module>workflowy-uml-nomnoml</module>
         <module>workflowy-embedding</module>
     </modules>

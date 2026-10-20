@@ -20,14 +20,14 @@
         </dependency>
 
         <dependency>
-            <groupId>com.goldmansachs.reladomo</groupId>
-            <artifactId>reladomo</artifactId>
+            <groupId>cool.klass</groupId>
+            <artifactId>klass-reladomo-utc-infinity-timestamp</artifactId>
+            <version>${klass.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>cool.klass</groupId>
-            <artifactId>klass-data-store-reladomo</artifactId>
-            <version>${klass.version}</version>
+            <groupId>com.goldmansachs.reladomo</groupId>
+            <artifactId>reladomo</artifactId>
         </dependency>
 
         <dependency>
@@ -52,9 +52,40 @@
 
             <!--region Phase 3: generate-sources-->
             <plugin>
+                <groupId>cool.klass</groupId>
+                <artifactId>klass-generator-reladomo-concrete-class-plugin</artifactId>
+                <version>${klass.version}</version>
+                <configuration>
+                    <colorScheme>dark</colorScheme>
+                    <klassSourcePackages>
+                        <klassSourcePackage>${app.rootPackageName}</klassSourcePackage>
+                    </klassSourcePackages>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>${app.artifactId}-domain-model</artifactId>
+                        <version>${project.version}</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-reladomo-concrete-classes</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>io.liftwizard</groupId>
                 <artifactId>liftwizard-generator-reladomo-code-plugin</artifactId>
                 <version>${liftwizard.version}</version>
+                <configuration>
+                    <generateConcreteClasses>false</generateConcreteClasses>
+                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>${project.groupId}</groupId>

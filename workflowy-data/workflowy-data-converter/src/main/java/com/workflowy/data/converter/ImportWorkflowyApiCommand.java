@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 
 import cool.klass.data.store.DataStore;
 import cool.klass.dropwizard.configuration.AbstractKlassConfiguration;
+import cool.klass.model.meta.domain.api.DomainModel;
 import io.dropwizard.Application;
 import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
@@ -67,7 +68,11 @@ public class ImportWorkflowyApiCommand<T extends AbstractKlassConfiguration>
 		ShutdownThread.register(this.containerLifeCycle);
 		this.containerLifeCycle.start();
 
-		DataStore dataStore = configuration.getKlassFactory().getDataStoreFactory().createDataStore();
+		DomainModel domainModel = configuration
+			.getKlassFactory()
+			.getDomainModelFactory()
+			.createDomainModel(environment.getObjectMapper());
+		DataStore dataStore = configuration.getKlassFactory().getDataStoreFactory().createDataStore(domainModel);
 
 		String apiExportFileString = namespace.getString("api_export_file");
 		var apiExportFile = new File(apiExportFileString);

@@ -1,5 +1,6 @@
 {
-	server: {
+	server:
+	{
 		detailedJsonProcessingExceptionMapper: true,
 		applicationConnectors: [
 			{
@@ -16,7 +17,8 @@
 			},
 		],
 		rootPath: "/*",
-		requestLog: {
+		requestLog:
+		{
 			appenders: [
 				{
 					type: "console",
@@ -39,9 +41,11 @@
 			],
 		},
 	},
-	logging: {
+	logging:
+	{
 		level: "DEBUG",
-		loggers: {
+		loggers:
+		{
 			"com.workflowy": "DEBUG",
 			"com.gs.fw.common.mithra.batch.sqllogs": "DEBUG",
 			"com.gs.fw.common.mithra.connectionmanager": "INFO",
@@ -59,26 +63,32 @@
 			},
 		],
 	},
-	clock: {
+	clock:
+	{
 		type: "incrementing",
 		instant: "2000-12-31T23:59:59Z",
 		incrementAmount: "1 day",
 	},
-	klass: {
-		domainModel: {
+	klass:
+	{
+		domainModel:
+		{
 			type: "compiler",
 			sourcePackages: ["klass.model.meta.domain", "com.workflowy"],
 			colorScheme: "dark",
 		},
-		dataStore: {
+		dataStore:
+		{
 			type: "reladomo",
-			uuid: {
+			uuid:
+			{
 				type: "seed",
 				seed: "test seed",
 			},
 		},
 	},
-	configLogging: {
+	configLogging:
+	{
 		enabled: true,
 	},
 	authFilters: [
@@ -88,13 +98,16 @@
 			prefix: "Impersonation",
 		},
 	],
-	h2: {
+	h2:
+	{
 		enabled: false,
 	},
-	cors: {
+	cors:
+	{
 		enabled: false,
 	},
-	liquibase: {
+	liquibase:
+	{
 		enabled: true,
 		dropEntireSchemaOnStartupAndShutdown: true,
 		dataSourceMigrations: [
@@ -115,7 +128,8 @@
 			user: "sa",
 			password: "",
 			url: "jdbc:p6spy:h2:mem:testdb;DB_CLOSE_DELAY=-1",
-			properties: {
+			properties:
+			{
 				charSet: "UTF-8",
 			},
 			logValidationErrors: true,
@@ -123,10 +137,12 @@
 		},
 	],
 	ddlExecutors: [],
-	sampleData: {
+	sampleData:
+	{
 		enabled: false,
 	},
-	reladomo: {
+	reladomo:
+	{
 		runtimeConfigurationPaths: ["reladomo-runtime-configuration/ReladomoRuntimeConfiguration.xml"],
 	},
 	connectionManagers: [
@@ -137,14 +153,17 @@
 			schemaName: "workflowy-h2",
 		},
 	],
-	jerseyHttpLogging: {
+	jerseyHttpLogging:
+	{
 		enabled: true,
 		maxEntitySize: "1 kilobyte",
 	},
-	bootstrap: {
+	bootstrap:
+	{
 		enabled: false,
 	},
-	graphQL: {
+	graphQL:
+	{
 		enableTracing: false,
 		queryCache: "maximumSize=10000",
 		schemaFiles: [

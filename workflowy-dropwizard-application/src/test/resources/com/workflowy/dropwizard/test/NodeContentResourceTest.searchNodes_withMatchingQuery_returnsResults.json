@@ -5,7 +5,8 @@
 		"note": "First child note",
 		"systemFrom": "1999-12-31T23:59:59.999Z",
 		"systemTo": null,
-		"metadata": {
+		"metadata":
+		{
 			"shortId": "short2",
 			"priority": 0,
 			"completed": false,
@@ -17,7 +18,8 @@
 			"systemFrom": "1999-12-31T23:59:59.999Z",
 			"systemTo": null,
 			"createdOn": "1999-12-31T23:59:59.999Z",
-			"createdBy": {
+			"createdBy":
+			{
 				"userId": "test-user-1",
 				"email": "test@example.com",
 				"firstName": "Test",
@@ -25,7 +27,8 @@
 				"systemFrom": "1999-12-31T23:59:59.999Z",
 				"systemTo": null
 			},
-			"lastUpdatedBy": {
+			"lastUpdatedBy":
+			{
 				"userId": "test-user-1",
 				"email": "test@example.com",
 				"firstName": "Test",
@@ -41,7 +44,8 @@
 		"note": null,
 		"systemFrom": "1999-12-31T23:59:59.999Z",
 		"systemTo": null,
-		"metadata": {
+		"metadata":
+		{
 			"shortId": "short3",
 			"priority": 1,
 			"completed": true,
@@ -53,7 +57,8 @@
 			"systemFrom": "1999-12-31T23:59:59.999Z",
 			"systemTo": null,
 			"createdOn": "1999-12-31T23:59:59.999Z",
-			"createdBy": {
+			"createdBy":
+			{
 				"userId": "test-user-1",
 				"email": "test@example.com",
 				"firstName": "Test",
@@ -61,7 +66,8 @@
 				"systemFrom": "1999-12-31T23:59:59.999Z",
 				"systemTo": null
 			},
-			"lastUpdatedBy": {
+			"lastUpdatedBy":
+			{
 				"userId": "test-user-1",
 				"email": "test@example.com",
 				"firstName": "Test",

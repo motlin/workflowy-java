@@ -11,7 +11,7 @@
     <name>${app.name} Embedding</name>
 
     <properties>
-        <djl.version>0.39.0</djl.version>
+        <djl.version>0.40.0</djl.version>
         <sqlite.version>3.54.1.0</sqlite.version>
         <sqlite-vec.version>0.1.6</sqlite-vec.version>
     </properties>

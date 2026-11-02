@@ -1,8 +1,10 @@
 {
-	server: {
+	server:
+	{
 		detailedJsonProcessingExceptionMapper: true,
 		rootPath: "/*",
-		requestLog: {
+		requestLog:
+		{
 			appenders: [
 				{
 					type: "console",
@@ -46,9 +48,11 @@
 			],
 		},
 	},
-	logging: {
+	logging:
+	{
 		level: "INFO",
-		loggers: {
+		loggers:
+		{
 			"com.workflowy": "DEBUG",
 			"com.gs.fw.common.mithra.batch.sqllogs": "DEBUG",
 			"com.gs.fw.common.mithra.connectionmanager": "INFO",
@@ -82,7 +86,8 @@
 				type: "file-logstash",
 				currentLogFilename: "./workflowy-dropwizard-application/logs/logstash.jsonl",
 				archivedLogFilenamePattern: "./workflowy-dropwizard-application/logs/logstash-%d.jsonl",
-				encoder: {
+				encoder:
+				{
 					includeContext: true,
 					includeMdc: true,
 					includeStructuredArguments: true,
@@ -93,32 +98,40 @@
 			},
 		],
 	},
-	clock: {
+	clock:
+	{
 		type: "system",
 	},
-	klass: {
-		domainModel: {
+	klass:
+	{
+		domainModel:
+		{
 			type: "compiler",
 			sourcePackages: ["klass.model.meta.domain", "com.workflowy"],
 			colorScheme: "dark",
 		},
-		dataStore: {
+		dataStore:
+		{
 			type: "reladomo",
-			uuid: {
+			uuid:
+			{
 				type: "system",
 			},
 		},
 	},
-	configLogging: {
+	configLogging:
+	{
 		enabled: false,
 	},
 	authFilters: [],
-	h2: {
+	h2:
+	{
 		enabled: true,
 		webPort: 8080,
 		tcpPort: 9090,
 	},
-	cors: {
+	cors:
+	{
 		enabled: false,
 	},
 	dataSources: [
@@ -129,7 +142,8 @@
 			user: "sa",
 			password: "",
 			url: "jdbc:p6spy:h2:mem:",
-			properties: {
+			properties:
+			{
 				charSet: "UTF-8",
 			},
 			logValidationErrors: true,
@@ -142,7 +156,8 @@
 			user: "sa",
 			password: "",
 			url: "jdbc:p6spy:h2:tcp://localhost:9090/workflowy-h2",
-			properties: {
+			properties:
+			{
 				charSet: "UTF-8",
 			},
 			logValidationErrors: true,
@@ -155,14 +170,16 @@
 			user: "sa",
 			password: "",
 			url: "jdbc:p6spy:h2:file:./workflowy-dropwizard-application/target/h2db/workflowy-h2",
-			properties: {
+			properties:
+			{
 				charSet: "UTF-8",
 			},
 			logValidationErrors: true,
 			maxWaitForConnection: "1 second",
 		},
 	],
-	reladomo: {
+	reladomo:
+	{
 		runtimeConfigurationPaths: ["reladomo-runtime-configuration/ReladomoRuntimeConfiguration.xml"],
 	},
 	connectionManagers: [
@@ -185,19 +202,23 @@
 			schemaName: "workflowy-h2",
 		},
 	],
-	jerseyHttpLogging: {
+	jerseyHttpLogging:
+	{
 		enabled: true,
 		maxEntitySize: "1 kilobyte",
 	},
-	sampleData: {
+	sampleData:
+	{
 		enabled: false,
 		dataInstant: "1999-12-31T23:59:00Z",
 		skippedPackages: ["klass.model.meta.domain"],
 	},
-	bootstrap: {
+	bootstrap:
+	{
 		enabled: false, // TODO: Re-enable after implementing visitUserLiteral() in klass
 	},
-	liquibase: {
+	liquibase:
+	{
 		enabled: true,
 		dropEntireSchemaOnStartupAndShutdown: false,
 		dataSourceMigrations: [
@@ -210,7 +231,8 @@
 		],
 		dryRun: false,
 	},
-	graphQL: {
+	graphQL:
+	{
 		enableTracing: false,
 		queryCache: "maximumSize=10000",
 		schemaFiles: [
@@ -221,7 +243,8 @@
 			"com/workflowy/graphql/schema/GraphQLSchema.graphqls",
 		],
 	},
-	singlePageRedirectFilter: {
+	singlePageRedirectFilter:
+	{
 		enabled: true,
 		redirectPage: "/index.html",
 		cacheControlHeader: "public, max-age=86400",
@@ -238,7 +261,8 @@
 			"/graphql-playground/",
 		],
 	},
-	embedding: {
+	embedding:
+	{
 		openaiApiKey: "${OPENAI_API_KEY:-}",
 		defaultModel: "minilm",
 		databasePath: "./embeddings.sqlite",

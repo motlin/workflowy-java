@@ -13,14 +13,16 @@
 	"overrides": [
 		{
 			"files": [".yamllint.yaml", "**/*.yaml", "**/*.yml"],
-			"options": {
+			"options":
+			{
 				"useTabs": false,
 				"tabWidth": 2
 			}
 		},
 		{
 			"files": ["**/*.md"],
-			"options": {
+			"options":
+			{
 				"printWidth": 320
 			}
 		}

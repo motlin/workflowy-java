@@ -791,13 +791,13 @@ public final class WorkflowyDataConverter
 		if (proposedTime.isBefore(maxTime))
 		{
 			throw new IllegalStateException(
-				"Cannot import backup with date "
-					+ backupFileDate
-					+ " which would create SYSTEM_FROM "
-					+ proposedTime
-					+ " before existing data at "
-					+ maxTime
-					+ ". Use 'rollback-temporal' command first to roll back to before this date."
+				"Cannot import backup with date " +
+					backupFileDate +
+					" which would create SYSTEM_FROM " +
+					proposedTime +
+					" before existing data at " +
+					maxTime +
+					". Use 'rollback-temporal' command first to roll back to before this date."
 			);
 		}
 	}

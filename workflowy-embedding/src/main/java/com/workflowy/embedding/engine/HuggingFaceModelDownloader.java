@@ -82,10 +82,10 @@ public final class HuggingFaceModelDownloader
 
 		int responseCode = connection.getResponseCode();
 		if (
-			responseCode == HttpURLConnection.HTTP_MOVED_TEMP
-			|| responseCode == HttpURLConnection.HTTP_MOVED_PERM
-			|| responseCode == 307
-			|| responseCode == 308
+			responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+			responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
+			responseCode == 307 ||
+			responseCode == 308
 		)
 		{
 			String newUrl = connection.getHeaderField("Location");

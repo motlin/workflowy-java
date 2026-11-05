@@ -69,8 +69,8 @@ public class RollbackWorkflowyCommand<T extends AbstractKlassConfiguration>
 			.type(Integer.class)
 			.required(true)
 			.help(
-				"Number of backup files to roll back. The database will be rolled back to just before "
-					+ "the Nth-to-last backup file's timestamp."
+				"Number of backup files to roll back. The database will be rolled back to just before " +
+					"the Nth-to-last backup file's timestamp."
 			);
 	}
 

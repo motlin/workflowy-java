@@ -28,8 +28,8 @@ public final class EmbeddingEngineFactory
 			if (openaiApiKey == null || openaiApiKey.isBlank())
 			{
 				throw new IllegalArgumentException(
-					"OpenAI API key is required for OpenAI models. "
-						+ "Set the OPENAI_API_KEY environment variable or configure it in config.json5"
+					"OpenAI API key is required for OpenAI models. " +
+						"Set the OPENAI_API_KEY environment variable or configure it in config.json5"
 				);
 			}
 			LOGGER.info("Creating OpenAI embedding engine for model: {}", model.getKey());

@@ -29,61 +29,61 @@ public class EmbeddingRepository
 	private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	private static final String INSERT_SQL = """
-	INSERT INTO node_embeddings (node_id, model, embedding, system_from, system_to)
-	VALUES (?, ?, ?, ?, ?)
-	""";
+		INSERT INTO node_embeddings (node_id, model, embedding, system_from, system_to)
+		VALUES (?, ?, ?, ?, ?)
+		""";
 
 	private static final String UPDATE_SYSTEM_TO_SQL = """
-	UPDATE node_embeddings
-	SET system_to = ?
-	WHERE node_id = ? AND model = ? AND system_to = ?
-	""";
+		UPDATE node_embeddings
+		SET system_to = ?
+		WHERE node_id = ? AND model = ? AND system_to = ?
+		""";
 
 	private static final String GET_EXISTING_IDS_SQL = """
-	SELECT node_id FROM node_embeddings
-	WHERE model = ? AND system_to = ?
-	""";
+		SELECT node_id FROM node_embeddings
+		WHERE model = ? AND system_to = ?
+		""";
 
 	private static final String SEARCH_SQL = """
-	SELECT node_id, embedding,
-	       vec_distance_cosine(embedding, ?) as distance
-	FROM node_embeddings
-	WHERE model = ? AND system_to = ?
-	ORDER BY distance ASC
-	LIMIT ?
-	""";
+		SELECT node_id, embedding,
+		       vec_distance_cosine(embedding, ?) as distance
+		FROM node_embeddings
+		WHERE model = ? AND system_to = ?
+		ORDER BY distance ASC
+		LIMIT ?
+		""";
 
 	private static final String SEARCH_WITH_THRESHOLD_SQL = """
-	SELECT node_id, embedding,
-	       vec_distance_cosine(embedding, ?) as distance
-	FROM node_embeddings
-	WHERE model = ? AND system_to = ?
-	AND vec_distance_cosine(embedding, ?) < ?
-	ORDER BY distance ASC
-	LIMIT ?
-	""";
+		SELECT node_id, embedding,
+		       vec_distance_cosine(embedding, ?) as distance
+		FROM node_embeddings
+		WHERE model = ? AND system_to = ?
+		AND vec_distance_cosine(embedding, ?) < ?
+		ORDER BY distance ASC
+		LIMIT ?
+		""";
 
 	private static final String FTS_DELETE_ALL_SQL = "DELETE FROM node_fts";
 
 	private static final String FTS_INSERT_SQL = "INSERT INTO node_fts(node_id, content) VALUES(?, ?)";
 
 	private static final String FTS_SEARCH_SQL = """
-	SELECT node_id, rank as score
-	FROM node_fts
-	WHERE node_fts MATCH ?
-	ORDER BY rank
-	LIMIT ?
-	""";
+		SELECT node_id, rank as score
+		FROM node_fts
+		WHERE node_fts MATCH ?
+		ORDER BY rank
+		LIMIT ?
+		""";
 
 	private static final String GET_CONTENT_HASH_SQL = """
-	SELECT content_hash FROM node_content_hash
-	WHERE node_id = ? AND model = ?
-	""";
+		SELECT content_hash FROM node_content_hash
+		WHERE node_id = ? AND model = ?
+		""";
 
 	private static final String UPSERT_CONTENT_HASH_SQL = """
-	INSERT OR REPLACE INTO node_content_hash (node_id, model, content_hash)
-	VALUES (?, ?, ?)
-	""";
+		INSERT OR REPLACE INTO node_content_hash (node_id, model, content_hash)
+		VALUES (?, ?, ?)
+		""";
 
 	private final SqliteVecConnection sqliteVecConnection;
 

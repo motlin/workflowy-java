@@ -88,19 +88,19 @@ public class SearchResult
 	public String toString()
 	{
 		return (
-			"SearchResult{"
-			+ "nodeId='"
-			+ this.nodeId
-			+ '\''
-			+ ", distance="
-			+ this.distance
-			+ ", name='"
-			+ this.name
-			+ '\''
-			+ ", fullPath='"
-			+ this.fullPath
-			+ '\''
-			+ '}'
+			"SearchResult{" +
+			"nodeId='" +
+			this.nodeId +
+			'\'' +
+			", distance=" +
+			this.distance +
+			", name='" +
+			this.name +
+			'\'' +
+			", fullPath='" +
+			this.fullPath +
+			'\'' +
+			'}'
 		);
 	}
 }

@@ -113,13 +113,13 @@ class JsonSyntaxHighlighterTest
 		throws IOException
 	{
 		var input = """
-		{
-		  "name": "Test",
-		  "count": 5,
-		  "enabled": true,
-		  "data": null,
-		  "items": ["a", "b"]
-		}""";
+			{
+			  "name": "Test",
+			  "count": 5,
+			  "enabled": true,
+			  "data": null,
+			  "items": ["a", "b"]
+			}""";
 		String result = JsonSyntaxHighlighter.highlight(input);
 
 		assertTrue(result.contains("name"));

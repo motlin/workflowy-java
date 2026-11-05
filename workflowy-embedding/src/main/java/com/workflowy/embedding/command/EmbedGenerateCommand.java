@@ -23,9 +23,7 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EmbedGenerateCommand<
-	T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider
->
+public class EmbedGenerateCommand<T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider>
 	extends EnvironmentCommand<T>
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EmbedGenerateCommand.class);

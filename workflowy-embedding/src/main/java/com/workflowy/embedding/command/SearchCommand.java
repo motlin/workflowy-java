@@ -27,9 +27,7 @@ import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SearchCommand<
-	T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider
->
+public class SearchCommand<T extends AbstractKlassConfiguration & EmbeddingConfigurationProvider>
 	extends EnvironmentCommand<T>
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchCommand.class);

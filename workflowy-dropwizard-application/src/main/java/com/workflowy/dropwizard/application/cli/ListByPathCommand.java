@@ -73,11 +73,11 @@ public class ListByPathCommand
 			{
 				throw new CommandException(
 					"PATH_NOT_FOUND",
-					"Path segment not found: "
-						+ targetName
-						+ " (at parent: "
-						+ (currentParentId != null ? currentParentId : "root")
-						+ ")"
+					"Path segment not found: " +
+						targetName +
+						" (at parent: " +
+						(currentParentId != null ? currentParentId : "root") +
+						")"
 				);
 			}
 

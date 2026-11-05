@@ -64,10 +64,10 @@ public class NodeEmbedding
 		for (var i = 0; i < floats.length; i++)
 		{
 			int intBits =
-				(bytes[i * 4] & 0xFF)
-				| ((bytes[i * 4 + 1] & 0xFF) << 8)
-				| ((bytes[i * 4 + 2] & 0xFF) << 16)
-				| ((bytes[i * 4 + 3] & 0xFF) << 24);
+				(bytes[i * 4] & 0xFF) |
+				((bytes[i * 4 + 1] & 0xFF) << 8) |
+				((bytes[i * 4 + 2] & 0xFF) << 16) |
+				((bytes[i * 4 + 3] & 0xFF) << 24);
 			floats[i] = Float.intBitsToFloat(intBits);
 		}
 		return floats;

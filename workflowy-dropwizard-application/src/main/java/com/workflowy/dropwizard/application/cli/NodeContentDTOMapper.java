@@ -53,9 +53,9 @@ public final class NodeContentDTOMapper
 		// Sort by priority
 		result.sort(
 			Comparator.comparingInt((dto) ->
-				dto.getMetadata() != null && dto.getMetadata().getPriority() != null
-					? dto.getMetadata().getPriority()
-					: 0
+				dto.getMetadata() != null && dto.getMetadata().getPriority() != null ?
+					dto.getMetadata().getPriority() :
+					0
 			)
 		);
 		return result;

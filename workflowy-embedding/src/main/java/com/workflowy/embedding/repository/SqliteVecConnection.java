@@ -19,37 +19,37 @@ public class SqliteVecConnection
 	private static final Logger LOGGER = LoggerFactory.getLogger(SqliteVecConnection.class);
 
 	private static final String CREATE_TABLE_SQL = """
-	CREATE TABLE IF NOT EXISTS node_embeddings (
-	    node_id TEXT NOT NULL,
-	    model TEXT NOT NULL DEFAULT 'minilm',
-	    embedding BLOB NOT NULL,
-	    system_from TEXT NOT NULL,
-	    system_to TEXT NOT NULL,
-	    PRIMARY KEY (node_id, model, system_from)
-	)
-	""";
+		CREATE TABLE IF NOT EXISTS node_embeddings (
+		    node_id TEXT NOT NULL,
+		    model TEXT NOT NULL DEFAULT 'minilm',
+		    embedding BLOB NOT NULL,
+		    system_from TEXT NOT NULL,
+		    system_to TEXT NOT NULL,
+		    PRIMARY KEY (node_id, model, system_from)
+		)
+		""";
 
 	private static final String CREATE_INDEX_SQL = """
-	CREATE INDEX IF NOT EXISTS idx_node_embeddings_model_system_to
-	ON node_embeddings (model, system_to)
-	""";
+		CREATE INDEX IF NOT EXISTS idx_node_embeddings_model_system_to
+		ON node_embeddings (model, system_to)
+		""";
 
 	private static final String CREATE_FTS_TABLE_SQL = """
-	CREATE VIRTUAL TABLE IF NOT EXISTS node_fts USING fts5(
-	    node_id UNINDEXED,
-	    content,
-	    tokenize='porter unicode61'
-	)
-	""";
+		CREATE VIRTUAL TABLE IF NOT EXISTS node_fts USING fts5(
+		    node_id UNINDEXED,
+		    content,
+		    tokenize='porter unicode61'
+		)
+		""";
 
 	private static final String CREATE_CONTENT_HASH_TABLE_SQL = """
-	CREATE TABLE IF NOT EXISTS node_content_hash (
-	    node_id TEXT NOT NULL,
-	    model TEXT NOT NULL,
-	    content_hash TEXT NOT NULL,
-	    PRIMARY KEY (node_id, model)
-	)
-	""";
+		CREATE TABLE IF NOT EXISTS node_content_hash (
+		    node_id TEXT NOT NULL,
+		    model TEXT NOT NULL,
+		    content_hash TEXT NOT NULL,
+		    PRIMARY KEY (node_id, model)
+		)
+		""";
 
 	private final Connection connection;
 	private final String databasePath;

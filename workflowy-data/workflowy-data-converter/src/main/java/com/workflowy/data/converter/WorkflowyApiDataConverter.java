@@ -376,11 +376,11 @@ public final class WorkflowyApiDataConverter
 		if (proposedTime.isBefore(maxTime))
 		{
 			throw new IllegalStateException(
-				"Cannot import API data with time "
-					+ proposedTime
-					+ " which is before existing data at "
-					+ maxTime
-					+ ". Use 'rollback-temporal' command first to roll back to before this date."
+				"Cannot import API data with time " +
+					proposedTime +
+					" which is before existing data at " +
+					maxTime +
+					". Use 'rollback-temporal' command first to roll back to before this date."
 			);
 		}
 	}

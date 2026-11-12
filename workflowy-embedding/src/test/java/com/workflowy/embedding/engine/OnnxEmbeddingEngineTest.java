@@ -137,7 +137,7 @@ class OnnxEmbeddingEngineTest
 		float[] embedding1 = engine.generateEmbedding(text, false);
 		float[] embedding2 = engine.generateEmbedding(text, false);
 
-		assertArrayEquals(embedding1, embedding2, 0.0001f);
+		assertArrayEquals(embedding1, embedding2, 0.0001F);
 	}
 
 	@Test
@@ -151,7 +151,7 @@ class OnnxEmbeddingEngineTest
 		assertArrayEquals(
 			queryEmbedding,
 			passageEmbedding,
-			0.0001f,
+			0.0001F,
 			"MINILM has no query/passage prefix, so embeddings should be identical"
 		);
 	}

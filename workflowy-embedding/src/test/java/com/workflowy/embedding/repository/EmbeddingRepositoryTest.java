@@ -159,8 +159,8 @@ class EmbeddingRepositoryTest
 		String nodeId1 = EmbeddingTestHelper.randomNodeId();
 		String nodeId2 = EmbeddingTestHelper.randomNodeId();
 
-		float[] similar1 = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.1f);
-		float[] similar2 = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.2f);
+		float[] similar1 = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.1F);
+		float[] similar2 = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.2F);
 
 		this.repository.save(EmbeddingTestHelper.createNodeEmbedding(nodeId1, EmbeddingModel.MINILM, similar1));
 		this.repository.save(EmbeddingTestHelper.createNodeEmbedding(nodeId2, EmbeddingModel.MINILM, similar2));
@@ -185,7 +185,7 @@ class EmbeddingRepositoryTest
 		for (var i = 0; i < 10; i++)
 		{
 			String nodeId = EmbeddingTestHelper.randomNodeId();
-			float[] similar = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.1f * (i + 1));
+			float[] similar = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.1F * (i + 1));
 			this.repository.save(EmbeddingTestHelper.createNodeEmbedding(nodeId, EmbeddingModel.MINILM, similar));
 		}
 
@@ -365,7 +365,7 @@ class EmbeddingRepositoryTest
 		float[] baseEmbedding = EmbeddingTestHelper.createRandomEmbedding(EmbeddingModel.MINILM.getDimensions());
 
 		String closeNodeId = EmbeddingTestHelper.randomNodeId();
-		float[] closeEmbedding = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.05f);
+		float[] closeEmbedding = EmbeddingTestHelper.createSimilarEmbedding(baseEmbedding, 0.05F);
 		this.repository.save(
 			EmbeddingTestHelper.createNodeEmbedding(closeNodeId, EmbeddingModel.MINILM, closeEmbedding)
 		);

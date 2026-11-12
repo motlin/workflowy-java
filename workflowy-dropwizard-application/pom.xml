@@ -78,6 +78,13 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>${app.artifactId}-swagger</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>${app.artifactId}-dtos</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -320,6 +327,12 @@
 
         <dependency>
             <groupId>cool.klass</groupId>
+            <artifactId>klass-service-swagger</artifactId>
+            <version>${klass.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cool.klass</groupId>
             <artifactId>klass-serialization-jackson-module-meta-model</artifactId>
             <version>${klass.version}</version>
         </dependency>
@@ -341,6 +354,20 @@
         <dependency>
             <groupId>cool.klass</groupId>
             <artifactId>klass-dropwizard-bundle-sample-data</artifactId>
+            <version>${klass.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cool.klass</groupId>
+            <artifactId>klass-dropwizard-bundle-swagger-ui</artifactId>
+            <version>${klass.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cool.klass</groupId>
+            <artifactId>klass-dropwizard-bundle-redoc</artifactId>
             <version>${klass.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -418,6 +445,13 @@
         <dependency>
             <groupId>cool.klass</groupId>
             <artifactId>klass-model-bootstrapped-graphql-reladomo-finder</artifactId>
+            <version>${klass.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>cool.klass</groupId>
+            <artifactId>klass-model-bootstrapped-swagger</artifactId>
             <version>${klass.version}</version>
             <scope>runtime</scope>
         </dependency>

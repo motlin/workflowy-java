@@ -2,7 +2,7 @@ package com.workflowy;
 
 import java.sql.Timestamp;
 
-import cool.klass.data.store.reladomo.UtcInfinityTimestamp;
+import cool.klass.reladomo.utc.infinity.timestamp.UtcInfinityTimestamp;
 
 public class Mirror
 	extends MirrorAbstract

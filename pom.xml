@@ -32,11 +32,12 @@
         <module>workflowy-reladomo-pojos</module>
         <module>workflowy-reladomo-runtime-configuration</module>
         <module>workflowy-services</module>
+        <module>workflowy-swagger</module>
         <module>workflowy-uml-nomnoml</module>
         <module>workflowy-embedding</module>
     </modules>
     <properties>
-        <klass.version>0.6.0</klass.version>
+        <klass.version>0.7.0-SNAPSHOT</klass.version>
         <app.artifactId>workflowy</app.artifactId>
         <app.rootPackageName>com.workflowy</app.rootPackageName>
         <app.name>Workflowy</app.name>

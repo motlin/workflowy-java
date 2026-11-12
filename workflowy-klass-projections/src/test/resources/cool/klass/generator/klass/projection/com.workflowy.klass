@@ -30,8 +30,6 @@ projection NodeContentProjection on NodeContent
     parent: {
         id: "NodeContent id",
     },
-    mirrors: {
-        },
     mirrorRecord: MirrorProjection,
     mirrorCopies: {
         id: "NodeContent id",
@@ -39,10 +37,6 @@ projection NodeContentProjection on NodeContent
     originalNode: {
         id: "NodeContent id",
     },
-    backlinks: {
-        },
-    incomingLinks: {
-        },
     linkTargets: {
         id: "NodeContent id",
     },

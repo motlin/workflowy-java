@@ -55,7 +55,7 @@ jobs:
             maven-rewrite-
             maven-
 
-      - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
+      - uses: twosigma/maven-cache-cleaner@fbb04c12bb496d3c4f1818eb235dbb5114b227c6 # v2.4.0
 
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         env:
@@ -113,7 +113,7 @@ jobs:
             maven-spotless-
             maven-
 
-      - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
+      - uses: twosigma/maven-cache-cleaner@fbb04c12bb496d3c4f1818eb235dbb5114b227c6 # v2.4.0
 
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         env:
@@ -166,7 +166,7 @@ jobs:
             maven-spotless-
             maven-
 
-      - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
+      - uses: twosigma/maven-cache-cleaner@fbb04c12bb496d3c4f1818eb235dbb5114b227c6 # v2.4.0
 
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         env:
@@ -219,7 +219,7 @@ jobs:
             maven-spotless-
             maven-
 
-      - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
+      - uses: twosigma/maven-cache-cleaner@fbb04c12bb496d3c4f1818eb235dbb5114b227c6 # v2.4.0
 
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         env:
@@ -272,7 +272,7 @@ jobs:
             maven-spotless-
             maven-
 
-      - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
+      - uses: twosigma/maven-cache-cleaner@fbb04c12bb496d3c4f1818eb235dbb5114b227c6 # v2.4.0
 
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         env:
@@ -325,7 +325,7 @@ jobs:
             maven-errorprone-
             maven-
 
-      - uses: twosigma/maven-cache-cleaner@8cc87ff622d543e1aad4085cbf5c05236b2d16d9 # v2.3.0
+      - uses: twosigma/maven-cache-cleaner@fbb04c12bb496d3c4f1818eb235dbb5114b227c6 # v2.4.0
 
       - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         env:
